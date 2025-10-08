@@ -1,0 +1,73 @@
+﻿; Study Buddy Inno Setup Installer Script
+; Alternative to WiX - simpler and free
+; Download Inno Setup from: https://jrsoftware.org/isinfo.php
+
+#define MyAppName "Study Buddy"
+#define MyAppVersion "1.0.0"
+#define MyAppPublisher "Study Buddy Team"
+#define MyAppURL "https://github.com/yourusername/studybuddy"
+#define MyAppExeName "StudyBuddy.exe"
+
+[Setup]
+; NOTE: The value of AppId uniquely identifies this application.
+AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
+DefaultDirName={autopf}\{#MyAppName}
+DefaultGroupName={#MyAppName}
+AllowNoIcons=yes
+LicenseFile=Installer\StudyBuddy\LICENSE.txt
+InfoBeforeFile=Installer\StudyBuddy\README.txt
+OutputDir=.
+OutputBaseFilename=StudyBuddy-Setup
+SetupIconFile=StudyBuddy\app.ico
+Compression=lzma
+SolidCompression=yes
+WizardStyle=modern
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
+PrivilegesRequired=admin
+UninstallDisplayIcon={app}\{#MyAppExeName}
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1; Check: not IsAdminInstallMode
+
+[Files]
+Source: "Installer\StudyBuddy\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Installer\StudyBuddy\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+[Dirs]
+Name: "{app}\Data"; Permissions: users-modify
+Name: "{app}\Logs"; Permissions: users-modify
+
+[Icons]
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
+
+[Run]
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[Code]
+function InitializeSetup(): Boolean;
+begin
+  Result := True;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+  begin
+    // Additional post-install tasks can be added here
+  end;
+end;

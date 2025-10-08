@@ -75,7 +75,7 @@ namespace StudyBuddy
             // lblAppTitle
             // 
             this.lblAppTitle.AutoSize = true;
-            this.lblAppTitle.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Bold);
+            this.lblAppTitle.Font = new System.Drawing.Font("Segoe UI Emoji", 20F, System.Drawing.FontStyle.Bold);
             this.lblAppTitle.ForeColor = System.Drawing.Color.White;
             this.lblAppTitle.Location = new System.Drawing.Point(20, 15);
             this.lblAppTitle.Name = "lblAppTitle";

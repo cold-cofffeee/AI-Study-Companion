@@ -1,30 +1,42 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\",
+  "WorkspaceRootPath": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\source\\repos\\studybuddy\\studybuddy\\controls\\basiccontrols.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\controls\\basiccontrols.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\source\\repos\\studybuddy\\studybuddy\\controls\\settingscontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\controls\\settingscontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\source\\repos\\studybuddy\\studybuddy\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\onedrive\\documents\\github\\ai-study-companion\\studybuddy_v2\\studybuddy\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\source\\repos\\studybuddy\\studybuddy\\models\\studymodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\onedrive\\documents\\github\\ai-study-companion\\studybuddy_v2\\studybuddy\\controls\\basiccontrols.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\controls\\basiccontrols.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\onedrive\\documents\\github\\ai-study-companion\\studybuddy_v2\\studybuddy\\controls\\settingscontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\controls\\settingscontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\onedrive\\documents\\github\\ai-study-companion\\studybuddy_v2\\studybuddy\\models\\studymodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\models\\studymodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\source\\repos\\studybuddy\\studybuddy\\controls\\reversequizcontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\onedrive\\documents\\github\\ai-study-companion\\studybuddy_v2\\studybuddy\\controls\\reversequizcontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\controls\\reversequizcontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\source\\repos\\studybuddy\\studybuddy\\helpers\\geminiapiclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\onedrive\\documents\\github\\ai-study-companion\\studybuddy_v2\\studybuddy\\helpers\\geminiapiclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\helpers\\geminiapiclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\onedrive\\documents\\github\\ai-study-companion\\studybuddy_v2\\studybuddy\\apikeydialog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\apikeydialog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\onedrive\\documents\\github\\ai-study-companion\\studybuddy_v2\\studybuddy\\controls\\dashboardcontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\controls\\dashboardcontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|c:\\users\\hiran\\onedrive\\documents\\github\\ai-study-companion\\studybuddy_v2\\studybuddy\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C60E7CBE-6D0A-4B1D-86ED-7645D961985A}|StudyBuddy\\StudyBuddy.csproj|solutionrelative:studybuddy\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,85 +46,118 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "GeminiApiClient.cs",
-              "DocumentMoniker": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Helpers\\GeminiApiClient.cs",
-              "RelativeDocumentMoniker": "StudyBuddy\\Helpers\\GeminiApiClient.cs",
-              "ToolTip": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Helpers\\GeminiApiClient.cs",
-              "RelativeToolTip": "StudyBuddy\\Helpers\\GeminiApiClient.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 8,
+              "Title": "MainForm.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\MainForm.Designer.cs",
+              "RelativeDocumentMoniker": "StudyBuddy\\MainForm.Designer.cs",
+              "ToolTip": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\MainForm.Designer.cs",
+              "RelativeToolTip": "StudyBuddy\\MainForm.Designer.cs",
+              "ViewState": "AgIAAJYAAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-08T15:07:49.146Z",
+              "WhenOpened": "2025-10-08T16:02:22.355Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ReverseQuizControl.cs",
-              "DocumentMoniker": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Controls\\ReverseQuizControl.cs",
-              "RelativeDocumentMoniker": "StudyBuddy\\Controls\\ReverseQuizControl.cs",
-              "ToolTip": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Controls\\ReverseQuizControl.cs",
-              "RelativeToolTip": "StudyBuddy\\Controls\\ReverseQuizControl.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 7,
+              "Title": "DashboardControl.cs",
+              "DocumentMoniker": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Controls\\DashboardControl.cs",
+              "RelativeDocumentMoniker": "StudyBuddy\\Controls\\DashboardControl.cs",
+              "ToolTip": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Controls\\DashboardControl.cs",
+              "RelativeToolTip": "StudyBuddy\\Controls\\DashboardControl.cs",
+              "ViewState": "AgIAAO4AAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-08T15:07:49.029Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-08T15:11:33.36Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ApiKeyDialog.cs",
+              "DocumentMoniker": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\ApiKeyDialog.cs",
+              "RelativeDocumentMoniker": "StudyBuddy\\ApiKeyDialog.cs",
+              "ToolTip": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\ApiKeyDialog.cs",
+              "RelativeToolTip": "StudyBuddy\\ApiKeyDialog.cs",
+              "ViewState": "AgIAAO8AAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-08T15:10:46.347Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "StudyModels.cs",
-              "DocumentMoniker": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Models\\StudyModels.cs",
+              "DocumentMoniker": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Models\\StudyModels.cs",
               "RelativeDocumentMoniker": "StudyBuddy\\Models\\StudyModels.cs",
-              "ToolTip": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Models\\StudyModels.cs",
+              "ToolTip": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Models\\StudyModels.cs",
               "RelativeToolTip": "StudyBuddy\\Models\\StudyModels.cs",
               "ViewState": "AgIAANIAAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-08T14:59:49Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-08T14:59:49Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "MainForm.cs",
-              "DocumentMoniker": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\MainForm.cs",
+              "DocumentMoniker": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\MainForm.cs",
               "RelativeDocumentMoniker": "StudyBuddy\\MainForm.cs",
-              "ToolTip": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\MainForm.cs",
+              "ToolTip": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\MainForm.cs",
               "RelativeToolTip": "StudyBuddy\\MainForm.cs",
-              "ViewState": "AgIAAFACAAAAAAAAAIBYwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-08T14:57:10.878Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "SettingsControl.cs",
-              "DocumentMoniker": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Controls\\SettingsControl.cs",
+              "DocumentMoniker": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Controls\\SettingsControl.cs",
               "RelativeDocumentMoniker": "StudyBuddy\\Controls\\SettingsControl.cs",
-              "ToolTip": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Controls\\SettingsControl.cs",
+              "ToolTip": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Controls\\SettingsControl.cs",
               "RelativeToolTip": "StudyBuddy\\Controls\\SettingsControl.cs",
               "ViewState": "AgIAAFMCAAAAAAAAAABBwFQCAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-08T14:56:56.329Z",
+              "WhenOpened": "2025-10-08T14:56:56.329Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "BasicControls.cs",
+              "DocumentMoniker": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Controls\\BasicControls.cs",
+              "RelativeDocumentMoniker": "StudyBuddy\\Controls\\BasicControls.cs",
+              "ToolTip": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Controls\\BasicControls.cs",
+              "RelativeToolTip": "StudyBuddy\\Controls\\BasicControls.cs",
+              "ViewState": "AgIAAMkAAAAAAAAAAABBwMAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-08T14:55:23.104Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "BasicControls.cs",
-              "DocumentMoniker": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Controls\\BasicControls.cs",
-              "RelativeDocumentMoniker": "StudyBuddy\\Controls\\BasicControls.cs",
-              "ToolTip": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\Controls\\BasicControls.cs",
-              "RelativeToolTip": "StudyBuddy\\Controls\\BasicControls.cs",
-              "ViewState": "AgIAALwAAAAAAAAAAAAwwAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 4,
+              "Title": "ReverseQuizControl.cs",
+              "DocumentMoniker": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Controls\\ReverseQuizControl.cs",
+              "RelativeDocumentMoniker": "StudyBuddy\\Controls\\ReverseQuizControl.cs",
+              "ToolTip": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Controls\\ReverseQuizControl.cs",
+              "RelativeToolTip": "StudyBuddy\\Controls\\ReverseQuizControl.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-08T14:55:23.104Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-08T15:07:49.029Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "GeminiApiClient.cs",
+              "DocumentMoniker": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Helpers\\GeminiApiClient.cs",
+              "RelativeDocumentMoniker": "StudyBuddy\\Helpers\\GeminiApiClient.cs",
+              "ToolTip": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\Helpers\\GeminiApiClient.cs",
+              "RelativeToolTip": "StudyBuddy\\Helpers\\GeminiApiClient.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-08T15:07:49.146Z"
             }
           ]
         }

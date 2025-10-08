@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/DMhZf/nRtk=",
+  "dgSpecHash": "SzoN5th6Lz0=",
   "success": true,
-  "projectFilePath": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\StudyBuddy.csproj",
+  "projectFilePath": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\StudyBuddy.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hiran\\.nuget\\packages\\bouncycastle\\1.8.9\\bouncycastle.1.8.9.nupkg.sha512",
     "C:\\Users\\hiran\\.nuget\\packages\\itextsharp\\5.5.13.3\\itextsharp.5.5.13.3.nupkg.sha512",
@@ -77,9 +77,9 @@
       "code": "NU1701",
       "level": "Warning",
       "message": "Package 'BouncyCastle 1.8.9' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0-windows7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\StudyBuddy.csproj",
+      "projectPath": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\StudyBuddy.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\StudyBuddy.csproj",
+      "filePath": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\StudyBuddy.csproj",
       "libraryId": "BouncyCastle",
       "targetGraphs": [
         "net8.0-windows7.0"
@@ -89,9 +89,9 @@
       "code": "NU1701",
       "level": "Warning",
       "message": "Package 'iTextSharp 5.5.13.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0-windows7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\StudyBuddy.csproj",
+      "projectPath": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\StudyBuddy.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\StudyBuddy.csproj",
+      "filePath": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\StudyBuddy.csproj",
       "libraryId": "iTextSharp",
       "targetGraphs": [
         "net8.0-windows7.0"

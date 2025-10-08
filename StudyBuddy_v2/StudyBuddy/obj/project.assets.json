@@ -3706,7 +3706,7 @@
     "net8.0-windows7.0": [
       "Microsoft.Data.Sqlite >= 8.0.0",
       "Newtonsoft.Json >= 13.0.3",
-      "PdfSharp >= 6.1.1",
+      "PDFsharp >= 6.1.1",
       "System.Net.Http >= 4.3.4",
       "iTextSharp >= 5.5.13.3"
     ]
@@ -3718,11 +3718,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\StudyBuddy.csproj",
+      "projectUniqueName": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\StudyBuddy.csproj",
       "projectName": "StudyBuddy",
-      "projectPath": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\StudyBuddy.csproj",
+      "projectPath": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\StudyBuddy.csproj",
       "packagesPath": "C:\\Users\\hiran\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\hiran\\source\\repos\\StudyBuddy\\StudyBuddy\\obj\\",
+      "outputPath": "C:\\Users\\hiran\\OneDrive\\Documents\\GitHub\\AI-Study-Companion\\StudyBuddy_v2\\StudyBuddy\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3769,7 +3769,7 @@
             "target": "Package",
             "version": "[13.0.3, )"
           },
-          "PdfSharp": {
+          "PDFsharp": {
             "target": "Package",
             "version": "[6.1.1, )"
           },

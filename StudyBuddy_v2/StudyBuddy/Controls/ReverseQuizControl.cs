@@ -111,7 +111,7 @@ namespace StudyBuddy.Controls
 
         #region Event Handlers
 
-        private async void btnGenerateQuiz_Click(object sender, EventArgs e)
+        private async void btnGenerateQuiz_Click(object? sender, EventArgs e)
         {
             if (_geminiClient == null)
             {
@@ -164,12 +164,12 @@ namespace StudyBuddy.Controls
             }
         }
 
-        private void btnOption1_Click(object sender, EventArgs e) => CheckAnswer(0);
-        private void btnOption2_Click(object sender, EventArgs e) => CheckAnswer(1);
-        private void btnOption3_Click(object sender, EventArgs e) => CheckAnswer(2);
-        private void btnOption4_Click(object sender, EventArgs e) => CheckAnswer(3);
+        private void btnOption1_Click(object? sender, EventArgs e) => CheckAnswer(0);
+        private void btnOption2_Click(object? sender, EventArgs e) => CheckAnswer(1);
+        private void btnOption3_Click(object? sender, EventArgs e) => CheckAnswer(2);
+        private void btnOption4_Click(object? sender, EventArgs e) => CheckAnswer(3);
 
-        private void btnNext_Click(object sender, EventArgs e)
+        private void btnNext_Click(object? sender, EventArgs e)
         {
             if (_currentQuestionIndex < _generatedQuestions.Count - 1)
             {
@@ -178,7 +178,7 @@ namespace StudyBuddy.Controls
             }
         }
 
-        private void btnPrevious_Click(object sender, EventArgs e)
+        private void btnPrevious_Click(object? sender, EventArgs e)
         {
             if (_currentQuestionIndex > 0)
             {
@@ -187,7 +187,7 @@ namespace StudyBuddy.Controls
             }
         }
 
-        private void btnRestart_Click(object sender, EventArgs e)
+        private void btnRestart_Click(object? sender, EventArgs e)
         {
             _currentQuestionIndex = 0;
             _correctAnswers = 0;
@@ -200,7 +200,7 @@ namespace StudyBuddy.Controls
             }
         }
 
-        private async void btnExport_Click(object sender, EventArgs e)
+        private async void btnExport_Click(object? sender, EventArgs e)
         {
             if (_generatedQuestions.Count == 0)
             {
@@ -239,7 +239,7 @@ namespace StudyBuddy.Controls
             }
         }
 
-        private void txtAnswers_TextChanged(object sender, EventArgs e)
+        private void txtAnswers_TextChanged(object? sender, EventArgs e)
         {
             UpdateButtonStates();
         }

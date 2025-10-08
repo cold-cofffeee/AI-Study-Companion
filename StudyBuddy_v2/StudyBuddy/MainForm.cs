@@ -112,14 +112,14 @@ namespace StudyBuddy
 
             var navigationItems = new (string Name, string Icon, UserControl Control, string Description)[]
             {
-                ("Dashboard", "[D]", _dashboardControl, "Overview & Daily Challenge"),
-                ("Summarizer", "[S]", _summarizerControl, "AI Study Summarizer"),
-                ("Problems", "[P]", _problemGeneratorControl, "Random Problem Generator"),
-                ("Optimizer", "[O]", _studyOptimizerControl, "Study Time Optimizer"),
-                ("Flashcards", "[F]", _flashcardControl, "Memory Trigger System"),
-                ("Quiz", "[Q]", _reverseQuizControl, "Reverse Quiz Generator"),
-                ("Settings", "[*]", _settingsControl, "App Settings & Preferences"),
-                ("About", "[?]", _aboutControl, "Help & Information")
+                ("Dashboard", "??", _dashboardControl, "Overview & Daily Challenge"),
+                ("Summarizer", "??", _summarizerControl, "AI Study Summarizer"),
+                ("Problems", "??", _problemGeneratorControl, "Random Problem Generator"),
+                ("Optimizer", "?", _studyOptimizerControl, "Study Time Optimizer"),
+                ("Flashcards", "???", _flashcardControl, "Memory Trigger System"),
+                ("Quiz", "?", _reverseQuizControl, "Reverse Quiz Generator"),
+                ("Settings", "??", _settingsControl, "App Settings & Preferences"),
+                ("About", "??", _aboutControl, "Help & Information")
             };
 
             int yPosition = 20;
@@ -150,7 +150,7 @@ namespace StudyBuddy
                 FlatStyle = FlatStyle.Flat,
                 BackColor = _themeColors.Surface,
                 ForeColor = _themeColors.Text,
-                Font = new Font("Segoe UI", 11F, FontStyle.Regular),
+                Font = new Font("Segoe UI Emoji", 11F, FontStyle.Regular),
                 TextAlign = ContentAlignment.MiddleLeft,
                 ImageAlign = ContentAlignment.MiddleLeft,
                 Text = $"   {icon}  {name}",

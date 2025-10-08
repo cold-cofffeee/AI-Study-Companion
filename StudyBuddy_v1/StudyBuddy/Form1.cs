@@ -1,0 +1,544 @@
+﻿using System.ComponentModel;
+using System.Text.RegularExpressions;
+
+namespace StudyBuddy
+{
+    public partial class Form1 : Form
+    {
+        private GeminiApiClient? _geminiClient;
+        private List<StudyOutput> _outputs = new List<StudyOutput>();
+        private string _currentApiKey = string.Empty;
+        private AppSettings _settings;
+
+        public Form1()
+        {
+            InitializeComponent();
+            _settings = AppSettings.Load();
+            LoadSettings();
+            InitializeLanguageDropdown();
+            UpdateButtonStates();
+            
+            // Set the form to open maximized by default
+            this.WindowState = FormWindowState.Maximized;
+        }
+
+        private void LoadSettings()
+        {
+            // Load API key if available
+            if (!string.IsNullOrEmpty(_settings.ApiKey))
+            {
+                _currentApiKey = _settings.ApiKey;
+                _geminiClient = new GeminiApiClient(_currentApiKey);
+                lblApiStatus.Text = "API Key configured ✓";
+                lblApiStatus.ForeColor = Color.Green;
+            }
+
+            // Restore window size and state
+            if (_settings.StartMaximized)
+            {
+                this.WindowState = FormWindowState.Maximized;
+            }
+            else if (_settings.RememberWindowPosition)
+            {
+                this.Size = new Size(_settings.WindowWidth, _settings.WindowHeight);
+            }
+        }
+
+        private void SaveSettings()
+        {
+            _settings.ApiKey = _currentApiKey;
+            _settings.LastSelectedLanguage = ((LanguageOption)cmbLanguage.SelectedItem).Code;
+            _settings.WindowWidth = this.Width;
+            _settings.WindowHeight = this.Height;
+            _settings.StartMaximized = this.WindowState == FormWindowState.Maximized;
+            _settings.Save();
+        }
+
+        private void InitializeLanguageDropdown()
+        {
+            var languages = new List<LanguageOption>
+            {
+                new LanguageOption { Code = "en", DisplayName = "English" },
+                new LanguageOption { Code = "es", DisplayName = "Español" },
+                new LanguageOption { Code = "fr", DisplayName = "Français" },
+                new LanguageOption { Code = "de", DisplayName = "Deutsch" },
+                new LanguageOption { Code = "it", DisplayName = "Italiano" },
+                new LanguageOption { Code = "pt", DisplayName = "Português" },
+                new LanguageOption { Code = "ru", DisplayName = "Русский" },
+                new LanguageOption { Code = "ja", DisplayName = "日本語" },
+                new LanguageOption { Code = "ko", DisplayName = "한국어" },
+                new LanguageOption { Code = "zh", DisplayName = "中文" }
+            };
+
+            cmbLanguage.DataSource = languages;
+            cmbLanguage.DisplayMember = "DisplayName";
+            cmbLanguage.ValueMember = "Code";
+            
+            // Restore last selected language
+            var savedLanguage = languages.FirstOrDefault(l => l.Code == _settings.LastSelectedLanguage);
+            if (savedLanguage != null)
+            {
+                cmbLanguage.SelectedItem = savedLanguage;
+            }
+            else
+            {
+                cmbLanguage.SelectedIndex = 0; // Default to English
+            }
+        }
+
+        private void UpdateButtonStates()
+        {
+            bool hasText = !string.IsNullOrWhiteSpace(txtInput.Text);
+            bool hasApiKey = !string.IsNullOrWhiteSpace(_currentApiKey);
+            bool canProcess = hasText && hasApiKey;
+
+            btnSummary.Enabled = canProcess;
+            btnQuiz.Enabled = canProcess;
+            btnMnemonics.Enabled = canProcess;
+
+            bool hasOutputs = _outputs.Count > 0;
+            btnCopyToClipboard.Enabled = hasOutputs;
+            btnSaveAsPdf.Enabled = hasOutputs;
+            btnShare.Enabled = hasOutputs;
+        }
+
+        private void btnConfigureApi_Click(object sender, EventArgs e)
+        {
+            using (var apiDialog = new ApiKeyDialog())
+            {
+                if (apiDialog.ShowDialog() == DialogResult.OK)
+                {
+                    _currentApiKey = apiDialog.ApiKey;
+                    _geminiClient?.Dispose();
+                    _geminiClient = new GeminiApiClient(_currentApiKey);
+                    lblApiStatus.Text = "API Key configured ✓";
+                    lblApiStatus.ForeColor = Color.Green;
+                    UpdateButtonStates();
+                    SaveSettings(); // Save the new API key
+                }
+            }
+        }
+
+        private async void btnSummary_Click(object sender, EventArgs e)
+        {
+            await ProcessWithGemini("Create a comprehensive bullet-point summary of the following text. Focus on key concepts and main ideas:", OutputType.Summary, "Summary");
+        }
+
+        private async void btnQuiz_Click(object sender, EventArgs e)
+        {
+            await ProcessWithGemini("Generate 3-5 quiz questions based on the following text. Include multiple choice questions with correct answers indicated:", OutputType.Quiz, "Quiz Questions");
+        }
+
+        private async void btnMnemonics_Click(object sender, EventArgs e)
+        {
+            await ProcessWithGemini("Create memory tricks and mnemonics to help remember the key concepts from the following text:", OutputType.Mnemonics, "Memory Tricks");
+        }
+
+        private async Task ProcessWithGemini(string basePrompt, OutputType outputType, string title)
+        {
+            if (_geminiClient == null)
+            {
+                MessageBox.Show("Please configure your API key first.", "API Key Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                // Show processing indicator
+                var originalText = GetActiveProcessingButton(outputType).Text;
+                GetActiveProcessingButton(outputType).Text = "Processing...";
+                GetActiveProcessingButton(outputType).Enabled = false;
+                Cursor = Cursors.WaitCursor;
+
+                // Get selected language
+                var selectedLanguage = (LanguageOption)cmbLanguage.SelectedItem;
+                var languageInstruction = selectedLanguage.Code != "en" 
+                    ? $" Please respond in {selectedLanguage.DisplayName}." 
+                    : "";
+
+                // Create full prompt
+                var fullPrompt = $"{basePrompt}{languageInstruction}\n\nText to analyze:\n{txtInput.Text}";
+
+                // Call Gemini API
+                var result = await _geminiClient.GenerateContentAsync(fullPrompt);
+
+                // Create output object
+                var output = new StudyOutput
+                {
+                    Title = GetCleanTitle(title),
+                    Content = result,
+                    Type = outputType,
+                    CreatedAt = DateTime.Now
+                };
+
+                _outputs.Add(output);
+
+                // Add to output tabs
+                AddOutputTab(output);
+
+                UpdateButtonStates();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error processing request: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Restore button state
+                var button = GetActiveProcessingButton(outputType);
+                button.Text = GetOriginalButtonText(outputType);
+                button.Enabled = true;
+                Cursor = Cursors.Default;
+            }
+        }
+
+        private Button GetActiveProcessingButton(OutputType type)
+        {
+            return type switch
+            {
+                OutputType.Summary => btnSummary,
+                OutputType.Quiz => btnQuiz,
+                OutputType.Mnemonics => btnMnemonics,
+                _ => btnSummary
+            };
+        }
+
+        private string GetOriginalButtonText(OutputType type)
+        {
+            return type switch
+            {
+                OutputType.Summary => "📋 Generate Summary",
+                OutputType.Quiz => "❓ Create Quiz",
+                OutputType.Mnemonics => "🧠 Memory Tricks",
+                _ => "Process"
+            };
+        }
+
+        private string GetCleanTitle(string baseTitle)
+        {
+            var timestamp = DateTime.Now.ToString("HH:mm");
+            return $"{baseTitle} ({timestamp})";
+        }
+
+        private void AddOutputTab(StudyOutput output)
+        {
+            var tabPage = new TabPage(output.Title);
+            
+            var richTextBox = new RichTextBox
+            {
+                Dock = DockStyle.Fill,
+                ReadOnly = true,
+                Font = new Font("Segoe UI", 12),
+                BackColor = Color.White,
+                ScrollBars = RichTextBoxScrollBars.Vertical,
+                Padding = new Padding(20),
+                SelectionIndent = 15,
+                SelectionRightIndent = 15
+            };
+
+            // Apply markdown-style formatting
+            ApplyMarkdownFormatting(richTextBox, output.Content);
+
+            tabPage.Controls.Add(richTextBox);
+            tabControlOutputs.TabPages.Add(tabPage);
+            tabControlOutputs.SelectedTab = tabPage;
+        }
+
+        private void ApplyMarkdownFormatting(RichTextBox rtb, string content)
+        {
+            // Clean the content first
+            var cleanContent = CleanApiResponse(content);
+            
+            rtb.Clear();
+            rtb.Text = cleanContent;
+            
+            var lines = cleanContent.Split('\n');
+            var currentPosition = 0;
+            
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrEmpty(line.Trim()))
+                {
+                    currentPosition += line.Length + 1;
+                    continue;
+                }
+                
+                var lineLength = line.Length;
+                rtb.Select(currentPosition, lineLength);
+                
+                var trimmedLine = line.Trim();
+                
+                // H1 Headers (# Header)
+                if (trimmedLine.StartsWith("# "))
+                {
+                    rtb.SelectionFont = new Font("Segoe UI", 18, FontStyle.Bold);
+                    rtb.SelectionColor = Color.FromArgb(63, 81, 181);
+                    rtb.Text = rtb.Text.Replace(line, trimmedLine.Substring(2).Trim());
+                }
+                // H2 Headers (## Header)
+                else if (trimmedLine.StartsWith("## "))
+                {
+                    rtb.SelectionFont = new Font("Segoe UI", 16, FontStyle.Bold);
+                    rtb.SelectionColor = Color.FromArgb(33, 150, 243);
+                    rtb.Text = rtb.Text.Replace(line, trimmedLine.Substring(3).Trim());
+                }
+                // H3 Headers (### Header)
+                else if (trimmedLine.StartsWith("### "))
+                {
+                    rtb.SelectionFont = new Font("Segoe UI", 14, FontStyle.Bold);
+                    rtb.SelectionColor = Color.FromArgb(76, 175, 80);
+                    rtb.Text = rtb.Text.Replace(line, trimmedLine.Substring(4).Trim());
+                }
+                // Bold text (**text**)
+                else if (trimmedLine.Contains("**"))
+                {
+                    ProcessBoldText(rtb, line, currentPosition);
+                }
+                // Bullet points (-, *, •)
+                else if (trimmedLine.StartsWith("- ") || trimmedLine.StartsWith("* ") || trimmedLine.StartsWith("• "))
+                {
+                    rtb.SelectionFont = new Font("Segoe UI", 12, FontStyle.Regular);
+                    rtb.SelectionColor = Color.FromArgb(33, 33, 33);
+                    rtb.SelectionIndent = 25;
+                    rtb.SelectionHangingIndent = 15;
+                }
+                // Sub-bullet points (indented)
+                else if (trimmedLine.StartsWith("  - ") || trimmedLine.StartsWith("  * ") || 
+                         trimmedLine.StartsWith("    - ") || trimmedLine.StartsWith("    * "))
+                {
+                    rtb.SelectionFont = new Font("Segoe UI", 11, FontStyle.Regular);
+                    rtb.SelectionColor = Color.FromArgb(66, 66, 66);
+                    rtb.SelectionIndent = 45;
+                    rtb.SelectionHangingIndent = 15;
+                }
+                // Numbered lists (1. 2. etc.)
+                else if (Regex.IsMatch(trimmedLine, @"^\d+\.\s"))
+                {
+                    rtb.SelectionFont = new Font("Segoe UI", 12, FontStyle.Regular);
+                    rtb.SelectionColor = Color.FromArgb(33, 33, 33);
+                    rtb.SelectionIndent = 25;
+                    rtb.SelectionHangingIndent = 15;
+                }
+                // Code blocks (`code`)
+                else if (trimmedLine.Contains("`"))
+                {
+                    ProcessCodeText(rtb, line, currentPosition);
+                }
+                // Regular paragraph text
+                else
+                {
+                    rtb.SelectionFont = new Font("Segoe UI", 12, FontStyle.Regular);
+                    rtb.SelectionColor = Color.FromArgb(33, 33, 33);
+                    rtb.SelectionIndent = 0;
+                    rtb.SelectionHangingIndent = 0;
+                }
+                
+                currentPosition += lineLength + 1;
+            }
+            
+            // Reset selection
+            rtb.Select(0, 0);
+        }
+
+        private string CleanApiResponse(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+                return content;
+                
+            // Remove unnecessary API response artifacts
+            var lines = content.Split('\n');
+            var cleanedLines = new List<string>();
+            bool skipMetaContent = false;
+            
+            foreach (var line in lines)
+            {
+                var trimmed = line.Trim();
+                
+                // Skip lines that look like prompts or meta information
+                if (trimmed.Contains("given the prompt") || 
+                    trimmed.Contains("comprehensive bullet-point summary") ||
+                    trimmed.Contains("needs to cover") ||
+                    trimmed.Contains("(since the original prompt") ||
+                    trimmed.Contains("*as if*") ||
+                    trimmed.Contains("Implicitly Responded To") ||
+                    trimmed.StartsWith("Okay,") ||
+                    trimmed.All(c => c == '?' || c == '*' || c == '=' || c == '-' || char.IsWhiteSpace(c)))
+                {
+                    continue;
+                }
+                
+                // Clean up asterisks and formatting artifacts
+                var cleaned = trimmed
+                    .Replace("*", "")
+                    .Replace("**", "")
+                    .Trim();
+                
+                if (!string.IsNullOrEmpty(cleaned))
+                {
+                    cleanedLines.Add(cleaned);
+                }
+            }
+            
+            return string.Join("\n\n", cleanedLines);
+        }
+
+        private void ProcessBoldText(RichTextBox rtb, string line, int position)
+        {
+            var parts = line.Split(new string[] { "**" }, StringSplitOptions.None);
+            var currentPos = position;
+            
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (i % 2 == 1) // Odd indices are bold text
+                {
+                    rtb.Select(currentPos, parts[i].Length);
+                    rtb.SelectionFont = new Font("Segoe UI", 12, FontStyle.Bold);
+                    rtb.SelectionColor = Color.FromArgb(33, 33, 33);
+                }
+                currentPos += parts[i].Length;
+            }
+        }
+
+        private void ProcessCodeText(RichTextBox rtb, string line, int position)
+        {
+            var parts = line.Split('`');
+            var currentPos = position;
+            
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (i % 2 == 1) // Odd indices are code text
+                {
+                    rtb.Select(currentPos, parts[i].Length);
+                    rtb.SelectionFont = new Font("Consolas", 11, FontStyle.Regular);
+                    rtb.SelectionColor = Color.FromArgb(220, 53, 69);
+                    rtb.SelectionBackColor = Color.FromArgb(248, 249, 250);
+                }
+                currentPos += parts[i].Length + 1; // +1 for the backtick
+            }
+        }
+
+        private void btnCopyToClipboard_Click(object sender, EventArgs e)
+        {
+            if (tabControlOutputs.SelectedTab?.Controls[0] is RichTextBox rtb)
+            {
+                // Get the original content and clean it for copying
+                var selectedOutput = _outputs.FirstOrDefault(o => $"{o.Title}" == tabControlOutputs.SelectedTab.Text);
+                if (selectedOutput != null)
+                {
+                    var cleanContent = CleanApiResponse(selectedOutput.Content);
+                    var markdownContent = ConvertToMarkdown(cleanContent);
+                    Clipboard.SetText(markdownContent);
+                }
+                else
+                {
+                    Clipboard.SetText(rtb.Text);
+                }
+                
+                MessageBox.Show("Content copied to clipboard in markdown format!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private string ConvertToMarkdown(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+                return content;
+                
+            var lines = content.Split('\n');
+            var markdownLines = new List<string>();
+            
+            foreach (var line in lines)
+            {
+                var trimmed = line.Trim();
+                if (string.IsNullOrEmpty(trimmed))
+                {
+                    markdownLines.Add("");
+                    continue;
+                }
+                
+                // Convert to proper markdown format
+                if (trimmed.EndsWith(":") && !trimmed.StartsWith("-") && !trimmed.StartsWith("•"))
+                {
+                    markdownLines.Add($"## {trimmed.TrimEnd(':')}");
+                    markdownLines.Add("");
+                }
+                else if (trimmed.StartsWith("•") || trimmed.StartsWith("*"))
+                {
+                    markdownLines.Add($"- {trimmed.Substring(1).Trim()}");
+                }
+                else if (trimmed.StartsWith("-"))
+                {
+                    markdownLines.Add(trimmed);
+                }
+                else
+                {
+                    markdownLines.Add(trimmed);
+                }
+            }
+            
+            return string.Join("\n", markdownLines);
+        }
+
+        private void btnSaveAsPdf_Click(object sender, EventArgs e)
+        {
+            if (tabControlOutputs.SelectedTab?.Controls[0] is RichTextBox rtb)
+            {
+                using (var saveDialog = new SaveFileDialog())
+                {
+                    saveDialog.Filter = "PDF files (*.pdf)|*.pdf";
+                    saveDialog.DefaultExt = "pdf";
+                    saveDialog.FileName = $"StudyBuddy_Output_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+
+                    if (saveDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        try
+                        {
+                            PdfGenerator.CreatePdf(rtb.Text, saveDialog.FileName, tabControlOutputs.SelectedTab.Text);
+                            MessageBox.Show("PDF saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Error saving PDF: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void btnShare_Click(object sender, EventArgs e)
+        {
+            if (tabControlOutputs.SelectedTab?.Controls[0] is RichTextBox rtb)
+            {
+                // Create a simple share dialog showing the content that can be copied
+                using (var shareDialog = new ShareDialog(rtb.Text, tabControlOutputs.SelectedTab.Text))
+                {
+                    shareDialog.ShowDialog();
+                }
+            }
+        }
+
+        private void txtInput_TextChanged(object sender, EventArgs e)
+        {
+            UpdateButtonStates();
+            lblCharCount.Text = $"{txtInput.Text.Length} characters";
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveSettings();
+            _geminiClient?.Dispose();
+        }
+
+        private void btnClearInput_Click(object sender, EventArgs e)
+        {
+            txtInput.Clear();
+            txtInput.Focus();
+        }
+
+        private void btnClearOutputs_Click(object sender, EventArgs e)
+        {
+            tabControlOutputs.TabPages.Clear();
+            _outputs.Clear();
+            UpdateButtonStates();
+        }
+    }
+}

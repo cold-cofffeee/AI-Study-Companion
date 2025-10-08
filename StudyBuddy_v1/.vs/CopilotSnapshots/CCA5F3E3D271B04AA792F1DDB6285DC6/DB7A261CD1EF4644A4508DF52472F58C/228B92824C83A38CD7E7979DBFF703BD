@@ -1,0 +1,195 @@
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace StudyBuddy
+{
+    public partial class ShareDialog : Form
+    {
+        private readonly string _content;
+        private readonly string _title;
+
+        public ShareDialog(string content, string title)
+        {
+            _content = content;
+            _title = title;
+            InitializeComponent();
+            LoadContent();
+        }
+
+        private void InitializeComponent()
+        {
+            this.lblTitle = new Label();
+            this.txtContent = new TextBox();
+            this.btnCopy = new Button();
+            this.btnClose = new Button();
+            this.lblInstructions = new Label();
+            this.SuspendLayout();
+
+            // Form properties
+            this.AutoScaleDimensions = new SizeF(8F, 20F);
+            this.AutoScaleMode = AutoScaleMode.Font;
+            this.ClientSize = new Size(600, 500);
+            this.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point);
+            this.Name = "ShareDialog";
+            this.StartPosition = FormStartPosition.CenterParent;
+            this.Text = "Share Content";
+            this.MinimumSize = new Size(500, 400);
+
+            // lblTitle
+            this.lblTitle.AutoSize = true;
+            this.lblTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            this.lblTitle.ForeColor = Color.FromArgb(63, 81, 181);
+            this.lblTitle.Location = new Point(20, 20);
+            this.lblTitle.Name = "lblTitle";
+            this.lblTitle.Size = new Size(200, 25);
+            this.lblTitle.Text = "Share Study Content";
+
+            // lblInstructions
+            this.lblInstructions.Location = new Point(20, 55);
+            this.lblInstructions.Name = "lblInstructions";
+            this.lblInstructions.Size = new Size(560, 40);
+            this.lblInstructions.Text = "Copy the content below and share it via your preferred platform (email, messaging apps, social media, etc.):";
+
+            // txtContent
+            this.txtContent.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            this.txtContent.Font = new Font("Segoe UI", 10F);
+            this.txtContent.Location = new Point(20, 105);
+            this.txtContent.Multiline = true;
+            this.txtContent.Name = "txtContent";
+            this.txtContent.ReadOnly = true;
+            this.txtContent.ScrollBars = ScrollBars.Vertical;
+            this.txtContent.Size = new Size(560, 330);
+            this.txtContent.TabIndex = 0;
+
+            // btnCopy
+            this.btnCopy.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            this.btnCopy.BackColor = Color.FromArgb(63, 81, 181);
+            this.btnCopy.FlatStyle = FlatStyle.Flat;
+            this.btnCopy.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            this.btnCopy.ForeColor = Color.White;
+            this.btnCopy.Location = new Point(420, 450);
+            this.btnCopy.Name = "btnCopy";
+            this.btnCopy.Size = new Size(75, 35);
+            this.btnCopy.Text = "Copy";
+            this.btnCopy.UseVisualStyleBackColor = false;
+            this.btnCopy.Click += new EventHandler(this.btnCopy_Click);
+
+            // btnClose
+            this.btnClose.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            this.btnClose.BackColor = Color.Gray;
+            this.btnClose.FlatStyle = FlatStyle.Flat;
+            this.btnClose.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            this.btnClose.ForeColor = Color.White;
+            this.btnClose.Location = new Point(505, 450);
+            this.btnClose.Name = "btnClose";
+            this.btnClose.Size = new Size(75, 35);
+            this.btnClose.Text = "Close";
+            this.btnClose.UseVisualStyleBackColor = false;
+            this.btnClose.Click += new EventHandler(this.btnClose_Click);
+
+            this.Controls.Add(this.lblTitle);
+            this.Controls.Add(this.lblInstructions);
+            this.Controls.Add(this.txtContent);
+            this.Controls.Add(this.btnCopy);
+            this.Controls.Add(this.btnClose);
+
+            this.ResumeLayout(false);
+            this.PerformLayout();
+        }
+
+        private void LoadContent()
+        {
+            var formattedContent = FormatShareContent(_content);
+            txtContent.Text = $"{_title}\n{'═'.ToString().PadRight(50, '═')}\n\n{formattedContent}";
+            
+            // Apply better formatting to the text box
+            txtContent.Font = new Font("Segoe UI", 11);
+            txtContent.BackColor = Color.FromArgb(248, 249, 250);
+            txtContent.ForeColor = Color.FromArgb(33, 37, 41);
+        }
+
+        private string FormatShareContent(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+                return content;
+
+            var lines = content.Split('\n');
+            var formattedLines = new List<string>();
+            
+            foreach (var line in lines)
+            {
+                var trimmedLine = line.Trim();
+                
+                if (string.IsNullOrEmpty(trimmedLine))
+                {
+                    formattedLines.Add("");
+                    continue;
+                }
+                
+                // Format bullet points for plain text sharing
+                if (trimmedLine.StartsWith("*") || trimmedLine.StartsWith("-") || trimmedLine.StartsWith("•"))
+                {
+                    formattedLines.Add($"• {trimmedLine.Substring(1).Trim()}");
+                }
+                // Format sub-bullet points
+                else if (trimmedLine.StartsWith("    *") || trimmedLine.StartsWith("    -"))
+                {
+                    formattedLines.Add($"  ○ {trimmedLine.Substring(5).Trim()}");
+                }
+                // Format numbered lists
+                else if (System.Text.RegularExpressions.Regex.IsMatch(trimmedLine, @"^\d+\."))
+                {
+                    formattedLines.Add(trimmedLine);
+                }
+                // Format headers (lines ending with colon)
+                else if (trimmedLine.EndsWith(":") && !trimmedLine.StartsWith("•"))
+                {
+                    formattedLines.Add($"\n{trimmedLine.ToUpper()}\n{'-'.ToString().PadRight(trimmedLine.Length, '-'):");
+                }
+                else
+                {
+                    formattedLines.Add(trimmedLine);
+                }
+            }
+            
+            return string.Join("\n", formattedLines);
+        }
+
+        private void btnCopy_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Clipboard.SetText(txtContent.Text);
+                btnCopy.Text = "Copied!";
+                btnCopy.BackColor = Color.FromArgb(76, 175, 80);
+                
+                var timer = new System.Windows.Forms.Timer();
+                timer.Interval = 2000;
+                timer.Tick += (s, args) =>
+                {
+                    btnCopy.Text = "Copy";
+                    btnCopy.BackColor = Color.FromArgb(63, 81, 181);
+                    timer.Stop();
+                    timer.Dispose();
+                };
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error copying to clipboard: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private Label lblTitle;
+        private Label lblInstructions;
+        private TextBox txtContent;
+        private Button btnCopy;
+        private Button btnClose;
+    }
+}

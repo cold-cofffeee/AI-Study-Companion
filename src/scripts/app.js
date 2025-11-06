@@ -251,35 +251,6 @@ function copyToClipboard(text) {
     });
 }
 
-// Navigate to Pomodoro (for floating timer click)
-window.navigateToPomodoro = async function() {
-    await loadModule('pomodoro');
-};
-
-// Music Player Float Controls
-window.toggleMusicFloat = function() {
-    const musicContainer = document.getElementById('persistent-music-container');
-    if (musicContainer) {
-        musicContainer.classList.toggle('minimized');
-        const isMinimized = musicContainer.classList.contains('minimized');
-        showToast(isMinimized ? '🎵 Music minimized' : '🎵 Music expanded', 'info');
-    }
-};
-
-window.stopPersistentMusic = function() {
-    if (typeof PomodoroModule !== 'undefined' && PomodoroModule.stopMusic) {
-        PomodoroModule.stopMusic();
-    } else if (window.MusicPlayer) {
-        window.MusicPlayer.stop();
-    }
-};
-
-// Timer Float Controls
-window.restoreTimerToPage = function(event) {
-    event.stopPropagation(); // Prevent triggering the navigate action
-    loadModule('pomodoro');
-};
-
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();

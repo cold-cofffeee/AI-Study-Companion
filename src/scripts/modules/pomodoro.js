@@ -1568,29 +1568,6 @@ const PomodoroModule = {
             const progress = ((this.data.totalTime - this.data.timeRemaining) / this.data.totalTime) * 565.48;
             progressCircle.style.strokeDashoffset = 565.48 - progress;
         }
-        
-        // Update floating timer (for when not on Pomodoro page)
-        this.updateFloatingTimer(timeStr);
-    },
-
-    updateFloatingTimer(timeStr) {
-        const floatingTimer = document.getElementById('floating-timer');
-        const floatingDisplay = document.getElementById('floating-timer-display');
-        const floatingStatus = document.getElementById('floating-timer-status');
-        
-        if (!floatingTimer || !floatingDisplay || !floatingStatus) return;
-        
-        // Show floating timer if timer is running OR paused, hide only on Pomodoro page
-        const isOnPomodoroPage = window.AppState && window.AppState.currentModule === 'pomodoro';
-        
-        if ((this.data.isRunning || this.data.isPaused) && !isOnPomodoroPage) {
-            floatingTimer.classList.remove('hidden');
-            floatingDisplay.textContent = timeStr;
-            floatingStatus.textContent = this.data.modes[this.data.currentMode]?.name || 'Timer';
-        } else if (!this.data.isRunning && !this.data.isPaused) {
-            floatingTimer.classList.add('hidden');
-        }
-        // Keep floating timer visible even on Pomodoro page if minimized (handled by window state)
     },
 
     updateSessionCount() {
@@ -1625,9 +1602,9 @@ const PomodoroModule = {
                 console.error('MusicPlayer does not have getAllPlaylists method');
             }
             
-            // Restore player if it was playing - use persistent container
+            // Restore player if it was playing - use music player container within the pomodoro module
             if (this.musicPlayer && typeof this.musicPlayer.isCurrentlyPlaying === 'function' && this.musicPlayer.isCurrentlyPlaying()) {
-                this.musicPlayer.restorePlayer('music-player-wrapper');
+                this.musicPlayer.restorePlayer('music-player-container');
             }
         } catch (error) {
             console.error('Error initializing music player:', error);
@@ -1715,8 +1692,8 @@ const PomodoroModule = {
         }
 
         try {
-            // Load music into the persistent container so it doesn't get destroyed on navigation
-            this.musicPlayer.loadPlayer(url, service, 'music-player-wrapper');
+            // Load music into the embedded container within the pomodoro module
+            this.musicPlayer.loadPlayer(url, service, 'music-player-container');
             showToast('Music started! 🎵', 'success');
         } catch (error) {
             console.error('Error playing music:', error);

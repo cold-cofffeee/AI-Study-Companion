@@ -82,7 +82,7 @@ if (typeof window.MusicPlayer === 'undefined') {
     }
 
     // Load player into container
-    loadPlayer(url, service = 'youtube', containerId = 'music-player-wrapper') {
+    loadPlayer(url, service = 'youtube', containerId = 'music-player-container') {
         let container = document.getElementById(containerId);
         if (!container) {
             console.error('Music player container not found:', containerId);
@@ -102,19 +102,11 @@ if (typeof window.MusicPlayer === 'undefined') {
         
         this.isPlaying = true;
         
-        // Show persistent container if using the persistent wrapper
-        if (containerId === 'music-player-wrapper') {
-            const persistentContainer = document.getElementById('persistent-music-container');
-            if (persistentContainer) {
-                persistentContainer.style.display = 'block';
-            }
-        }
-        
         return player;
     }
 
     // Restore player after navigation
-    restorePlayer(containerId = 'music-player-wrapper') {
+    restorePlayer(containerId = 'music-player-container') {
         if (!this.currentPlayer || !this.isPlaying) {
             return;
         }
@@ -129,14 +121,6 @@ if (typeof window.MusicPlayer === 'undefined') {
         container.appendChild(this.currentPlayer);
         this.playerContainer = container;
         this.containerIdUsed = containerId;
-        
-        // Show persistent container
-        if (containerId === 'music-player-wrapper') {
-            const persistentContainer = document.getElementById('persistent-music-container');
-            if (persistentContainer) {
-                persistentContainer.style.display = 'block';
-            }
-        }
     }
 
     // Stop/Remove player
@@ -144,12 +128,6 @@ if (typeof window.MusicPlayer === 'undefined') {
         // Clear from stored container
         if (this.playerContainer) {
             this.playerContainer.innerHTML = '';
-        }
-        
-        // Hide persistent container
-        const persistentContainer = document.getElementById('persistent-music-container');
-        if (persistentContainer) {
-            persistentContainer.style.display = 'none';
         }
         
         this.currentPlayer = null;

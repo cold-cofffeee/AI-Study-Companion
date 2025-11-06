@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const Store = require('electron-store');
-const DatabaseHelper = require('./src/helpers/DatabaseHelper');
+const JsonDataStore = require('./src/helpers/JsonDataStore');
 const SettingsHandler = require('./src/helpers/SettingsHandler');
 
 // Load environment variables
@@ -10,7 +10,7 @@ require('dotenv').config();
 // Initialize store and helpers
 const store = new Store();
 let mainWindow;
-let databaseHelper;
+let dataStore;
 let settingsHandler;
 
 function createWindow() {
@@ -75,11 +75,9 @@ function createWindow() {
 
 // App lifecycle
 app.whenReady().then(async () => {
-  // Initialize database and settings
-  databaseHelper = new DatabaseHelper();
+  // Initialize JSON data store and settings
+  dataStore = new JsonDataStore();
   settingsHandler = new SettingsHandler();
-  
-  await databaseHelper.initialize();
   
   createWindow();
 
@@ -111,29 +109,50 @@ ipcMain.handle('update-setting', async (event, key, value) => {
   return await settingsHandler.updateSetting(key, value);
 });
 
-// Database operations
+// Data operations
 ipcMain.handle('db-query', async (event, query, params) => {
-  return await databaseHelper.query(query, params);
+  // Legacy support - not used anymore
+  return [];
 });
 
 ipcMain.handle('db-get-sessions', async (event, limit) => {
-  return await databaseHelper.getRecentSessions(limit);
+  dataStore.logActivity('database', 'get-sessions', { limit });
+  return dataStore.getSessions(limit);
 });
 
 ipcMain.handle('db-get-flashcards', async () => {
-  return await databaseHelper.getDueFlashcards();
+  dataStore.logActivity('database', 'get-flashcards');
+  return dataStore.getFlashcards();
 });
 
 ipcMain.handle('db-save-session', async (event, session) => {
-  return await databaseHelper.saveStudySession(session);
+  dataStore.logActivity('database', 'save-session', { topic: session.topic });
+  return dataStore.saveSession(session);
 });
 
 ipcMain.handle('db-save-flashcard', async (event, flashcard) => {
-  return await databaseHelper.saveFlashcard(flashcard);
+  dataStore.logActivity('database', 'save-flashcard');
+  return dataStore.saveFlashcard(flashcard);
 });
 
 ipcMain.handle('db-update-flashcard', async (event, id, data) => {
-  return await databaseHelper.updateFlashcard(id, data);
+  dataStore.logActivity('database', 'update-flashcard', { id });
+  return dataStore.updateFlashcard(id, data);
+});
+
+ipcMain.handle('db-delete-flashcard', async (event, id) => {
+  dataStore.logActivity('database', 'delete-flashcard', { id });
+  return dataStore.deleteFlashcard(id);
+});
+
+// Module state persistence
+ipcMain.handle('save-module-state', async (event, moduleName, state) => {
+  dataStore.saveModuleState(moduleName, state);
+  return true;
+});
+
+ipcMain.handle('get-module-state', async (event, moduleName) => {
+  return dataStore.getModuleState(moduleName);
 });
 
 // File dialogs
@@ -162,41 +181,89 @@ ipcMain.handle('show-notification', (event, title, body) => {
   new Notification({ title, body }).show();
 });
 
-// Gemini API handlers
+// Gemini API handlers with logging
 ipcMain.handle('gemini-generate-summary', async (event, text, apiKey) => {
-  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
-  const client = new GeminiApiClient(apiKey);
-  return await client.generateSummary(text);
+  try {
+    const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+    const client = new GeminiApiClient(apiKey);
+    const response = await client.generateSummary(text);
+    dataStore.saveAIResponse('summarizer', text.substring(0, 100), response);
+    dataStore.logActivity('ai', 'generate-summary', { textLength: text.length });
+    return response;
+  } catch (error) {
+    dataStore.logError('summarizer', error, { action: 'generate-summary' });
+    throw error;
+  }
 });
 
 ipcMain.handle('gemini-generate-quiz', async (event, topic, apiKey) => {
-  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
-  const client = new GeminiApiClient(apiKey);
-  return await client.generateQuiz(topic);
+  try {
+    const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+    const client = new GeminiApiClient(apiKey);
+    const response = await client.generateQuiz(topic);
+    dataStore.saveAIResponse('quiz', topic, response);
+    dataStore.logActivity('ai', 'generate-quiz', { topic });
+    return response;
+  } catch (error) {
+    dataStore.logError('quiz', error, { action: 'generate-quiz', topic });
+    throw error;
+  }
 });
 
 ipcMain.handle('gemini-generate-mnemonics', async (event, topic, apiKey) => {
-  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
-  const client = new GeminiApiClient(apiKey);
-  return await client.generateMnemonics(topic);
+  try {
+    const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+    const client = new GeminiApiClient(apiKey);
+    const response = await client.generateMnemonics(topic);
+    dataStore.saveAIResponse('summarizer', topic, response, { type: 'mnemonics' });
+    dataStore.logActivity('ai', 'generate-mnemonics', { topic });
+    return response;
+  } catch (error) {
+    dataStore.logError('summarizer', error, { action: 'generate-mnemonics', topic });
+    throw error;
+  }
 });
 
 ipcMain.handle('gemini-generate-problems', async (event, topic, difficulty, apiKey) => {
-  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
-  const client = new GeminiApiClient(apiKey);
-  return await client.generateProblems(topic, difficulty);
+  try {
+    const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+    const client = new GeminiApiClient(apiKey);
+    const response = await client.generateProblems(topic, difficulty);
+    dataStore.saveAIResponse('problems', topic, response, { difficulty });
+    dataStore.logActivity('ai', 'generate-problems', { topic, difficulty });
+    return response;
+  } catch (error) {
+    dataStore.logError('problems', error, { action: 'generate-problems', topic });
+    throw error;
+  }
 });
 
 ipcMain.handle('gemini-generate-schedule', async (event, topics, hoursPerDay, apiKey) => {
-  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
-  const client = new GeminiApiClient(apiKey);
-  return await client.generateStudySchedule(topics, hoursPerDay);
+  try {
+    const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+    const client = new GeminiApiClient(apiKey);
+    const response = await client.generateStudySchedule(topics, hoursPerDay);
+    dataStore.saveAIResponse('optimizer', topics, response, { hoursPerDay });
+    dataStore.saveSchedule({ topics, hoursPerDay, content: response });
+    dataStore.logActivity('ai', 'generate-schedule', { topics });
+    return response;
+  } catch (error) {
+    dataStore.logError('optimizer', error, { action: 'generate-schedule', topics });
+    throw error;
+  }
 });
 
 ipcMain.handle('gemini-test-connection', async (event, apiKey) => {
-  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
-  const client = new GeminiApiClient(apiKey);
-  return await client.testConnection();
+  try {
+    const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+    const client = new GeminiApiClient(apiKey);
+    const result = await client.testConnection();
+    dataStore.logActivity('settings', 'test-api-connection', { success: result });
+    return result;
+  } catch (error) {
+    dataStore.logError('settings', error, { action: 'test-connection' });
+    throw error;
+  }
 });
 
 console.log('Study Buddy Pro - Electron App Started');

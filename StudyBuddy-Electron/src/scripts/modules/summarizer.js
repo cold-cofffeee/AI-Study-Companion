@@ -106,6 +106,43 @@ const Summarizer = {
     async init() {
         await this.checkApiStatus();
         this.updateCharCount();
+        await this.restoreState();
+    },
+
+    async restoreState() {
+        try {
+            const savedState = await window.ipcRenderer.invoke('get-module-state', 'summarizer');
+            if (savedState) {
+                // Restore input text
+                if (savedState.inputText) {
+                    const textarea = document.getElementById('input-text');
+                    if (textarea) {
+                        textarea.value = savedState.inputText;
+                        this.updateCharCount();
+                    }
+                }
+                // Restore outputs
+                if (savedState.outputs && savedState.outputs.length > 0) {
+                    this.data.outputs = savedState.outputs;
+                    this.displayAllOutputs();
+                }
+            }
+        } catch (error) {
+            console.error('Error restoring summarizer state:', error);
+        }
+    },
+
+    saveState() {
+        try {
+            const textarea = document.getElementById('input-text');
+            const state = {
+                inputText: textarea?.value || '',
+                outputs: this.data.outputs
+            };
+            window.ipcRenderer.invoke('save-module-state', 'summarizer', state);
+        } catch (error) {
+            console.error('Error saving summarizer state:', error);
+        }
     },
 
     async checkApiStatus() {
@@ -195,6 +232,7 @@ const Summarizer = {
             const result = await client.generateSummary(text, language);
             
             this.addOutput('Summary', result, 'summary');
+            this.saveState(); // Save state after generating
             showToast('Summary generated successfully!', 'success');
         } catch (error) {
             console.error('Error generating summary:', error);

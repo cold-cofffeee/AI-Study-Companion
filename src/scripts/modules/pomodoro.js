@@ -967,6 +967,8 @@ const PomodoroModule = {
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    opacity: 1;
+                    transition: opacity 0.15s ease-in-out;
                 }
 
                 .music-player-container:empty::before {
@@ -977,6 +979,7 @@ const PomodoroModule = {
 
                 .music-player-container iframe {
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                    border-radius: 10px;
                 }
             </style>
         `;
@@ -1670,6 +1673,7 @@ const PomodoroModule = {
     playMusic() {
         if (!this.musicPlayer) {
             showToast('Music player not initialized', 'error');
+            console.error('Music player not initialized');
             return;
         }
 
@@ -1678,11 +1682,14 @@ const PomodoroModule = {
 
         // Get URL based on selected service
         if (service === 'youtube') {
-            url = document.getElementById('youtube-playlist-select').value;
+            const select = document.getElementById('youtube-playlist-select');
+            url = select ? select.value : '';
         } else if (service === 'spotify') {
-            url = document.getElementById('spotify-playlist-select').value;
+            const select = document.getElementById('spotify-playlist-select');
+            url = select ? select.value : '';
         } else if (service === 'custom') {
-            url = document.getElementById('custom-music-url').value;
+            const input = document.getElementById('custom-music-url');
+            url = input ? input.value.trim() : '';
             if (url) {
                 service = this.musicPlayer.detectService(url);
             }
@@ -1694,9 +1701,10 @@ const PomodoroModule = {
         }
 
         try {
+            console.log(`Playing ${service} music:`, url);
             // Load music into the embedded container within the pomodoro module
             this.musicPlayer.loadPlayer(url, service, 'music-player-container');
-            showToast('Music started! 🎵', 'success');
+            showToast(`🎵 ${service === 'youtube' ? 'YouTube' : service === 'spotify' ? 'Spotify' : 'Music'} player started!`, 'success');
         } catch (error) {
             console.error('Error playing music:', error);
             showToast('Failed to play music', 'error');
@@ -1704,8 +1712,12 @@ const PomodoroModule = {
     },
 
     stopMusic() {
-        if (!this.musicPlayer) return;
+        if (!this.musicPlayer) {
+            console.warn('Music player not initialized');
+            return;
+        }
         
+        console.log('Stopping music...');
         this.musicPlayer.stop();
         showToast('Music stopped', 'info');
     },

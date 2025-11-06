@@ -45,35 +45,48 @@ if (typeof window.MusicPlayer === 'undefined') {
         iframe.style.height = service === 'youtube' ? '200px' : '152px';
         iframe.style.border = 'none';
         iframe.style.borderRadius = '10px';
-        iframe.allow = 'autoplay; encrypted-media';
+        iframe.allow = 'autoplay; encrypted-media; fullscreen';
         iframe.allowFullscreen = true;
+        iframe.setAttribute('loading', 'lazy');
         
         // Format URL based on service
         let embedUrl = url;
         
         if (service === 'youtube') {
-            // Convert regular YouTube URLs to embed format
-            if (url.includes('youtube.com/watch?v=')) {
+            // Check if URL is already an embed URL
+            if (url.includes('/embed/')) {
+                // Already embed format, just ensure it has the right parameters
+                embedUrl = url;
+                if (!url.includes('autoplay')) {
+                    embedUrl += (url.includes('?') ? '&' : '?') + 'autoplay=1';
+                }
+                if (!url.includes('controls')) {
+                    embedUrl += '&controls=1';
+                }
+            } else if (url.includes('youtube.com/watch?v=')) {
+                // Convert regular watch URL to embed format
                 const videoId = url.split('v=')[1].split('&')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}`;
+                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1`;
             } else if (url.includes('youtu.be/')) {
+                // Convert short URL to embed format
                 const videoId = url.split('youtu.be/')[1].split('?')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}`;
-            } else if (!url.includes('embed')) {
-                embedUrl = url.replace('youtube.com/', 'youtube.com/embed/');
+                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1`;
             }
         } else if (service === 'spotify') {
-            // Convert Spotify URLs to embed format
-            if (url.includes('open.spotify.com') && !url.includes('embed')) {
-                // Remove query parameters like ?si=xxx
+            // Spotify URLs - check if already embed
+            if (url.includes('/embed/')) {
+                embedUrl = url;
+            } else if (url.includes('open.spotify.com')) {
+                // Convert to embed format
                 const cleanUrl = url.split('?')[0];
                 embedUrl = cleanUrl.replace('open.spotify.com/', 'open.spotify.com/embed/');
             }
         } else if (service === 'soundcloud') {
             // SoundCloud embed
-            embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&hide_related=true&show_comments=false`;
+            embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&hide_related=true&show_comments=false&visual=true`;
         }
         
+        console.log('Final embed URL:', embedUrl);
         iframe.src = embedUrl;
         this.currentPlayer = iframe;
         this.currentService = service;
@@ -89,6 +102,8 @@ if (typeof window.MusicPlayer === 'undefined') {
             return null;
         }
         
+        console.log(`Loading ${service} player with URL:`, url);
+        
         // Store container reference for persistence
         this.playerContainer = container;
         this.containerIdUsed = containerId;
@@ -98,11 +113,15 @@ if (typeof window.MusicPlayer === 'undefined') {
         
         // Create and add new player
         const player = this.createPlayer(url, service);
-        container.appendChild(player);
+        if (player) {
+            container.appendChild(player);
+            this.isPlaying = true;
+            console.log(`${service} player iframe added to container`);
+        } else {
+            console.error('Failed to create player');
+        }
         
-        this.isPlaying = true;
-        
-        return player;
+        return this.currentPlayer;
     }
 
     // Restore player after navigation
@@ -125,6 +144,8 @@ if (typeof window.MusicPlayer === 'undefined') {
 
     // Stop/Remove player
     stop() {
+        console.log('Stopping music player');
+        
         // Clear from stored container
         if (this.playerContainer) {
             this.playerContainer.innerHTML = '';
@@ -133,6 +154,8 @@ if (typeof window.MusicPlayer === 'undefined') {
         this.currentPlayer = null;
         this.isPlaying = false;
         this.playerContainer = null;
+        
+        console.log('Music player stopped and cleared');
     }
 
     // Detect service from URL

@@ -1,6 +1,5 @@
 // Study Optimizer Module
 // ipcRenderer is available globally via window.ipcRenderer from app.js
-const GeminiApiClient = require('../../helpers/GeminiApiClient');
 
 const StudyOptimizer = {
     data: {
@@ -102,8 +101,7 @@ const StudyOptimizer = {
                 throw new Error('API key not configured');
             }
 
-            const client = new GeminiApiClient(settings.apiKey);
-            const result = await client.generateStudySchedule(topic, duration, difficulty, settings.preferredLanguage || 'en');
+            const result = await window.ipcRenderer.invoke('gemini-generate-schedule', topic, duration, settings.apiKey);
             
             this.displaySchedule(result);
             showToast('Schedule generated successfully!', 'success');

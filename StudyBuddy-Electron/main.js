@@ -162,4 +162,35 @@ ipcMain.handle('show-notification', (event, title, body) => {
   new Notification({ title, body }).show();
 });
 
+// Gemini API handlers
+ipcMain.handle('gemini-generate-summary', async (event, text, apiKey) => {
+  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+  const client = new GeminiApiClient(apiKey);
+  return await client.generateSummary(text);
+});
+
+ipcMain.handle('gemini-generate-quiz', async (event, topic, apiKey) => {
+  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+  const client = new GeminiApiClient(apiKey);
+  return await client.generateQuiz(topic);
+});
+
+ipcMain.handle('gemini-generate-mnemonics', async (event, topic, apiKey) => {
+  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+  const client = new GeminiApiClient(apiKey);
+  return await client.generateMnemonics(topic);
+});
+
+ipcMain.handle('gemini-generate-problems', async (event, topic, difficulty, apiKey) => {
+  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+  const client = new GeminiApiClient(apiKey);
+  return await client.generateProblems(topic, difficulty);
+});
+
+ipcMain.handle('gemini-generate-schedule', async (event, topics, hoursPerDay, apiKey) => {
+  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+  const client = new GeminiApiClient(apiKey);
+  return await client.generateStudySchedule(topics, hoursPerDay);
+});
+
 console.log('Study Buddy Pro - Electron App Started');

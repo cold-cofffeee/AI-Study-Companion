@@ -1,6 +1,5 @@
 // Problem Generator Module
 // ipcRenderer is available globally via window.ipcRenderer from app.js
-const GeminiApiClient = require('../../helpers/GeminiApiClient');
 
 const ProblemGenerator = {
     data: {
@@ -88,8 +87,7 @@ const ProblemGenerator = {
                 throw new Error('API key not configured. Please configure it in Settings.');
             }
 
-            const client = new GeminiApiClient(settings.apiKey);
-            const result = await client.generateProblems(subject, difficulty, count, settings.preferredLanguage || 'en');
+            const result = await window.ipcRenderer.invoke('gemini-generate-problems', subject, difficulty, settings.apiKey);
             
             this.displayProblems(result);
             showToast('Problems generated successfully!', 'success');

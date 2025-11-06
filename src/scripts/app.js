@@ -68,6 +68,26 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
+// Module cache to keep modules alive
+const moduleCache = {};
+const moduleInitialized = {};
+
+// Helper to get module object
+function getModuleObject(moduleName) {
+    switch (moduleName) {
+        case 'dashboard': return typeof Dashboard !== 'undefined' ? Dashboard : null;
+        case 'summarizer': return typeof Summarizer !== 'undefined' ? Summarizer : null;
+        case 'problems': return typeof ProblemGenerator !== 'undefined' ? ProblemGenerator : null;
+        case 'pomodoro': return typeof PomodoroModule !== 'undefined' ? PomodoroModule : null;
+        case 'optimizer': return typeof StudyOptimizer !== 'undefined' ? StudyOptimizer : null;
+        case 'flashcards': return typeof Flashcards !== 'undefined' ? Flashcards : null;
+        case 'quiz': return typeof ReverseQuiz !== 'undefined' ? ReverseQuiz : null;
+        case 'settings': return typeof Settings !== 'undefined' ? Settings : null;
+        case 'about': return typeof About !== 'undefined' ? About : null;
+        default: return null;
+    }
+}
+
 // Module loader
 async function loadModule(moduleName) {
     const container = document.getElementById('module-container');
@@ -75,10 +95,12 @@ async function loadModule(moduleName) {
     try {
         showLoading(`Loading ${moduleName}...`);
         
-        // Call cleanup on current module before switching (save state)
-        if (AppState.currentModule === 'pomodoro' && typeof PomodoroModule !== 'undefined' && PomodoroModule.cleanup) {
-            PomodoroModule.cleanup();
-        }
+        // Hide all cached modules first
+        Object.keys(moduleCache).forEach(key => {
+            if (moduleCache[key]) {
+                moduleCache[key].style.display = 'none';
+            }
+        });
         
         // Update active navigation
         document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -87,6 +109,27 @@ async function loadModule(moduleName) {
                 btn.classList.add('active');
             }
         });
+        
+        // Check if module is already cached
+        if (moduleCache[moduleName]) {
+            // Module already exists, just show it
+            moduleCache[moduleName].style.display = 'block';
+            AppState.currentModule = moduleName;
+            
+            // Call module's onShow method if it exists (for refreshing data)
+            const moduleObj = getModuleObject(moduleName);
+            if (moduleObj && moduleObj.onShow) {
+                await moduleObj.onShow();
+            }
+            
+            hideLoading();
+            return;
+        }
+        
+        // Create new module container
+        const moduleDiv = document.createElement('div');
+        moduleDiv.id = `module-${moduleName}`;
+        moduleDiv.className = 'module-view';
         
         // Check if module exists before trying to render
         let content = '';
@@ -158,55 +201,63 @@ async function loadModule(moduleName) {
                 content = '<h1>Module not found</h1>';
         }
         
-        container.innerHTML = content;
+        moduleDiv.innerHTML = content;
+        container.appendChild(moduleDiv);
         
-        // Initialize module-specific functionality only if module exists
-        switch (moduleName) {
-            case 'dashboard':
-                if (typeof Dashboard !== 'undefined' && Dashboard.init) {
-                    await Dashboard.init();
-                }
-                break;
-            case 'summarizer':
-                if (typeof Summarizer !== 'undefined' && Summarizer.init) {
-                    await Summarizer.init();
-                }
-                break;
-            case 'problems':
-                if (typeof ProblemGenerator !== 'undefined' && ProblemGenerator.init) {
-                    await ProblemGenerator.init();
-                }
-                break;
-            case 'pomodoro':
-                if (typeof PomodoroModule !== 'undefined' && PomodoroModule.init) {
-                    await PomodoroModule.init();
-                }
-                break;
-            case 'optimizer':
-                if (typeof StudyOptimizer !== 'undefined' && StudyOptimizer.init) {
-                    await StudyOptimizer.init();
-                }
-                break;
-            case 'flashcards':
-                if (typeof Flashcards !== 'undefined' && Flashcards.init) {
-                    await Flashcards.init();
-                }
-                break;
-            case 'quiz':
-                if (typeof ReverseQuiz !== 'undefined' && ReverseQuiz.init) {
-                    await ReverseQuiz.init();
-                }
-                break;
-            case 'settings':
-                if (typeof Settings !== 'undefined' && Settings.init) {
-                    await Settings.init();
-                }
-                break;
-            case 'about':
-                if (typeof About !== 'undefined' && About.init) {
-                    await About.init();
-                }
-                break;
+        // Cache the module
+        moduleCache[moduleName] = moduleDiv;
+        
+        // Initialize module-specific functionality only once
+        if (!moduleInitialized[moduleName]) {
+            switch (moduleName) {
+                case 'dashboard':
+                    if (typeof Dashboard !== 'undefined' && Dashboard.init) {
+                        await Dashboard.init();
+                    }
+                    break;
+                case 'summarizer':
+                    if (typeof Summarizer !== 'undefined' && Summarizer.init) {
+                        await Summarizer.init();
+                    }
+                    break;
+                case 'problems':
+                    if (typeof ProblemGenerator !== 'undefined' && ProblemGenerator.init) {
+                        await ProblemGenerator.init();
+                    }
+                    break;
+                case 'pomodoro':
+                    if (typeof PomodoroModule !== 'undefined' && PomodoroModule.init) {
+                        await PomodoroModule.init();
+                    }
+                    break;
+                case 'optimizer':
+                    if (typeof StudyOptimizer !== 'undefined' && StudyOptimizer.init) {
+                        await StudyOptimizer.init();
+                    }
+                    break;
+                case 'flashcards':
+                    if (typeof Flashcards !== 'undefined' && Flashcards.init) {
+                        await Flashcards.init();
+                    }
+                    break;
+                case 'quiz':
+                    if (typeof ReverseQuiz !== 'undefined' && ReverseQuiz.init) {
+                        await ReverseQuiz.init();
+                    }
+                    break;
+                case 'settings':
+                    if (typeof Settings !== 'undefined' && Settings.init) {
+                        await Settings.init();
+                    }
+                    break;
+                case 'about':
+                    if (typeof About !== 'undefined' && About.init) {
+                        await About.init();
+                    }
+                    break;
+            }
+            
+            moduleInitialized[moduleName] = true;
         }
         
         AppState.currentModule = moduleName;

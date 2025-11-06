@@ -1602,9 +1602,11 @@ const PomodoroModule = {
                 console.error('MusicPlayer does not have getAllPlaylists method');
             }
             
-            // Restore player if it was playing - use music player container within the pomodoro module
+            // Restore player if it was playing (it should already be in the container)
             if (this.musicPlayer && typeof this.musicPlayer.isCurrentlyPlaying === 'function' && this.musicPlayer.isCurrentlyPlaying()) {
+                // Just make sure it's in the right container
                 this.musicPlayer.restorePlayer('music-player-container');
+                console.log('Music player restored to Pomodoro container');
             }
         } catch (error) {
             console.error('Error initializing music player:', error);
@@ -1775,6 +1777,12 @@ const PomodoroModule = {
         this.data.completedSessions = savedState.completedSessions || 0;
         this.data.isADHDMode = savedState.isADHDMode || false;
         this.data.autoStart = savedState.autoStart !== undefined ? savedState.autoStart : true;
+        
+        // Restore the interval reference from AppState
+        const appState = window.AppState;
+        if (appState && appState.pomodoroTimer && appState.pomodoroTimer.interval) {
+            this.data.interval = appState.pomodoroTimer.interval;
+        }
     },
 
     resumeTimer() {
@@ -1824,11 +1832,20 @@ const PomodoroModule = {
 
     // Cleanup on navigation (save state but keep timer running)
     cleanup() {
-        // Save current state
+        // Save current state - timer and music will continue running
         this.saveTimerState();
         
-        // Note: We DON'T clear the interval here because we want it to keep running
-        // The interval is stored in AppState and will continue in the background
+        // Note: We DON'T clear the interval or stop music
+        // The module stays alive in the background with timer and music running
+    },
+    
+    // Called when module is shown again (optional refresh)
+    onShow() {
+        // Refresh the display in case time has passed
+        if (this.data.isRunning || this.data.isPaused) {
+            this.updateDisplay();
+            this.updateSessionCount();
+        }
     }
 };
 

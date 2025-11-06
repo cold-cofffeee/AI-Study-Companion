@@ -208,6 +208,10 @@ body {
 /* Module Container */
 #module-container {
     max-width: 1200px;
+    position: relative;
+}
+
+.module-view {
     animation: fadeIn 0.3s ease;
 }
 

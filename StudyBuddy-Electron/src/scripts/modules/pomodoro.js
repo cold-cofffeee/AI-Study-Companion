@@ -51,6 +51,42 @@ const PomodoroModule = {
     async render() {
         return `
             <div class="pomodoro-container">
+                <!-- Quick Schedule Generator -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-magic"></i> Quick Study Plan Generator</h3>
+                        <p class="text-muted">Generate a study schedule for your Pomodoro sessions</p>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Main Subject:</label>
+                        <input type="text" id="pomodoro-subject" class="input-field" 
+                               placeholder="e.g., Mathematics, Physics, Programming">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Topics (comma-separated):</label>
+                        <textarea id="pomodoro-topics" class="input-field" rows="2"
+                               placeholder="e.g., Algebra, Geometry, Calculus"></textarea>
+                    </div>
+                    <div class="flex gap-10">
+                        <button class="btn btn-primary" onclick="PomodoroModule.generateSchedule()">
+                            <i class="fas fa-sparkles"></i> Generate Schedule
+                        </button>
+                        <button class="btn btn-outline" onclick="PomodoroModule.loadScheduleFromOptimizer()" id="load-schedule-btn" style="display: none;">
+                            <i class="fas fa-download"></i> Load Saved Schedule
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schedule/Task List -->
+                <div class="card" id="pomodoro-schedule-card" style="display: none;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list-check"></i> Study Tasks</h3>
+                    </div>
+                    <div id="pomodoro-task-list" class="task-list">
+                        <!-- Tasks will be populated here -->
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="card-header">
                         <h2><i class="fas fa-clock"></i> Pomodoro Focus Timer</h2>
@@ -422,6 +458,44 @@ const PomodoroModule = {
                     color: var(--text-muted);
                 }
 
+                .task-list {
+                    padding: 15px;
+                }
+
+                .task-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px;
+                    margin-bottom: 10px;
+                    background: var(--bg-secondary);
+                    border-radius: 8px;
+                    border-left: 4px solid var(--primary-color);
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+
+                .task-item:hover {
+                    transform: translateX(5px);
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+
+                .task-item.completed {
+                    opacity: 0.6;
+                    border-left-color: #28a745;
+                    text-decoration: line-through;
+                }
+
+                .task-checkbox {
+                    width: 20px;
+                    height: 20px;
+                    cursor: pointer;
+                }
+
+                .task-text {
+                    flex: 1;
+                }
+
                 body.dark .adhd-mode-container {
                     background: rgba(255, 193, 7, 0.15);
                 }
@@ -434,6 +508,114 @@ const PomodoroModule = {
         this.setupEventListeners();
         this.updateDisplay();
         this.updateSessionCount();
+        await this.checkForSavedSchedule();
+    },
+
+    async checkForSavedSchedule() {
+        try {
+            const settings = await window.ipcRenderer.invoke('get-settings');
+            if (settings.pomodoroSchedule) {
+                document.getElementById('load-schedule-btn').style.display = 'inline-flex';
+            }
+        } catch (error) {
+            console.error('Error checking for saved schedule:', error);
+        }
+    },
+
+    async generateSchedule() {
+        const subject = document.getElementById('pomodoro-subject')?.value;
+        const topicsText = document.getElementById('pomodoro-topics')?.value;
+
+        if (!subject || subject.trim() === '') {
+            showToast('Please enter a main subject', 'warning');
+            return;
+        }
+
+        if (!topicsText || topicsText.trim() === '') {
+            showToast('Please enter at least one topic', 'warning');
+            return;
+        }
+
+        const topics = topicsText.split(',').map(t => t.trim()).filter(t => t);
+        const studyPlan = `${subject}: ${topics.join(', ')}`;
+
+        showLoading('Generating study plan...');
+
+        try {
+            const settings = await window.ipcRenderer.invoke('get-settings');
+            if (!settings.apiKey) {
+                throw new Error('API key not configured. Please configure it in Settings.');
+            }
+
+            const duration = 120; // Default 2 hours
+            const result = await window.ipcRenderer.invoke('gemini-generate-schedule', studyPlan, duration, settings.apiKey);
+            
+            const scheduleData = {
+                subject: subject,
+                topics: topics,
+                duration: duration,
+                content: result
+            };
+            
+            await window.ipcRenderer.invoke('update-setting', 'pomodoroSchedule', scheduleData);
+            this.displayScheduleTasks(scheduleData);
+            showToast('Study plan generated! 📚', 'success');
+        } catch (error) {
+            console.error('Error generating schedule:', error);
+            showToast('Failed to generate schedule: ' + error.message, 'error');
+        } finally {
+            hideLoading();
+        }
+    },
+
+    async loadScheduleFromOptimizer() {
+        try {
+            const settings = await window.ipcRenderer.invoke('get-settings');
+            if (settings.pomodoroSchedule) {
+                this.displayScheduleTasks(settings.pomodoroSchedule);
+                showToast('Schedule loaded! 🍅', 'success');
+            }
+        } catch (error) {
+            console.error('Error loading schedule:', error);
+            showToast('Failed to load schedule', 'error');
+        }
+    },
+
+    displayScheduleTasks(scheduleData) {
+        document.getElementById('pomodoro-schedule-card').style.display = 'block';
+        const taskList = document.getElementById('pomodoro-task-list');
+        
+        // Extract tasks from the content
+        const tasks = scheduleData.topics || [];
+        
+        taskList.innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <h4 style="color: var(--primary-color); margin-bottom: 10px;">
+                    <i class="fas fa-book"></i> ${scheduleData.subject}
+                </h4>
+                <p style="color: var(--text-muted); font-size: 14px;">
+                    Total Duration: ${scheduleData.duration} minutes
+                </p>
+            </div>
+            ${tasks.map((task, index) => `
+                <div class="task-item" data-task-index="${index}">
+                    <input type="checkbox" class="task-checkbox" id="task-${index}" 
+                           onchange="PomodoroModule.toggleTask(${index})">
+                    <label for="task-${index}" class="task-text">${task}</label>
+                </div>
+            `).join('')}
+        `;
+    },
+
+    toggleTask(index) {
+        const taskItem = document.querySelector(`[data-task-index="${index}"]`);
+        const checkbox = document.getElementById(`task-${index}`);
+        
+        if (checkbox.checked) {
+            taskItem.classList.add('completed');
+        } else {
+            taskItem.classList.remove('completed');
+        }
     },
 
     async loadSettings() {

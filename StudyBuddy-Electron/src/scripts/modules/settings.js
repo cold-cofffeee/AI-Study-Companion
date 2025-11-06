@@ -88,22 +88,6 @@ const Settings = {
                     <h3 class="settings-section-title">📚 Study Settings</h3>
                     <div class="settings-row">
                         <div>
-                            <div class="settings-label">Default Study Session (minutes)</div>
-                            <div class="settings-description">Pomodoro session length</div>
-                        </div>
-                        <input type="number" id="setting-session-minutes" class="input-field" 
-                               style="width: 100px;" min="15" max="60" value="25">
-                    </div>
-                    <div class="settings-row">
-                        <div>
-                            <div class="settings-label">Default Break (minutes)</div>
-                            <div class="settings-description">Break time between sessions</div>
-                        </div>
-                        <input type="number" id="setting-break-minutes" class="input-field" 
-                               style="width: 100px;" min="3" max="15" value="5">
-                    </div>
-                    <div class="settings-row">
-                        <div>
                             <div class="settings-label">Enable Notifications</div>
                             <div class="settings-description">Get reminders for breaks and sessions</div>
                         </div>

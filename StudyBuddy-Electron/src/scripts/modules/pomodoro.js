@@ -148,6 +148,48 @@ const PomodoroModule = {
                                 <i class="fas fa-couch"></i>
                                 <span>Long Break <small>(15m)</small></span>
                             </button>
+                            <button class="mode-btn mode-btn-custom" data-mode="custom">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>Custom <small id="custom-duration-label">(30m)</small></span>
+                            </button>
+                        </div>
+
+                        <!-- Custom Timer Settings (Cute Popup) -->
+                        <div class="custom-timer-box" id="custom-timer-box" style="display: none;">
+                            <div class="custom-timer-content">
+                                <div class="custom-timer-header">
+                                    <i class="fas fa-magic"></i>
+                                    <h4>Custom Timer</h4>
+                                </div>
+                                <div class="custom-timer-body">
+                                    <div class="time-input-group">
+                                        <label>Minutes:</label>
+                                        <div class="time-stepper">
+                                            <button class="stepper-btn" onclick="PomodoroModule.adjustCustomTime(-5)">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" id="custom-timer-input" class="custom-time-input" 
+                                                   value="30" min="1" max="180">
+                                            <button class="stepper-btn" onclick="PomodoroModule.adjustCustomTime(5)">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="custom-timer-presets">
+                                        <span class="text-muted small">Quick set:</span>
+                                        <div class="preset-buttons">
+                                            <button class="preset-btn" onclick="PomodoroModule.setCustomTime(15)">15m</button>
+                                            <button class="preset-btn" onclick="PomodoroModule.setCustomTime(30)">30m</button>
+                                            <button class="preset-btn" onclick="PomodoroModule.setCustomTime(45)">45m</button>
+                                            <button class="preset-btn" onclick="PomodoroModule.setCustomTime(60)">60m</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="custom-timer-footer">
+                                    <button class="btn btn-outline btn-sm" onclick="PomodoroModule.closeCustomTimer()">Cancel</button>
+                                    <button class="btn btn-primary btn-sm" onclick="PomodoroModule.applyCustomTimer()">Apply</button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- ADHD Mode Toggle -->
@@ -330,6 +372,163 @@ const PomodoroModule = {
                     opacity: 0.7;
                 }
 
+                .mode-btn-custom {
+                    border-color: #6c757d;
+                    position: relative;
+                }
+
+                .mode-btn-custom:hover {
+                    border-color: #6c757d;
+                    background: rgba(108, 117, 125, 0.1);
+                }
+
+                .mode-btn-custom.active {
+                    border-color: #6c757d;
+                    background: rgba(108, 117, 125, 0.2);
+                    color: #6c757d;
+                }
+
+                .custom-timer-box {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    z-index: 1000;
+                    animation: popIn 0.3s ease-out;
+                }
+
+                @keyframes popIn {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0.8);
+                        opacity: 0;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(1);
+                        opacity: 1;
+                    }
+                }
+
+                .custom-timer-content {
+                    background: white;
+                    border-radius: 20px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                    padding: 25px;
+                    min-width: 320px;
+                    border: 3px solid var(--primary-color);
+                }
+
+                body.dark .custom-timer-content {
+                    background: var(--card-bg);
+                }
+
+                .custom-timer-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                    color: var(--primary-color);
+                }
+
+                .custom-timer-header i {
+                    font-size: 24px;
+                }
+
+                .custom-timer-header h4 {
+                    margin: 0;
+                    font-size: 20px;
+                }
+
+                .custom-timer-body {
+                    margin-bottom: 20px;
+                }
+
+                .time-input-group {
+                    margin-bottom: 15px;
+                }
+
+                .time-input-group label {
+                    display: block;
+                    margin-bottom: 8px;
+                    font-weight: 500;
+                    color: var(--text-primary);
+                }
+
+                .time-stepper {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    justify-content: center;
+                }
+
+                .stepper-btn {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    border: 2px solid var(--primary-color);
+                    background: white;
+                    color: var(--primary-color);
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s;
+                }
+
+                body.dark .stepper-btn {
+                    background: var(--bg-secondary);
+                }
+
+                .stepper-btn:hover {
+                    background: var(--primary-color);
+                    color: white;
+                    transform: scale(1.1);
+                }
+
+                .custom-time-input {
+                    width: 80px;
+                    height: 50px;
+                    text-align: center;
+                    font-size: 24px;
+                    font-weight: bold;
+                    border: 2px solid var(--border-color);
+                    border-radius: 10px;
+                    background: var(--bg-secondary);
+                }
+
+                .custom-timer-presets {
+                    text-align: center;
+                }
+
+                .preset-buttons {
+                    display: flex;
+                    gap: 8px;
+                    margin-top: 8px;
+                    justify-content: center;
+                }
+
+                .preset-btn {
+                    padding: 8px 16px;
+                    border: 2px solid var(--border-color);
+                    background: var(--bg-secondary);
+                    border-radius: 20px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    font-weight: 500;
+                }
+
+                .preset-btn:hover {
+                    border-color: var(--primary-color);
+                    background: var(--primary-light);
+                    color: var(--primary-color);
+                    transform: translateY(-2px);
+                }
+
+                .custom-timer-footer {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: flex-end;
+                }
+
                 .adhd-mode-container {
                     margin: 30px 0;
                     padding: 20px;
@@ -504,11 +703,25 @@ const PomodoroModule = {
     },
 
     async init() {
-        await this.loadSettings();
-        this.setupEventListeners();
-        this.updateDisplay();
-        this.updateSessionCount();
-        await this.checkForSavedSchedule();
+        try {
+            // Small delay to ensure DOM is fully rendered
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            await this.loadSettings();
+            this.setupEventListeners();
+            this.updateDisplay();
+            this.updateSessionCount();
+            await this.checkForSavedSchedule();
+        } catch (error) {
+            console.error('Error initializing Pomodoro:', error);
+            // Continue even if there's an error
+            try {
+                this.setupEventListeners();
+                this.updateDisplay();
+            } catch (e) {
+                console.error('Failed to setup event listeners:', e);
+            }
+        }
     },
 
     async checkForSavedSchedule() {
@@ -625,38 +838,99 @@ const PomodoroModule = {
             this.data.autoStart = settings.pomodoroAutoStart !== false;
             this.data.completedSessions = settings.pomodoroSessionsToday || 0;
             
-            document.getElementById('adhd-mode-toggle').checked = this.data.isADHDMode;
-            document.getElementById('auto-start-toggle').checked = this.data.autoStart;
+            // Check if elements exist before accessing them
+            const adhdToggle = document.getElementById('adhd-mode-toggle');
+            const autoStartToggle = document.getElementById('auto-start-toggle');
+            
+            if (adhdToggle) adhdToggle.checked = this.data.isADHDMode;
+            if (autoStartToggle) autoStartToggle.checked = this.data.autoStart;
             
             this.setMode(this.data.currentMode);
         } catch (error) {
             console.error('Error loading pomodoro settings:', error);
+            // Set defaults if settings fail to load
+            this.data.isADHDMode = false;
+            this.data.autoStart = true;
+            this.data.completedSessions = 0;
         }
     },
 
     setupEventListeners() {
-        document.getElementById('pomodoro-start-btn').onclick = () => this.start();
-        document.getElementById('pomodoro-pause-btn').onclick = () => this.pause();
-        document.getElementById('pomodoro-stop-btn').onclick = () => this.stop();
+        const startBtn = document.getElementById('pomodoro-start-btn');
+        const pauseBtn = document.getElementById('pomodoro-pause-btn');
+        const stopBtn = document.getElementById('pomodoro-stop-btn');
+        const adhdToggle = document.getElementById('adhd-mode-toggle');
+        const autoStartToggle = document.getElementById('auto-start-toggle');
+        
+        if (startBtn) startBtn.onclick = () => this.start();
+        if (pauseBtn) pauseBtn.onclick = () => this.pause();
+        if (stopBtn) stopBtn.onclick = () => this.stop();
         
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.onclick = () => {
                 const mode = btn.dataset.mode;
-                this.setMode(mode);
+                if (mode === 'custom') {
+                    this.openCustomTimer();
+                } else {
+                    this.setMode(mode);
+                }
             };
         });
         
-        document.getElementById('adhd-mode-toggle').onchange = (e) => {
-            this.data.isADHDMode = e.target.checked;
-            window.ipcRenderer.invoke('update-setting', 'pomodoroADHDMode', this.data.isADHDMode);
-            this.setMode(this.data.currentMode);
-            showToast(this.data.isADHDMode ? 'ADHD Mode enabled' : 'Normal mode enabled', 'success');
+        if (adhdToggle) {
+            adhdToggle.onchange = (e) => {
+                this.data.isADHDMode = e.target.checked;
+                window.ipcRenderer.invoke('update-setting', 'pomodoroADHDMode', this.data.isADHDMode);
+                this.setMode(this.data.currentMode);
+                showToast(this.data.isADHDMode ? 'ADHD Mode enabled' : 'Normal mode enabled', 'success');
+            };
+        }
+        
+        if (autoStartToggle) {
+            autoStartToggle.onchange = (e) => {
+                this.data.autoStart = e.target.checked;
+                window.ipcRenderer.invoke('update-setting', 'pomodoroAutoStart', this.data.autoStart);
+            };
+        }
+    },
+
+    openCustomTimer() {
+        document.getElementById('custom-timer-box').style.display = 'block';
+        const currentMinutes = Math.floor(this.data.totalTime / 60);
+        document.getElementById('custom-timer-input').value = currentMinutes || 30;
+    },
+
+    closeCustomTimer() {
+        document.getElementById('custom-timer-box').style.display = 'none';
+    },
+
+    adjustCustomTime(amount) {
+        const input = document.getElementById('custom-timer-input');
+        let value = parseInt(input.value) || 30;
+        value = Math.max(1, Math.min(180, value + amount));
+        input.value = value;
+    },
+
+    setCustomTime(minutes) {
+        document.getElementById('custom-timer-input').value = minutes;
+    },
+
+    applyCustomTimer() {
+        const minutes = parseInt(document.getElementById('custom-timer-input').value) || 30;
+        
+        // Add custom mode to modes
+        this.data.modes.custom = {
+            name: 'Custom Timer',
+            duration: minutes,
+            adhdDuration: minutes,
+            icon: 'fas fa-sliders-h',
+            color: '#6c757d'
         };
         
-        document.getElementById('auto-start-toggle').onchange = (e) => {
-            this.data.autoStart = e.target.checked;
-            window.ipcRenderer.invoke('update-setting', 'pomodoroAutoStart', this.data.autoStart);
-        };
+        this.setMode('custom');
+        document.getElementById('custom-duration-label').textContent = `(${minutes}m)`;
+        this.closeCustomTimer();
+        showToast(`Custom timer set to ${minutes} minutes! ⏱️`, 'success');
     },
 
     setMode(mode) {

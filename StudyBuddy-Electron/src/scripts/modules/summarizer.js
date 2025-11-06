@@ -142,13 +142,19 @@ const Summarizer = {
                 <p>Enter your Google Gemini API Key:</p>
                 <input type="text" id="api-key-input" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 15px;" placeholder="Enter API key...">
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button onclick="document.body.removeChild(this.closest('div').parentElement)" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                    <button id="cancel-api-key-btn" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
                     <button id="save-api-key-btn" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Save</button>
                 </div>
             </div>
         `;
         document.body.appendChild(dialog);
         
+        // Cancel button handler
+        document.getElementById('cancel-api-key-btn').onclick = () => {
+            document.body.removeChild(dialog);
+        };
+        
+        // Save button handler
         document.getElementById('save-api-key-btn').onclick = async () => {
             const apiKey = document.getElementById('api-key-input').value.trim();
             if (apiKey) {

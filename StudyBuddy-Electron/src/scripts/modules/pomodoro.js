@@ -1,0 +1,652 @@
+// Pomodoro Timer Module
+// ipcRenderer is available globally via window.ipcRenderer from app.js
+
+const PomodoroModule = {
+    data: {
+        timeRemaining: 0,
+        totalTime: 0,
+        isRunning: false,
+        isPaused: false,
+        currentMode: 'focus',
+        interval: null,
+        isADHDMode: false,
+        completedSessions: 0,
+        autoStart: true,
+        sessionStartTime: null,
+        
+        modes: {
+            focus: { 
+                name: 'Focus Session', 
+                duration: 25, 
+                adhdDuration: 10,
+                icon: 'fas fa-brain',
+                color: '#007bff'
+            },
+            'short-break': { 
+                name: 'Short Break', 
+                duration: 5, 
+                adhdDuration: 2,
+                icon: 'fas fa-coffee',
+                color: '#28a745'
+            },
+            'long-break': { 
+                name: 'Long Break', 
+                duration: 15, 
+                adhdDuration: 5,
+                icon: 'fas fa-couch',
+                color: '#6c757d'
+            }
+        },
+
+        motivationalQuotes: [
+            "Great job! You're building focus like a muscle. 💪",
+            "Amazing focus session! Your brain is getting stronger. 🧠",
+            "You did it! Small steps lead to big achievements. 🌟",
+            "Fantastic work! You're training your concentration. 🎯",
+            "Well done! Every session counts towards your goals. 🚀",
+            "Excellent! You're developing a powerful focus habit. ⚡"
+        ]
+    },
+
+    async render() {
+        return `
+            <div class="pomodoro-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-clock"></i> Pomodoro Focus Timer</h2>
+                        <p class="text-muted">ADHD-Friendly Productivity Tool</p>
+                    </div>
+
+                    <div class="timer-section">
+                        <!-- Timer Status -->
+                        <div class="timer-status">
+                            <div class="status-indicator">
+                                <div class="pulse-dot" id="status-dot"></div>
+                                <span id="timer-status-text">Ready to Focus</span>
+                            </div>
+                            <div class="session-counter">
+                                <i class="fas fa-calendar-check"></i>
+                                <span id="sessions-completed">0 sessions today</span>
+                            </div>
+                        </div>
+
+                        <!-- Timer Circle -->
+                        <div class="timer-circle-container">
+                            <svg class="timer-circle" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="90" class="timer-circle-bg"/>
+                                <circle id="timer-progress-circle" cx="100" cy="100" r="90" 
+                                        class="timer-circle-progress" 
+                                        stroke-dasharray="565.48" 
+                                        stroke-dashoffset="565.48"/>
+                            </svg>
+                            <div class="timer-display-center">
+                                <div id="pomodoro-timer-display" class="timer-time">25:00</div>
+                                <div id="pomodoro-timer-mode" class="timer-mode-name">Focus Session</div>
+                            </div>
+                        </div>
+
+                        <!-- Timer Controls -->
+                        <div class="timer-controls">
+                            <button id="pomodoro-start-btn" class="btn btn-primary btn-large">
+                                <i class="fas fa-play"></i> Start Focus
+                            </button>
+                            <button id="pomodoro-pause-btn" class="btn btn-secondary btn-large" style="display: none;">
+                                <i class="fas fa-pause"></i> Pause
+                            </button>
+                            <button id="pomodoro-stop-btn" class="btn btn-outline">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                        </div>
+
+                        <!-- Mode Selector -->
+                        <div class="mode-selector">
+                            <button class="mode-btn active" data-mode="focus">
+                                <i class="fas fa-brain"></i>
+                                <span>Focus <small>(25m)</small></span>
+                            </button>
+                            <button class="mode-btn" data-mode="short-break">
+                                <i class="fas fa-coffee"></i>
+                                <span>Short Break <small>(5m)</small></span>
+                            </button>
+                            <button class="mode-btn" data-mode="long-break">
+                                <i class="fas fa-couch"></i>
+                                <span>Long Break <small>(15m)</small></span>
+                            </button>
+                        </div>
+
+                        <!-- ADHD Mode Toggle -->
+                        <div class="adhd-mode-container">
+                            <div class="adhd-mode-box">
+                                <i class="fas fa-bolt"></i>
+                                <span>ADHD Mode (Shorter Sessions)</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="adhd-mode-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <p class="text-muted small">Enables shorter focus sessions: 10min focus, 2min short break, 5min long break</p>
+                        </div>
+
+                        <!-- Auto-start Toggle -->
+                        <div class="setting-row">
+                            <label>
+                                <input type="checkbox" id="auto-start-toggle" checked>
+                                Auto-start next session
+                            </label>
+                        </div>
+
+                        <!-- Session History -->
+                        <div class="session-history">
+                            <h3><i class="fas fa-history"></i> Today's Sessions</h3>
+                            <div id="session-history-list" class="history-list">
+                                <p class="text-muted">No sessions completed yet. Start your first focus session!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                .pomodoro-container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+
+                .timer-section {
+                    padding: 20px;
+                }
+
+                .timer-status {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 30px;
+                    padding: 15px;
+                    background: var(--card-bg);
+                    border-radius: 10px;
+                }
+
+                .status-indicator {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .pulse-dot {
+                    width: 12px;
+                    height: 12px;
+                    background: #28a745;
+                    border-radius: 50%;
+                    animation: pulse 2s infinite;
+                }
+
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                }
+
+                .session-counter {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: var(--text-muted);
+                }
+
+                .timer-circle-container {
+                    position: relative;
+                    width: 280px;
+                    height: 280px;
+                    margin: 40px auto;
+                }
+
+                .timer-circle {
+                    width: 100%;
+                    height: 100%;
+                    transform: rotate(-90deg);
+                }
+
+                .timer-circle-bg {
+                    fill: none;
+                    stroke: var(--border-color);
+                    stroke-width: 8;
+                }
+
+                .timer-circle-progress {
+                    fill: none;
+                    stroke: #007bff;
+                    stroke-width: 8;
+                    stroke-linecap: round;
+                    transition: stroke-dashoffset 1s linear, stroke 0.3s;
+                }
+
+                .timer-display-center {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    text-align: center;
+                }
+
+                .timer-time {
+                    font-size: 48px;
+                    font-weight: bold;
+                    font-family: 'Courier New', monospace;
+                    margin-bottom: 10px;
+                }
+
+                .timer-mode-name {
+                    font-size: 18px;
+                    color: var(--text-muted);
+                    font-weight: 500;
+                }
+
+                .timer-controls {
+                    display: flex;
+                    justify-content: center;
+                    gap: 15px;
+                    margin: 30px 0;
+                }
+
+                .btn-large {
+                    padding: 15px 40px;
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+
+                .mode-selector {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: center;
+                    margin: 30px 0;
+                }
+
+                .mode-btn {
+                    flex: 1;
+                    max-width: 200px;
+                    padding: 15px;
+                    border: 2px solid var(--border-color);
+                    background: var(--card-bg);
+                    border-radius: 10px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .mode-btn:hover {
+                    border-color: var(--primary-color);
+                    transform: translateY(-2px);
+                }
+
+                .mode-btn.active {
+                    border-color: var(--primary-color);
+                    background: var(--primary-light);
+                    color: var(--primary-color);
+                }
+
+                .mode-btn i {
+                    font-size: 24px;
+                }
+
+                .mode-btn small {
+                    opacity: 0.7;
+                }
+
+                .adhd-mode-container {
+                    margin: 30px 0;
+                    padding: 20px;
+                    background: #fff3cd;
+                    border: 2px solid #ffc107;
+                    border-radius: 10px;
+                }
+
+                .adhd-mode-box {
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                    margin-bottom: 10px;
+                }
+
+                .adhd-mode-box i {
+                    color: #ffc107;
+                    font-size: 20px;
+                }
+
+                .switch {
+                    position: relative;
+                    display: inline-block;
+                    width: 50px;
+                    height: 26px;
+                    margin-left: auto;
+                }
+
+                .switch input {
+                    opacity: 0;
+                    width: 0;
+                    height: 0;
+                }
+
+                .slider {
+                    position: absolute;
+                    cursor: pointer;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: #ccc;
+                    transition: 0.4s;
+                    border-radius: 26px;
+                }
+
+                .slider:before {
+                    position: absolute;
+                    content: "";
+                    height: 18px;
+                    width: 18px;
+                    left: 4px;
+                    bottom: 4px;
+                    background-color: white;
+                    transition: 0.4s;
+                    border-radius: 50%;
+                }
+
+                input:checked + .slider {
+                    background-color: #ffc107;
+                }
+
+                input:checked + .slider:before {
+                    transform: translateX(24px);
+                }
+
+                .setting-row {
+                    padding: 15px;
+                    margin: 20px 0;
+                    background: var(--card-bg);
+                    border-radius: 10px;
+                }
+
+                .session-history {
+                    margin-top: 40px;
+                    padding-top: 30px;
+                    border-top: 2px solid var(--border-color);
+                }
+
+                .session-history h3 {
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .history-list {
+                    max-height: 300px;
+                    overflow-y: auto;
+                }
+
+                .history-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px;
+                    margin-bottom: 8px;
+                    background: var(--card-bg);
+                    border-radius: 8px;
+                    border-left: 4px solid #007bff;
+                }
+
+                .history-item.break {
+                    border-left-color: #28a745;
+                }
+
+                .history-item-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .history-item-icon {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: var(--primary-light);
+                    color: var(--primary-color);
+                }
+
+                .history-item-time {
+                    font-size: 12px;
+                    color: var(--text-muted);
+                }
+
+                body.dark .adhd-mode-container {
+                    background: rgba(255, 193, 7, 0.15);
+                }
+            </style>
+        `;
+    },
+
+    async init() {
+        await this.loadSettings();
+        this.setupEventListeners();
+        this.updateDisplay();
+        this.updateSessionCount();
+    },
+
+    async loadSettings() {
+        try {
+            const settings = await window.ipcRenderer.invoke('get-settings');
+            this.data.isADHDMode = settings.pomodoroADHDMode || false;
+            this.data.autoStart = settings.pomodoroAutoStart !== false;
+            this.data.completedSessions = settings.pomodoroSessionsToday || 0;
+            
+            document.getElementById('adhd-mode-toggle').checked = this.data.isADHDMode;
+            document.getElementById('auto-start-toggle').checked = this.data.autoStart;
+            
+            this.setMode(this.data.currentMode);
+        } catch (error) {
+            console.error('Error loading pomodoro settings:', error);
+        }
+    },
+
+    setupEventListeners() {
+        document.getElementById('pomodoro-start-btn').onclick = () => this.start();
+        document.getElementById('pomodoro-pause-btn').onclick = () => this.pause();
+        document.getElementById('pomodoro-stop-btn').onclick = () => this.stop();
+        
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.onclick = () => {
+                const mode = btn.dataset.mode;
+                this.setMode(mode);
+            };
+        });
+        
+        document.getElementById('adhd-mode-toggle').onchange = (e) => {
+            this.data.isADHDMode = e.target.checked;
+            window.ipcRenderer.invoke('update-setting', 'pomodoroADHDMode', this.data.isADHDMode);
+            this.setMode(this.data.currentMode);
+            showToast(this.data.isADHDMode ? 'ADHD Mode enabled' : 'Normal mode enabled', 'success');
+        };
+        
+        document.getElementById('auto-start-toggle').onchange = (e) => {
+            this.data.autoStart = e.target.checked;
+            window.ipcRenderer.invoke('update-setting', 'pomodoroAutoStart', this.data.autoStart);
+        };
+    },
+
+    setMode(mode) {
+        this.data.currentMode = mode;
+        const modeConfig = this.data.modes[mode];
+        const duration = this.data.isADHDMode ? modeConfig.adhdDuration : modeConfig.duration;
+        
+        this.data.totalTime = duration * 60;
+        this.data.timeRemaining = this.data.totalTime;
+        
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+        
+        document.getElementById('pomodoro-timer-mode').textContent = modeConfig.name;
+        document.getElementById('timer-progress-circle').style.stroke = modeConfig.color;
+        
+        this.updateDisplay();
+    },
+
+    start() {
+        if (this.data.isPaused) {
+            this.data.isPaused = false;
+        } else {
+            this.data.sessionStartTime = new Date();
+        }
+        
+        this.data.isRunning = true;
+        document.getElementById('pomodoro-start-btn').style.display = 'none';
+        document.getElementById('pomodoro-pause-btn').style.display = 'inline-flex';
+        document.getElementById('timer-status-text').textContent = 'Focusing...';
+        document.getElementById('status-dot').style.background = '#007bff';
+        
+        this.data.interval = setInterval(() => {
+            if (this.data.timeRemaining > 0) {
+                this.data.timeRemaining--;
+                this.updateDisplay();
+            } else {
+                this.complete();
+            }
+        }, 1000);
+    },
+
+    pause() {
+        this.data.isRunning = false;
+        this.data.isPaused = true;
+        clearInterval(this.data.interval);
+        
+        document.getElementById('pomodoro-start-btn').style.display = 'inline-flex';
+        document.getElementById('pomodoro-start-btn').innerHTML = '<i class="fas fa-play"></i> Resume';
+        document.getElementById('pomodoro-pause-btn').style.display = 'none';
+        document.getElementById('timer-status-text').textContent = 'Paused';
+        document.getElementById('status-dot').style.background = '#ffc107';
+    },
+
+    stop() {
+        this.data.isRunning = false;
+        this.data.isPaused = false;
+        clearInterval(this.data.interval);
+        
+        this.setMode(this.data.currentMode);
+        
+        document.getElementById('pomodoro-start-btn').style.display = 'inline-flex';
+        document.getElementById('pomodoro-start-btn').innerHTML = '<i class="fas fa-play"></i> Start Focus';
+        document.getElementById('pomodoro-pause-btn').style.display = 'none';
+        document.getElementById('timer-status-text').textContent = 'Ready to Focus';
+        document.getElementById('status-dot').style.background = '#28a745';
+    },
+
+    async complete() {
+        this.data.isRunning = false;
+        clearInterval(this.data.interval);
+        
+        const wasBreak = this.data.currentMode !== 'focus';
+        
+        if (!wasBreak) {
+            this.data.completedSessions++;
+            await window.ipcRenderer.invoke('update-setting', 'pomodoroSessionsToday', this.data.completedSessions);
+            this.updateSessionCount();
+            
+            // Save to history
+            await this.saveSession();
+            
+            // Show motivational quote
+            const quote = this.data.motivationalQuotes[Math.floor(Math.random() * this.data.motivationalQuotes.length)];
+            showToast(quote, 'success');
+            
+            // Notification
+            window.ipcRenderer.invoke('show-notification', 'Focus Session Complete!', 'Great work! Time for a break 🎉');
+        }
+        
+        // Auto-start next session
+        if (this.data.autoStart) {
+            setTimeout(() => {
+                if (!wasBreak) {
+                    const nextMode = this.data.completedSessions % 4 === 0 ? 'long-break' : 'short-break';
+                    this.setMode(nextMode);
+                } else {
+                    this.setMode('focus');
+                }
+                this.start();
+            }, 2000);
+        } else {
+            this.stop();
+        }
+    },
+
+    async saveSession() {
+        const session = {
+            type: this.data.currentMode,
+            duration: Math.floor(this.data.totalTime / 60),
+            completed: new Date().toISOString(),
+            date: new Date().toLocaleDateString()
+        };
+        
+        await window.ipcRenderer.invoke('db-save-session', session);
+        this.loadSessionHistory();
+    },
+
+    async loadSessionHistory() {
+        try {
+            const today = new Date().toLocaleDateString();
+            const sessions = await window.ipcRenderer.invoke('db-get-sessions', 20);
+            const todaySessions = sessions.filter(s => new Date(s.createdAt).toLocaleDateString() === today);
+            
+            const historyList = document.getElementById('session-history-list');
+            if (todaySessions.length === 0) {
+                historyList.innerHTML = '<p class="text-muted">No sessions completed yet. Start your first focus session!</p>';
+                return;
+            }
+            
+            historyList.innerHTML = todaySessions.map(session => {
+                const time = new Date(session.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const icon = session.type === 'focus' ? 'fa-brain' : 'fa-coffee';
+                const isBreak = session.type !== 'focus';
+                
+                return `
+                    <div class="history-item ${isBreak ? 'break' : ''}">
+                        <div class="history-item-info">
+                            <div class="history-item-icon">
+                                <i class="fas ${icon}"></i>
+                            </div>
+                            <div>
+                                <div><strong>${session.topic || session.type}</strong></div>
+                                <div class="history-item-time">${time} • ${session.durationMinutes || session.duration}min</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Error loading session history:', error);
+        }
+    },
+
+    updateDisplay() {
+        const minutes = Math.floor(this.data.timeRemaining / 60);
+        const seconds = this.data.timeRemaining % 60;
+        document.getElementById('pomodoro-timer-display').textContent = 
+            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        if (this.data.totalTime > 0) {
+            const progress = ((this.data.totalTime - this.data.timeRemaining) / this.data.totalTime) * 565.48;
+            document.getElementById('timer-progress-circle').style.strokeDashoffset = 565.48 - progress;
+        }
+    },
+
+    updateSessionCount() {
+        document.getElementById('sessions-completed').textContent = 
+            `${this.data.completedSessions} session${this.data.completedSessions !== 1 ? 's' : ''} today`;
+        this.loadSessionHistory();
+    }
+};
+
+window.PomodoroModule = PomodoroModule;

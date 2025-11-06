@@ -107,6 +107,13 @@ async function loadModule(moduleName) {
                     content = '<div class="card"><h2>Loading Problem Generator...</h2><p>Please wait...</p></div>';
                 }
                 break;
+            case 'pomodoro':
+                if (typeof PomodoroModule !== 'undefined') {
+                    content = await PomodoroModule.render();
+                } else {
+                    content = '<div class="card"><h2>Loading Pomodoro...</h2><p>Please wait...</p></div>';
+                }
+                break;
             case 'optimizer':
                 if (typeof StudyOptimizer !== 'undefined') {
                     content = await StudyOptimizer.render();
@@ -163,6 +170,11 @@ async function loadModule(moduleName) {
             case 'problems':
                 if (typeof ProblemGenerator !== 'undefined' && ProblemGenerator.init) {
                     await ProblemGenerator.init();
+                }
+                break;
+            case 'pomodoro':
+                if (typeof PomodoroModule !== 'undefined' && PomodoroModule.init) {
+                    await PomodoroModule.init();
                 }
                 break;
             case 'optimizer':

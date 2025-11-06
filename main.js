@@ -4,9 +4,6 @@ const Store = require('electron-store');
 const JsonDataStore = require('./src/helpers/JsonDataStore');
 const SettingsHandler = require('./src/helpers/SettingsHandler');
 
-// Load environment variables
-require('dotenv').config();
-
 // Initialize store and helpers
 const store = new Store();
 let mainWindow;

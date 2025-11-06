@@ -14,6 +14,24 @@ const PomodoroModule = {
         autoStart: true,
         sessionStartTime: null,
         
+        // Audio elements for sounds
+        sounds: {
+            sessionComplete: null,
+            breakComplete: null,
+            tick: null,
+            ambient: null
+        },
+        soundEnabled: true,
+        ambientMusicEnabled: false,
+        
+        // Free CDN links for sounds
+        soundUrls: {
+            sessionComplete: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3', // Success bell
+            breakComplete: 'https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3', // Gentle notification
+            tick: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', // Soft click
+            ambient: 'https://assets.mixkit.co/active_storage/sfx/2456/2456-preview.mp3' // Calm ambient
+        },
+        
         modes: {
             focus: { 
                 name: 'Focus Session', 
@@ -211,6 +229,30 @@ const PomodoroModule = {
                                 <input type="checkbox" id="auto-start-toggle" checked>
                                 Auto-start next session
                             </label>
+                        </div>
+
+                        <!-- Sound Settings -->
+                        <div class="settings-group">
+                            <h4><i class="fas fa-volume-up"></i> Sound Settings</h4>
+                            <div class="setting-row">
+                                <label>
+                                    <input type="checkbox" id="sound-enabled-toggle" checked>
+                                    Enable notification sounds
+                                </label>
+                            </div>
+                            <div class="setting-row">
+                                <label>
+                                    <input type="checkbox" id="ambient-music-toggle">
+                                    Play ambient music during focus
+                                </label>
+                            </div>
+                            <div class="setting-row">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <span>Volume:</span>
+                                    <input type="range" id="volume-slider" min="0" max="100" value="50" style="flex: 1;">
+                                    <span id="volume-value">50%</span>
+                                </label>
+                            </div>
                         </div>
 
                         <!-- Session History -->
@@ -617,6 +659,51 @@ const PomodoroModule = {
                     border-radius: 10px;
                 }
 
+                .settings-group {
+                    margin: 30px 0;
+                    padding: 20px;
+                    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+                    border-radius: 15px;
+                    border: 2px solid rgba(102, 126, 234, 0.2);
+                }
+
+                .settings-group h4 {
+                    margin-bottom: 15px;
+                    color: var(--primary-color);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                #volume-slider {
+                    height: 6px;
+                    border-radius: 3px;
+                    background: var(--border-color);
+                    outline: none;
+                    -webkit-appearance: none;
+                }
+
+                #volume-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    cursor: pointer;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                }
+
+                #volume-slider::-webkit-slider-thumb:hover {
+                    transform: scale(1.2);
+                }
+
+                #volume-value {
+                    min-width: 45px;
+                    text-align: right;
+                    font-weight: bold;
+                    color: var(--primary-color);
+                }
+
                 .session-history {
                     margin-top: 40px;
                     padding-top: 30px;
@@ -722,6 +809,7 @@ const PomodoroModule = {
             // Small delay to ensure DOM is fully rendered
             await new Promise(resolve => setTimeout(resolve, 100));
             
+            this.initializeSounds();
             await this.loadSettings();
             this.setupEventListeners();
             this.updateDisplay();
@@ -737,6 +825,73 @@ const PomodoroModule = {
                 console.error('Failed to setup event listeners:', e);
             }
         }
+    },
+
+    // Initialize audio elements
+    initializeSounds() {
+        try {
+            this.data.sounds.sessionComplete = new Audio(this.data.soundUrls.sessionComplete);
+            this.data.sounds.breakComplete = new Audio(this.data.soundUrls.breakComplete);
+            this.data.sounds.tick = new Audio(this.data.soundUrls.tick);
+            this.data.sounds.ambient = new Audio(this.data.soundUrls.ambient);
+            
+            // Set volumes
+            Object.values(this.data.sounds).forEach(sound => {
+                if (sound) {
+                    sound.volume = 0.5;
+                }
+            });
+            
+            // Make ambient music loop
+            if (this.data.sounds.ambient) {
+                this.data.sounds.ambient.loop = true;
+            }
+            
+            console.log('🔊 Sounds initialized successfully');
+        } catch (error) {
+            console.error('Error initializing sounds:', error);
+        }
+    },
+
+    // Play sound effect
+    playSound(soundType) {
+        if (!this.data.soundEnabled) return;
+        
+        try {
+            const sound = this.data.sounds[soundType];
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(err => console.log('Sound play prevented:', err));
+            }
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    },
+
+    // Toggle ambient music
+    toggleAmbientMusic(enable) {
+        try {
+            if (enable && this.data.ambientMusicEnabled) {
+                this.data.sounds.ambient?.play().catch(err => console.log('Ambient play prevented:', err));
+            } else {
+                this.data.sounds.ambient?.pause();
+                if (this.data.sounds.ambient) {
+                    this.data.sounds.ambient.currentTime = 0;
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling ambient music:', error);
+        }
+    },
+
+    // Update volume for all sounds
+    updateVolume(volume) {
+        const volumeLevel = volume / 100;
+        Object.values(this.data.sounds).forEach(sound => {
+            if (sound) {
+                sound.volume = volumeLevel;
+            }
+        });
     },
 
     async checkForSavedSchedule() {
@@ -852,13 +1007,27 @@ const PomodoroModule = {
             this.data.isADHDMode = settings.pomodoroADHDMode || false;
             this.data.autoStart = settings.pomodoroAutoStart !== false;
             this.data.completedSessions = settings.pomodoroSessionsToday || 0;
+            this.data.soundEnabled = settings.pomodoroSoundEnabled !== false;
+            this.data.ambientMusicEnabled = settings.pomodoroAmbientMusic || false;
+            const volume = settings.pomodoroVolume || 50;
             
             // Check if elements exist before accessing them
             const adhdToggle = document.getElementById('adhd-mode-toggle');
             const autoStartToggle = document.getElementById('auto-start-toggle');
+            const soundToggle = document.getElementById('sound-enabled-toggle');
+            const ambientToggle = document.getElementById('ambient-music-toggle');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeValue = document.getElementById('volume-value');
             
             if (adhdToggle) adhdToggle.checked = this.data.isADHDMode;
             if (autoStartToggle) autoStartToggle.checked = this.data.autoStart;
+            if (soundToggle) soundToggle.checked = this.data.soundEnabled;
+            if (ambientToggle) ambientToggle.checked = this.data.ambientMusicEnabled;
+            if (volumeSlider) {
+                volumeSlider.value = volume;
+                this.updateVolume(volume);
+            }
+            if (volumeValue) volumeValue.textContent = `${volume}%`;
             
             this.setMode(this.data.currentMode);
         } catch (error) {
@@ -867,6 +1036,8 @@ const PomodoroModule = {
             this.data.isADHDMode = false;
             this.data.autoStart = true;
             this.data.completedSessions = 0;
+            this.data.soundEnabled = true;
+            this.data.ambientMusicEnabled = false;
         }
     },
 
@@ -905,6 +1076,40 @@ const PomodoroModule = {
             autoStartToggle.onchange = (e) => {
                 this.data.autoStart = e.target.checked;
                 window.ipcRenderer.invoke('update-setting', 'pomodoroAutoStart', this.data.autoStart);
+            };
+        }
+
+        // Sound control event listeners
+        const soundToggle = document.getElementById('sound-enabled-toggle');
+        const ambientToggle = document.getElementById('ambient-music-toggle');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeValue = document.getElementById('volume-value');
+
+        if (soundToggle) {
+            soundToggle.onchange = (e) => {
+                this.data.soundEnabled = e.target.checked;
+                window.ipcRenderer.invoke('update-setting', 'pomodoroSoundEnabled', this.data.soundEnabled);
+                showToast(this.data.soundEnabled ? '🔊 Sounds enabled' : '🔇 Sounds muted', 'info');
+            };
+        }
+
+        if (ambientToggle) {
+            ambientToggle.onchange = (e) => {
+                this.data.ambientMusicEnabled = e.target.checked;
+                window.ipcRenderer.invoke('update-setting', 'pomodoroAmbientMusic', this.data.ambientMusicEnabled);
+                if (this.data.isRunning && this.data.currentMode === 'focus') {
+                    this.toggleAmbientMusic(e.target.checked);
+                }
+                showToast(this.data.ambientMusicEnabled ? '🎵 Ambient music enabled' : '🎵 Ambient music disabled', 'info');
+            };
+        }
+
+        if (volumeSlider && volumeValue) {
+            volumeSlider.oninput = (e) => {
+                const volume = e.target.value;
+                volumeValue.textContent = `${volume}%`;
+                this.updateVolume(volume);
+                window.ipcRenderer.invoke('update-setting', 'pomodoroVolume', volume);
             };
         }
     },
@@ -979,6 +1184,11 @@ const PomodoroModule = {
         document.getElementById('timer-status-text').textContent = 'Focusing...';
         document.getElementById('status-dot').style.background = '#007bff';
         
+        // Play ambient music if enabled and in focus mode
+        if (this.data.currentMode === 'focus' && this.data.ambientMusicEnabled) {
+            this.toggleAmbientMusic(true);
+        }
+        
         this.data.interval = setInterval(() => {
             if (this.data.timeRemaining > 0) {
                 this.data.timeRemaining--;
@@ -994,6 +1204,9 @@ const PomodoroModule = {
         this.data.isPaused = true;
         clearInterval(this.data.interval);
         
+        // Pause ambient music
+        this.toggleAmbientMusic(false);
+        
         document.getElementById('pomodoro-start-btn').style.display = 'inline-flex';
         document.getElementById('pomodoro-start-btn').innerHTML = '<i class="fas fa-play"></i> Resume';
         document.getElementById('pomodoro-pause-btn').style.display = 'none';
@@ -1005,6 +1218,9 @@ const PomodoroModule = {
         this.data.isRunning = false;
         this.data.isPaused = false;
         clearInterval(this.data.interval);
+        
+        // Stop ambient music
+        this.toggleAmbientMusic(false);
         
         this.setMode(this.data.currentMode);
         
@@ -1019,9 +1235,15 @@ const PomodoroModule = {
         this.data.isRunning = false;
         clearInterval(this.data.interval);
         
+        // Stop ambient music
+        this.toggleAmbientMusic(false);
+        
         const wasBreak = this.data.currentMode !== 'focus';
         
         if (!wasBreak) {
+            // Play session complete sound
+            this.playSound('sessionComplete');
+            
             this.data.completedSessions++;
             await window.ipcRenderer.invoke('update-setting', 'pomodoroSessionsToday', this.data.completedSessions);
             this.updateSessionCount();
@@ -1035,6 +1257,12 @@ const PomodoroModule = {
             
             // Notification
             window.ipcRenderer.invoke('show-notification', 'Focus Session Complete!', 'Great work! Time for a break 🎉');
+        } else {
+            // Play break complete sound
+            this.playSound('breakComplete');
+            
+            // Notification for break end
+            window.ipcRenderer.invoke('show-notification', 'Break Complete!', 'Ready to focus again? 💪');
         }
         
         // Auto-start next session

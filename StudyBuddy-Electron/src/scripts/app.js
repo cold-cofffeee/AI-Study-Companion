@@ -75,6 +75,11 @@ async function loadModule(moduleName) {
     try {
         showLoading(`Loading ${moduleName}...`);
         
+        // Call cleanup on current module before switching (save state)
+        if (AppState.currentModule === 'pomodoro' && typeof PomodoroModule !== 'undefined' && PomodoroModule.cleanup) {
+            PomodoroModule.cleanup();
+        }
+        
         // Update active navigation
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.classList.remove('active');
@@ -245,6 +250,11 @@ function copyToClipboard(text) {
         showToast('Failed to copy to clipboard', 'error');
     });
 }
+
+// Navigate to Pomodoro (for floating timer click)
+window.navigateToPomodoro = async function() {
+    await loadModule('pomodoro');
+};
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {

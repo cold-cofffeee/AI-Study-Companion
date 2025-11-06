@@ -984,6 +984,19 @@ const PomodoroModule = {
 
     async init() {
         try {
+            // Get global app state
+            const appState = window.AppState;
+            let savedState = null;
+            
+            // Check if we have a running timer to restore
+            if (appState && typeof appState.getPomodoroState === 'function') {
+                savedState = appState.getPomodoroState();
+                if (savedState && (savedState.isRunning || savedState.isPaused)) {
+                    // Restore timer state
+                    this.restoreTimerState(savedState);
+                }
+            }
+            
             // Small delay to ensure DOM is fully rendered
             await new Promise(resolve => setTimeout(resolve, 100));
             
@@ -994,8 +1007,13 @@ const PomodoroModule = {
             this.updateSessionCount();
             await this.checkForSavedSchedule();
             
-            // Initialize Music Player
+            // Initialize Music Player and restore if playing
             this.initializeMusicPlayer();
+            
+            // If timer was running, restart the interval
+            if (savedState && savedState.isRunning) {
+                this.resumeTimer();
+            }
         } catch (error) {
             console.error('Error initializing Pomodoro:', error);
             // Continue even if there's an error
@@ -1373,6 +1391,7 @@ const PomodoroModule = {
         // Handle music player during session
         this.handleMusicDuringSession();
         
+        const appState = window.AppState;
         this.data.interval = setInterval(() => {
             if (this.data.timeRemaining > 0) {
                 this.data.timeRemaining--;
@@ -1381,6 +1400,11 @@ const PomodoroModule = {
                 this.complete();
             }
         }, 1000);
+        
+        if (appState && typeof appState.setPomodoroInterval === 'function') {
+            appState.setPomodoroInterval(this.data.interval);
+        }
+        this.saveTimerState();
     },
 
     pause() {
@@ -1401,6 +1425,8 @@ const PomodoroModule = {
         document.getElementById('pomodoro-pause-btn').style.display = 'none';
         document.getElementById('timer-status-text').textContent = 'Paused';
         document.getElementById('status-dot').style.background = '#ffc107';
+        
+        this.saveTimerState();
     },
 
     stop() {
@@ -1423,6 +1449,8 @@ const PomodoroModule = {
         document.getElementById('pomodoro-pause-btn').style.display = 'none';
         document.getElementById('timer-status-text').textContent = 'Ready to Focus';
         document.getElementById('status-dot').style.background = '#28a745';
+        
+        this.saveTimerState();
     },
 
     async complete() {
@@ -1526,12 +1554,41 @@ const PomodoroModule = {
     updateDisplay() {
         const minutes = Math.floor(this.data.timeRemaining / 60);
         const seconds = this.data.timeRemaining % 60;
-        document.getElementById('pomodoro-timer-display').textContent = 
-            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         
-        if (this.data.totalTime > 0) {
+        // Update main timer display
+        const mainDisplay = document.getElementById('pomodoro-timer-display');
+        if (mainDisplay) {
+            mainDisplay.textContent = timeStr;
+        }
+        
+        // Update progress circle
+        const progressCircle = document.getElementById('timer-progress-circle');
+        if (progressCircle && this.data.totalTime > 0) {
             const progress = ((this.data.totalTime - this.data.timeRemaining) / this.data.totalTime) * 565.48;
-            document.getElementById('timer-progress-circle').style.strokeDashoffset = 565.48 - progress;
+            progressCircle.style.strokeDashoffset = 565.48 - progress;
+        }
+        
+        // Update floating timer (for when not on Pomodoro page)
+        this.updateFloatingTimer(timeStr);
+    },
+
+    updateFloatingTimer(timeStr) {
+        const floatingTimer = document.getElementById('floating-timer');
+        const floatingDisplay = document.getElementById('floating-timer-display');
+        const floatingStatus = document.getElementById('floating-timer-status');
+        
+        if (!floatingTimer || !floatingDisplay || !floatingStatus) return;
+        
+        // Show floating timer only if timer is running and we're NOT on Pomodoro page
+        const isOnPomodoroPage = window.AppState && window.AppState.currentModule === 'pomodoro';
+        
+        if (this.data.isRunning && !isOnPomodoroPage) {
+            floatingTimer.classList.remove('hidden');
+            floatingDisplay.textContent = timeStr;
+            floatingStatus.textContent = this.data.modes[this.data.currentMode]?.name || 'Timer';
+        } else {
+            floatingTimer.classList.add('hidden');
         }
     },
 
@@ -1545,49 +1602,74 @@ const PomodoroModule = {
 
     initializeMusicPlayer() {
         try {
-            // Load MusicPlayer if not already loaded
-            if (typeof MusicPlayer === 'undefined') {
-                console.log('MusicPlayer not found, will be available after script load');
+            // Get or create singleton instance
+            if (typeof window.MusicPlayer !== 'undefined') {
+                this.musicPlayer = window.MusicPlayer;
+                console.log('MusicPlayer found on window:', this.musicPlayer);
+            } else if (typeof MusicPlayer !== 'undefined') {
+                this.musicPlayer = MusicPlayer.getInstance();
+                console.log('MusicPlayer created from class');
+            } else {
+                console.warn('MusicPlayer not found, will be available after script load');
                 return;
             }
 
-            this.musicPlayer = new MusicPlayer();
             this.currentMusicService = 'youtube';
             
-            // Populate playlist dropdowns
-            this.populateMusicPlaylists();
+            // Verify musicPlayer has required methods
+            if (this.musicPlayer && typeof this.musicPlayer.getAllPlaylists === 'function') {
+                // Populate playlist dropdowns
+                this.populateMusicPlaylists();
+            } else {
+                console.error('MusicPlayer does not have getAllPlaylists method');
+            }
+            
+            // Restore player if it was playing
+            if (this.musicPlayer && typeof this.musicPlayer.isCurrentlyPlaying === 'function' && this.musicPlayer.isCurrentlyPlaying()) {
+                this.musicPlayer.restorePlayer('music-player-container');
+            }
         } catch (error) {
             console.error('Error initializing music player:', error);
         }
     },
 
     populateMusicPlaylists() {
-        if (!this.musicPlayer) return;
-
-        const allPlaylists = this.musicPlayer.getAllPlaylists();
-        
-        // Populate YouTube playlists
-        const youtubeSelect = document.getElementById('youtube-playlist-select');
-        if (youtubeSelect) {
-            youtubeSelect.innerHTML = '<option value="">-- Choose a focus playlist --</option>';
-            allPlaylists.youtube.forEach(playlist => {
-                const option = document.createElement('option');
-                option.value = playlist.url;
-                option.textContent = playlist.name;
-                youtubeSelect.appendChild(option);
-            });
+        if (!this.musicPlayer) {
+            console.warn('Music player not initialized');
+            return;
         }
 
-        // Populate Spotify playlists
-        const spotifySelect = document.getElementById('spotify-playlist-select');
-        if (spotifySelect) {
-            spotifySelect.innerHTML = '<option value="">-- Choose a focus playlist --</option>';
-            allPlaylists.spotify.forEach(playlist => {
-                const option = document.createElement('option');
-                option.value = playlist.url;
-                option.textContent = playlist.name;
-                spotifySelect.appendChild(option);
-            });
+        try {
+            const allPlaylists = this.musicPlayer.getAllPlaylists();
+            console.log('All playlists:', allPlaylists);
+            
+            // Populate YouTube playlists
+            const youtubeSelect = document.getElementById('youtube-playlist-select');
+            if (youtubeSelect && allPlaylists.youtube) {
+                youtubeSelect.innerHTML = '<option value="">-- Choose a focus playlist --</option>';
+                allPlaylists.youtube.forEach(playlist => {
+                    const option = document.createElement('option');
+                    option.value = playlist.url;
+                    option.textContent = playlist.name;
+                    youtubeSelect.appendChild(option);
+                });
+                console.log(`Populated ${allPlaylists.youtube.length} YouTube playlists`);
+            }
+
+            // Populate Spotify playlists
+            const spotifySelect = document.getElementById('spotify-playlist-select');
+            if (spotifySelect && allPlaylists.spotify) {
+                spotifySelect.innerHTML = '<option value="">-- Choose a focus playlist --</option>';
+                allPlaylists.spotify.forEach(playlist => {
+                    const option = document.createElement('option');
+                    option.value = playlist.url;
+                    option.textContent = playlist.name;
+                    spotifySelect.appendChild(option);
+                });
+                console.log(`Populated ${allPlaylists.spotify.length} Spotify playlists`);
+            }
+        } catch (error) {
+            console.error('Error populating music playlists:', error);
         }
     },
 
@@ -1683,6 +1765,91 @@ const PomodoroModule = {
             // Stop music during breaks if enabled
             this.stopMusic();
         }
+    },
+
+    // ==================== State Persistence Methods ====================
+
+    saveTimerState() {
+        const appState = window.AppState;
+        if (appState && typeof appState.savePomodoroState === 'function') {
+            appState.savePomodoroState({
+                timeRemaining: this.data.timeRemaining,
+                totalTime: this.data.totalTime,
+                isRunning: this.data.isRunning,
+                isPaused: this.data.isPaused,
+                currentMode: this.data.currentMode,
+                sessionStartTime: this.data.sessionStartTime,
+                completedSessions: this.data.completedSessions,
+                isADHDMode: this.data.isADHDMode,
+                autoStart: this.data.autoStart
+            });
+        }
+    },
+
+    restoreTimerState(savedState) {
+        this.data.timeRemaining = savedState.timeRemaining || 0;
+        this.data.totalTime = savedState.totalTime || 0;
+        this.data.isRunning = savedState.isRunning || false;
+        this.data.isPaused = savedState.isPaused || false;
+        this.data.currentMode = savedState.currentMode || 'focus';
+        this.data.sessionStartTime = savedState.sessionStartTime;
+        this.data.completedSessions = savedState.completedSessions || 0;
+        this.data.isADHDMode = savedState.isADHDMode || false;
+        this.data.autoStart = savedState.autoStart !== undefined ? savedState.autoStart : true;
+    },
+
+    resumeTimer() {
+        // Update UI to show running state
+        document.getElementById('pomodoro-start-btn').style.display = 'none';
+        document.getElementById('pomodoro-pause-btn').style.display = 'inline-flex';
+        
+        if (this.data.isPaused) {
+            document.getElementById('timer-status-text').textContent = 'Paused';
+            document.getElementById('status-dot').style.background = '#ffc107';
+            document.getElementById('pomodoro-start-btn').style.display = 'inline-flex';
+            document.getElementById('pomodoro-start-btn').innerHTML = '<i class="fas fa-play"></i> Resume';
+            document.getElementById('pomodoro-pause-btn').style.display = 'none';
+        } else {
+            document.getElementById('timer-status-text').textContent = 'Focusing...';
+            document.getElementById('status-dot').style.background = '#007bff';
+            
+            // Restart the interval
+            const appState = window.AppState;
+            this.data.interval = setInterval(() => {
+                if (this.data.timeRemaining > 0) {
+                    this.data.timeRemaining--;
+                    this.updateDisplay();
+                    this.saveTimerState(); // Save state periodically
+                } else {
+                    this.complete();
+                }
+            }, 1000);
+            
+            if (appState && typeof appState.setPomodoroInterval === 'function') {
+                appState.setPomodoroInterval(this.data.interval);
+            }
+        }
+        
+        // Update mode display
+        const modeConfig = this.data.modes[this.data.currentMode];
+        if (modeConfig) {
+            document.getElementById('pomodoro-timer-mode').textContent = modeConfig.name;
+            document.getElementById('timer-progress-circle').style.stroke = modeConfig.color;
+        }
+        
+        // Update mode buttons
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === this.data.currentMode);
+        });
+    },
+
+    // Cleanup on navigation (save state but keep timer running)
+    cleanup() {
+        // Save current state
+        this.saveTimerState();
+        
+        // Note: We DON'T clear the interval here because we want it to keep running
+        // The interval is stored in AppState and will continue in the background
     }
 };
 

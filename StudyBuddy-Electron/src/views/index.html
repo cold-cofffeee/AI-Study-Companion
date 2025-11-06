@@ -63,6 +63,11 @@
             <!-- Content will be dynamically loaded here -->
             <div id="module-container"></div>
         </main>
+
+        <!-- Persistent Music Player Container (stays alive during navigation) -->
+        <div id="persistent-music-container" style="display: none;">
+            <div id="music-player-container"></div>
+        </div>
     </div>
 
     <!-- Loading Overlay -->
@@ -74,7 +79,17 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast hidden"></div>
 
-    <!-- Scripts - Load modules BEFORE app.js -->
+    <!-- Floating Timer Widget (shows when timer is running and not on Pomodoro page) -->
+    <div id="floating-timer" class="floating-timer hidden" onclick="window.navigateToPomodoro && window.navigateToPomodoro()">
+        <div class="floating-timer-icon">🍅</div>
+        <div class="floating-timer-info">
+            <div class="floating-timer-time" id="floating-timer-display">25:00</div>
+            <div class="floating-timer-status" id="floating-timer-status">Focus Session</div>
+        </div>
+    </div>
+
+    <!-- Scripts - Load helpers and state first, then modules, then app.js -->
+    <script src="../helpers/AppState.js"></script>
     <script src="../helpers/MusicPlayer.js"></script>
     <script src="../scripts/modules/dashboard.js"></script>
     <script src="../scripts/modules/summarizer.js"></script>

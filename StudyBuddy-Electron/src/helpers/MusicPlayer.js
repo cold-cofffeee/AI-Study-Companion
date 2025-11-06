@@ -1,12 +1,21 @@
 // MusicPlayer.js - Embedded Music Player (No API Keys Required!)
 // Supports: YouTube, Spotify Web Player, SoundCloud, and more
 
-class MusicPlayer {
-    constructor() {
-        this.currentPlayer = null;
-        this.currentService = null;
-        this.isPlaying = false;
-        this.volume = 50;
+// Check if MusicPlayer already exists globally
+if (typeof window.MusicPlayer === 'undefined') {
+    class MusicPlayer {
+        constructor() {
+            // Singleton pattern - ensure only one instance exists
+            if (MusicPlayer.instance) {
+                return MusicPlayer.instance;
+            }
+            MusicPlayer.instance = this;
+
+            this.currentPlayer = null;
+            this.currentService = null;
+            this.isPlaying = false;
+            this.volume = 50;
+            this.playerContainer = null;
         
         // Pre-configured playlists for focus music
         this.focusPlaylists = {
@@ -56,7 +65,9 @@ class MusicPlayer {
         } else if (service === 'spotify') {
             // Convert Spotify URLs to embed format
             if (url.includes('open.spotify.com') && !url.includes('embed')) {
-                embedUrl = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
+                // Remove query parameters like ?si=xxx
+                const cleanUrl = url.split('?')[0];
+                embedUrl = cleanUrl.replace('open.spotify.com/', 'open.spotify.com/embed/');
             }
         } else if (service === 'soundcloud') {
             // SoundCloud embed
@@ -72,11 +83,14 @@ class MusicPlayer {
 
     // Load player into container
     loadPlayer(url, service = 'youtube', containerId = 'music-player-container') {
-        const container = document.getElementById(containerId);
+        let container = document.getElementById(containerId);
         if (!container) {
             console.error('Music player container not found');
             return null;
         }
+        
+        // Store container reference for persistence
+        this.playerContainer = container;
         
         // Clear existing player
         container.innerHTML = '';
@@ -88,6 +102,23 @@ class MusicPlayer {
         this.isPlaying = true;
         
         return player;
+    }
+
+    // Restore player after navigation
+    restorePlayer(containerId = 'music-player-container') {
+        if (!this.currentPlayer || !this.isPlaying) {
+            return;
+        }
+
+        const container = document.getElementById(containerId);
+        if (!container) {
+            return;
+        }
+
+        // Clear and restore player
+        container.innerHTML = '';
+        container.appendChild(this.currentPlayer);
+        this.playerContainer = container;
     }
 
     // Stop/Remove player
@@ -169,9 +200,26 @@ class MusicPlayer {
     getCurrentService() {
         return this.currentService;
     }
+
+    // Get singleton instance
+    static getInstance() {
+        if (!MusicPlayer.instance) {
+            MusicPlayer.instance = new MusicPlayer();
+        }
+        return MusicPlayer.instance;
+    }
 }
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = MusicPlayer;
-}
+    // Create singleton instance
+    const musicPlayerInstance = MusicPlayer.getInstance();
+
+    // Make it available globally
+    if (typeof window !== 'undefined') {
+        window.MusicPlayer = musicPlayerInstance;
+    }
+
+    // Export for use in other modules
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = MusicPlayer;
+    }
+} // End of check for existing MusicPlayer

@@ -1580,16 +1580,17 @@ const PomodoroModule = {
         
         if (!floatingTimer || !floatingDisplay || !floatingStatus) return;
         
-        // Show floating timer only if timer is running and we're NOT on Pomodoro page
+        // Show floating timer if timer is running OR paused, hide only on Pomodoro page
         const isOnPomodoroPage = window.AppState && window.AppState.currentModule === 'pomodoro';
         
-        if (this.data.isRunning && !isOnPomodoroPage) {
+        if ((this.data.isRunning || this.data.isPaused) && !isOnPomodoroPage) {
             floatingTimer.classList.remove('hidden');
             floatingDisplay.textContent = timeStr;
             floatingStatus.textContent = this.data.modes[this.data.currentMode]?.name || 'Timer';
-        } else {
+        } else if (!this.data.isRunning && !this.data.isPaused) {
             floatingTimer.classList.add('hidden');
         }
+        // Keep floating timer visible even on Pomodoro page if minimized (handled by window state)
     },
 
     updateSessionCount() {
@@ -1624,9 +1625,9 @@ const PomodoroModule = {
                 console.error('MusicPlayer does not have getAllPlaylists method');
             }
             
-            // Restore player if it was playing
+            // Restore player if it was playing - use persistent container
             if (this.musicPlayer && typeof this.musicPlayer.isCurrentlyPlaying === 'function' && this.musicPlayer.isCurrentlyPlaying()) {
-                this.musicPlayer.restorePlayer('music-player-container');
+                this.musicPlayer.restorePlayer('music-player-wrapper');
             }
         } catch (error) {
             console.error('Error initializing music player:', error);
@@ -1714,7 +1715,8 @@ const PomodoroModule = {
         }
 
         try {
-            this.musicPlayer.loadPlayer(url, service);
+            // Load music into the persistent container so it doesn't get destroyed on navigation
+            this.musicPlayer.loadPlayer(url, service, 'music-player-wrapper');
             showToast('Music started! 🎵', 'success');
         } catch (error) {
             console.error('Error playing music:', error);

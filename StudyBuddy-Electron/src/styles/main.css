@@ -26,6 +26,91 @@ body {
     border-right: 1px solid var(--border-color);
     background: var(--surface-color);
     flex-shrink: 0;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Sidebar positioning classes */
+.sidebar.position-left {
+    order: 0;
+    border-right: 1px solid var(--border-color);
+    border-left: none;
+}
+
+.sidebar.position-right {
+    order: 2;
+    border-left: 1px solid var(--border-color);
+    border-right: none;
+}
+
+/* Drag handle for sidebar repositioning */
+.sidebar::after {
+    content: '⋮⋮';
+    position: absolute;
+    top: 50%;
+    right: -10px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 40px;
+    background: var(--primary-color);
+    border-radius: 0 8px 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    cursor: move;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+.sidebar.position-right::after {
+    right: auto;
+    left: -10px;
+    border-radius: 8px 0 0 8px;
+}
+
+.sidebar::after:hover {
+    opacity: 1;
+}
+
+/* Position indicator tooltip */
+.sidebar-position-menu {
+    position: fixed;
+    background: white;
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    display: none;
+}
+
+.sidebar-position-menu.active {
+    display: block;
+}
+
+.sidebar-position-btn {
+    display: block;
+    width: 100%;
+    padding: 10px 20px;
+    margin: 5px 0;
+    border: none;
+    background: var(--background-color);
+    color: var(--text-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.sidebar-position-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateX(5px);
 }
 
 .sidebar-header {
@@ -419,4 +504,39 @@ body {
 
 .gap-20 {
     gap: 20px;
+}
+
+/* Persistent Music Player */
+.persistent-music-player {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    display: none;
+    max-width: 400px;
+    animation: slideUp 0.3s ease;
+}
+
+.persistent-music-player.visible {
+    display: block;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+#music-player-wrapper iframe {
+    border-radius: 10px;
 }

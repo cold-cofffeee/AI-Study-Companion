@@ -82,15 +82,16 @@ if (typeof window.MusicPlayer === 'undefined') {
     }
 
     // Load player into container
-    loadPlayer(url, service = 'youtube', containerId = 'music-player-container') {
+    loadPlayer(url, service = 'youtube', containerId = 'music-player-wrapper') {
         let container = document.getElementById(containerId);
         if (!container) {
-            console.error('Music player container not found');
+            console.error('Music player container not found:', containerId);
             return null;
         }
         
         // Store container reference for persistence
         this.playerContainer = container;
+        this.containerIdUsed = containerId;
         
         // Clear existing player
         container.innerHTML = '';
@@ -101,11 +102,19 @@ if (typeof window.MusicPlayer === 'undefined') {
         
         this.isPlaying = true;
         
+        // Show persistent container if using the persistent wrapper
+        if (containerId === 'music-player-wrapper') {
+            const persistentContainer = document.getElementById('persistent-music-container');
+            if (persistentContainer) {
+                persistentContainer.style.display = 'block';
+            }
+        }
+        
         return player;
     }
 
     // Restore player after navigation
-    restorePlayer(containerId = 'music-player-container') {
+    restorePlayer(containerId = 'music-player-wrapper') {
         if (!this.currentPlayer || !this.isPlaying) {
             return;
         }
@@ -119,16 +128,33 @@ if (typeof window.MusicPlayer === 'undefined') {
         container.innerHTML = '';
         container.appendChild(this.currentPlayer);
         this.playerContainer = container;
+        this.containerIdUsed = containerId;
+        
+        // Show persistent container
+        if (containerId === 'music-player-wrapper') {
+            const persistentContainer = document.getElementById('persistent-music-container');
+            if (persistentContainer) {
+                persistentContainer.style.display = 'block';
+            }
+        }
     }
 
     // Stop/Remove player
     stop() {
-        const container = document.getElementById('music-player-container');
-        if (container) {
-            container.innerHTML = '';
+        // Clear from stored container
+        if (this.playerContainer) {
+            this.playerContainer.innerHTML = '';
         }
+        
+        // Hide persistent container
+        const persistentContainer = document.getElementById('persistent-music-container');
+        if (persistentContainer) {
+            persistentContainer.style.display = 'none';
+        }
+        
         this.currentPlayer = null;
         this.isPlaying = false;
+        this.playerContainer = null;
     }
 
     // Detect service from URL

@@ -66,6 +66,19 @@ function createWindow() {
       maximized: isMaximized
     });
   });
+  
+  // Track window minimize/restore state for floating timer
+  mainWindow.on('minimize', () => {
+    if (mainWindow && mainWindow.webContents) {
+      mainWindow.webContents.send('window-minimized', true);
+    }
+  });
+  
+  mainWindow.on('restore', () => {
+    if (mainWindow && mainWindow.webContents) {
+      mainWindow.webContents.send('window-minimized', false);
+    }
+  });
 
   // Open DevTools in development mode (optional)
   // mainWindow.webContents.openDevTools();

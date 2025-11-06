@@ -268,7 +268,134 @@ document.addEventListener('DOMContentLoaded', () => {
             await loadModule(module);
         });
     });
+    
+    // Initialize sidebar repositioning
+    initializeSidebarPositioning();
+    
+    // Listen for window minimize/restore events for floating timer
+    ipcRenderer.on('window-minimized', (event, isMinimized) => {
+        const floatingTimer = document.getElementById('floating-timer');
+        if (floatingTimer && typeof PomodoroModule !== 'undefined') {
+            // Show floating timer if timer is running and window is minimized
+            if (isMinimized && (PomodoroModule.data.isRunning || PomodoroModule.data.isPaused)) {
+                floatingTimer.classList.remove('hidden');
+            } else if (!isMinimized && AppState.currentModule === 'pomodoro') {
+                // Hide when restored and on pomodoro page
+                floatingTimer.classList.add('hidden');
+            }
+        }
+    });
 });
+
+// Sidebar Repositioning Feature
+function initializeSidebarPositioning() {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    
+    // Load saved position
+    const savedPosition = localStorage.getItem('sidebarPosition') || 'left';
+    applySidebarPosition(savedPosition);
+    
+    // Create position menu
+    const menu = document.createElement('div');
+    menu.className = 'sidebar-position-menu';
+    menu.id = 'sidebar-position-menu';
+    menu.innerHTML = `
+        <button class="sidebar-position-btn" data-position="left">
+            <i class="fas fa-arrow-left"></i> Left Side
+        </button>
+        <button class="sidebar-position-btn" data-position="right">
+            <i class="fas fa-arrow-right"></i> Right Side
+        </button>
+    `;
+    document.body.appendChild(menu);
+    
+    // Add click handlers for position buttons
+    menu.querySelectorAll('.sidebar-position-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const position = e.currentTarget.dataset.position;
+            applySidebarPosition(position);
+            localStorage.setItem('sidebarPosition', position);
+            menu.classList.remove('active');
+            showToast(`Sidebar moved to ${position} side! 📍`, 'success');
+        });
+    });
+    
+    // Handle drag to show menu
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    
+    sidebar.addEventListener('mousedown', (e) => {
+        // Check if click is near the right edge (drag handle area)
+        const rect = sidebar.getBoundingClientRect();
+        const isNearEdge = sidebar.classList.contains('position-right') 
+            ? (e.clientX - rect.left) < 30 
+            : (rect.right - e.clientX) < 30;
+        
+        if (isNearEdge) {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            const deltaX = Math.abs(e.clientX - startX);
+            const deltaY = Math.abs(e.clientY - startY);
+            
+            // Show menu if dragged enough
+            if (deltaX > 20 || deltaY > 20) {
+                menu.classList.add('active');
+                menu.style.left = e.clientX + 'px';
+                menu.style.top = e.clientY + 'px';
+            }
+        }
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            // Hide menu after a delay
+            setTimeout(() => {
+                if (!menu.matches(':hover')) {
+                    menu.classList.remove('active');
+                }
+            }, 3000);
+        }
+    });
+    
+    // Hide menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target) && !sidebar.contains(e.target)) {
+            menu.classList.remove('active');
+        }
+    });
+}
+
+function applySidebarPosition(position) {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    
+    if (!sidebar || !mainContent) return;
+    
+    // Remove all position classes
+    sidebar.classList.remove('position-left', 'position-right');
+    
+    // Apply new position
+    sidebar.classList.add(`position-${position}`);
+    
+    // Reorder in flex layout
+    if (position === 'left') {
+        sidebar.style.order = '0';
+        mainContent.style.order = '1';
+    } else if (position === 'right') {
+        sidebar.style.order = '2';
+        mainContent.style.order = '1';
+    }
+}
 
 // Export for use in other modules
 window.AppState = AppState;

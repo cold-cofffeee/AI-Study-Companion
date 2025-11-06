@@ -16,6 +16,7 @@ if (typeof window.MusicPlayer === 'undefined') {
             this.isPlaying = false;
             this.volume = 50;
             this.playerContainer = null;
+            this.currentVolume = 50; // Store current volume level
         
         // Pre-configured playlists for focus music
         this.focusPlaylists = {
@@ -45,9 +46,15 @@ if (typeof window.MusicPlayer === 'undefined') {
         iframe.style.height = service === 'youtube' ? '200px' : '152px';
         iframe.style.border = 'none';
         iframe.style.borderRadius = '10px';
-        iframe.allow = 'autoplay; encrypted-media; fullscreen';
+        
+        // Add proper permissions for Electron/browser compatibility
+        iframe.allow = 'autoplay; encrypted-media; fullscreen; accelerometer; gyroscope; picture-in-picture';
         iframe.allowFullscreen = true;
-        iframe.setAttribute('loading', 'lazy');
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('scrolling', 'no');
+        
+        // Remove any sandbox restrictions to allow full interactivity
+        // This is safe for known services like YouTube and Spotify
         
         // Format URL based on service
         let embedUrl = url;
@@ -63,14 +70,17 @@ if (typeof window.MusicPlayer === 'undefined') {
                 if (!url.includes('controls')) {
                     embedUrl += '&controls=1';
                 }
+                if (!url.includes('enablejsapi')) {
+                    embedUrl += `&enablejsapi=1&origin=${window.location.origin}`;
+                }
             } else if (url.includes('youtube.com/watch?v=')) {
                 // Convert regular watch URL to embed format
                 const videoId = url.split('v=')[1].split('&')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1`;
+                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0&enablejsapi=1&origin=${window.location.origin}`;
             } else if (url.includes('youtu.be/')) {
                 // Convert short URL to embed format
                 const videoId = url.split('youtu.be/')[1].split('?')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1`;
+                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0&enablejsapi=1&origin=${window.location.origin}`;
             }
         } else if (service === 'spotify') {
             // Spotify URLs - check if already embed
@@ -250,6 +260,36 @@ if (typeof window.MusicPlayer === 'undefined') {
     // Get current service
     getCurrentService() {
         return this.currentService;
+    }
+
+    // Set volume for the music player
+    setVolume(volumePercent) {
+        this.currentVolume = volumePercent;
+        console.log(`Setting music player volume to ${volumePercent}%`);
+        
+        if (!this.currentPlayer) {
+            console.log('No active player to set volume');
+            return;
+        }
+
+        try {
+            if (this.currentService === 'youtube') {
+                // For YouTube, we need to use postMessage API
+                const command = {
+                    event: 'command',
+                    func: 'setVolume',
+                    args: [volumePercent]
+                };
+                this.currentPlayer.contentWindow?.postMessage(JSON.stringify(command), '*');
+                console.log('YouTube volume command sent');
+            } else if (this.currentService === 'spotify') {
+                // Spotify embeds don't support volume control via API
+                // The user must use the player's built-in controls
+                console.log('Spotify volume cannot be controlled programmatically - use player controls');
+            }
+        } catch (error) {
+            console.error('Error setting volume:', error);
+        }
     }
 
     // Get singleton instance

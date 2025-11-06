@@ -980,6 +980,9 @@ const PomodoroModule = {
                 .music-player-container iframe {
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
                     border-radius: 10px;
+                    pointer-events: auto !important;
+                    user-select: auto;
+                    -webkit-user-select: auto;
                 }
             </style>
         `;
@@ -1086,14 +1089,21 @@ const PomodoroModule = {
         }
     },
 
-    // Update volume for all sounds
+    // Update volume for all sounds AND music player
     updateVolume(volume) {
         const volumeLevel = volume / 100;
+        
+        // Update ambient sounds
         Object.values(this.data.sounds).forEach(sound => {
             if (sound) {
                 sound.volume = volumeLevel;
             }
         });
+        
+        // Update music player volume
+        if (this.musicPlayer && this.musicPlayer.setVolume) {
+            this.musicPlayer.setVolume(volume);
+        }
     },
 
     async checkForSavedSchedule() {

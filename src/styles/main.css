@@ -12,6 +12,13 @@ body {
     -webkit-user-select: none;
 }
 
+/* Allow interaction with iframes (music players, etc.) */
+iframe {
+    pointer-events: auto !important;
+    user-select: auto !important;
+    -webkit-user-select: auto !important;
+}
+
 .app-container {
     display: flex;
     height: 100vh;

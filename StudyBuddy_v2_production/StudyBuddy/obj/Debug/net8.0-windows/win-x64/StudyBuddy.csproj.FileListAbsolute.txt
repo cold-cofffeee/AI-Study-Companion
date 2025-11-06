@@ -1,8 +1,0 @@
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\StudyBuddy\obj\Debug\net8.0-windows\win-x64\StudyBuddy.csproj.AssemblyReference.cache
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\StudyBuddy\obj\Debug\net8.0-windows\win-x64\StudyBuddy.Form1.resources
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\StudyBuddy\obj\Debug\net8.0-windows\win-x64\StudyBuddy.Localization.Resources.en.resources
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\StudyBuddy\obj\Debug\net8.0-windows\win-x64\StudyBuddy.csproj.GenerateResource.cache
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\StudyBuddy\obj\Debug\net8.0-windows\win-x64\StudyBuddy.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\StudyBuddy\obj\Debug\net8.0-windows\win-x64\StudyBuddy.AssemblyInfoInputs.cache
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\StudyBuddy\obj\Debug\net8.0-windows\win-x64\StudyBuddy.AssemblyInfo.cs
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\StudyBuddy\obj\Debug\net8.0-windows\win-x64\StudyBuddy.csproj.CoreCompileInputs.cache

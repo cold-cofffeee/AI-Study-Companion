@@ -1,3 +1,0 @@
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\Output\StudyBuddy.pdb
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\Output\StudyBuddy.dll.config
-C:\Users\hiran\OneDrive\Desktop\StudyBuddy_v2\Output\StudyBuddy.exe

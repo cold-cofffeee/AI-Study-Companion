@@ -1,0 +1,81 @@
+/* Theme Variables */
+
+/* Light Theme */
+.theme-light {
+    --primary-color: #3f51b5;
+    --primary-hover: #303f9f;
+    --secondary-color: #2196f3;
+    --background-color: #f5f5f5;
+    --surface-color: #ffffff;
+    --border-color: #e0e0e0;
+    --text-color: #212121;
+    --text-secondary: #757575;
+    --hover-color: rgba(63, 81, 181, 0.1);
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --error-color: #f44336;
+}
+
+/* Dark Theme */
+.theme-dark {
+    --primary-color: #5c6bc0;
+    --primary-hover: #7986cb;
+    --secondary-color: #42a5f5;
+    --background-color: #121212;
+    --surface-color: #1e1e1e;
+    --border-color: #333333;
+    --text-color: #e0e0e0;
+    --text-secondary: #9e9e9e;
+    --hover-color: rgba(92, 107, 192, 0.2);
+    --success-color: #66bb6a;
+    --warning-color: #ffa726;
+    --error-color: #ef5350;
+}
+
+/* Auto Theme (uses system preference) */
+@media (prefers-color-scheme: dark) {
+    .theme-auto {
+        --primary-color: #5c6bc0;
+        --primary-hover: #7986cb;
+        --secondary-color: #42a5f5;
+        --background-color: #121212;
+        --surface-color: #1e1e1e;
+        --border-color: #333333;
+        --text-color: #e0e0e0;
+        --text-secondary: #9e9e9e;
+        --hover-color: rgba(92, 107, 192, 0.2);
+        --success-color: #66bb6a;
+        --warning-color: #ffa726;
+        --error-color: #ef5350;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    .theme-auto {
+        --primary-color: #3f51b5;
+        --primary-hover: #303f9f;
+        --secondary-color: #2196f3;
+        --background-color: #f5f5f5;
+        --surface-color: #ffffff;
+        --border-color: #e0e0e0;
+        --text-color: #212121;
+        --text-secondary: #757575;
+        --hover-color: rgba(63, 81, 181, 0.1);
+        --success-color: #4caf50;
+        --warning-color: #ff9800;
+        --error-color: #f44336;
+    }
+}
+
+/* Smooth Theme Transitions */
+body,
+.card,
+.btn,
+.input-field,
+.textarea-field,
+.select-field,
+.nav-btn,
+.sidebar,
+.main-content {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

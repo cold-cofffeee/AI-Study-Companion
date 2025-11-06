@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Buddy Pro - AI-Powered Learning Companion</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/themes.css">
+    <link rel="stylesheet" href="../styles/components.css">
+</head>
+<body class="theme-light">
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="app-title">📚 Study Buddy Pro</h1>
+                <p class="app-subtitle">AI-Powered Learning</p>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-module="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Dashboard</span>
+                </button>
+                <button class="nav-btn" data-module="summarizer">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-label">Summarizer</span>
+                </button>
+                <button class="nav-btn" data-module="problems">
+                    <span class="nav-icon">🧮</span>
+                    <span class="nav-label">Problems</span>
+                </button>
+                <button class="nav-btn" data-module="optimizer">
+                    <span class="nav-icon">⏰</span>
+                    <span class="nav-label">Optimizer</span>
+                </button>
+                <button class="nav-btn" data-module="flashcards">
+                    <span class="nav-icon">🎴</span>
+                    <span class="nav-label">Flashcards</span>
+                </button>
+                <button class="nav-btn" data-module="quiz">
+                    <span class="nav-icon">❓</span>
+                    <span class="nav-label">Quiz</span>
+                </button>
+                <button class="nav-btn" data-module="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Settings</span>
+                </button>
+                <button class="nav-btn" data-module="about">
+                    <span class="nav-icon">ℹ️</span>
+                    <span class="nav-label">About</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Content will be dynamically loaded here -->
+            <div id="module-container"></div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading...</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Scripts -->
+    <script src="../scripts/app.js"></script>
+    <script src="../scripts/navigation.js"></script>
+    <script src="../scripts/modules/dashboard.js"></script>
+    <script src="../scripts/modules/summarizer.js"></script>
+    <script src="../scripts/modules/problems.js"></script>
+    <script src="../scripts/modules/optimizer.js"></script>
+    <script src="../scripts/modules/flashcards.js"></script>
+    <script src="../scripts/modules/quiz.js"></script>
+    <script src="../scripts/modules/settings.js"></script>
+    <script src="../scripts/modules/about.js"></script>
+</body>
+</html>

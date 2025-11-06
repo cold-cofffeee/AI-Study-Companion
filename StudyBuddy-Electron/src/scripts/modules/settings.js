@@ -1,5 +1,5 @@
 // Settings Module
-const { ipcRenderer } = require('electron');
+// ipcRenderer is available globally via window.ipcRenderer from app.js
 
 const Settings = {
     data: {
@@ -162,7 +162,7 @@ const Settings = {
 
     async loadSettings() {
         try {
-            this.data.settings = await ipcRenderer.invoke('get-settings');
+            this.data.settings = await window.ipcRenderer.invoke('get-settings');
             
             // Populate fields
             document.getElementById('setting-api-key').value = this.data.settings.apiKey || '';
@@ -187,7 +187,7 @@ const Settings = {
         }
 
         try {
-            await ipcRenderer.invoke('update-setting', 'apiKey', apiKey);
+            await window.ipcRenderer.invoke('update-setting', 'apiKey', apiKey);
             showToast('API Key saved successfully! ✓', 'success');
         } catch (error) {
             showToast('Failed to save API key', 'error');
@@ -246,7 +246,7 @@ const Settings = {
                 startMaximized: document.getElementById('setting-start-maximized')?.checked !== false
             };
 
-            await ipcRenderer.invoke('save-settings', settings);
+            await window.ipcRenderer.invoke('save-settings', settings);
             showToast('All settings saved successfully! ✓', 'success');
             
             // Apply theme
@@ -273,7 +273,7 @@ const Settings = {
                     startMaximized: true
                 };
 
-                await ipcRenderer.invoke('save-settings', defaults);
+                await window.ipcRenderer.invoke('save-settings', defaults);
                 await this.loadSettings();
                 this.changeTheme();
                 

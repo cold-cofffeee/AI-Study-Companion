@@ -1,5 +1,5 @@
 // Flashcards Module
-const { ipcRenderer } = require('electron');
+// ipcRenderer is available globally via window.ipcRenderer from app.js
 
 const Flashcards = {
     data: {
@@ -102,7 +102,7 @@ const Flashcards = {
 
     async loadDueCards() {
         try {
-            this.data.cards = await ipcRenderer.invoke('db-get-flashcards');
+            this.data.cards = await window.ipcRenderer.invoke('db-get-flashcards');
             document.getElementById('card-counter').textContent = `${this.data.cards.length} cards due`;
             
             if (this.data.cards.length > 0) {
@@ -172,7 +172,7 @@ const Flashcards = {
         const nextReviewDate = new Date();
         nextReviewDate.setDate(nextReviewDate.getDate() + interval);
 
-        await ipcRenderer.invoke('db-update-flashcard', card.id, {
+        await window.ipcRenderer.invoke('db-update-flashcard', card.id, {
             reviewCount,
             correctCount,
             easeFactor,
@@ -196,7 +196,7 @@ const Flashcards = {
         }
 
         try {
-            await ipcRenderer.invoke('db-save-flashcard', {
+            await window.ipcRenderer.invoke('db-save-flashcard', {
                 question,
                 answer,
                 category,
@@ -218,7 +218,7 @@ const Flashcards = {
 
     async loadAllCards() {
         try {
-            const allCards = await ipcRenderer.invoke('db-query', 
+            const allCards = await window.ipcRenderer.invoke('db-query', 
                 'SELECT * FROM flashcards ORDER BY created_at DESC', []);
             
             const container = document.getElementById('all-cards-list');
@@ -251,7 +251,7 @@ const Flashcards = {
     async deleteCard(id) {
         if (confirm('Are you sure you want to delete this flashcard?')) {
             try {
-                await ipcRenderer.invoke('db-query', 'DELETE FROM flashcards WHERE id = ?', [id]);
+                await window.ipcRenderer.invoke('db-query', 'DELETE FROM flashcards WHERE id = ?', [id]);
                 showToast('Flashcard deleted', 'success');
                 await this.loadAllCards();
                 await this.loadDueCards();

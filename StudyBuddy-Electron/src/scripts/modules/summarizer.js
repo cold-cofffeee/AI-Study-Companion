@@ -1,6 +1,5 @@
 // Summarizer Module
-const { ipcRenderer } = require('electron');
-const GeminiApiClient = require('../../helpers/GeminiApiClient');
+// ipcRenderer is available globally via window.ipcRenderer from app.js
 
 const Summarizer = {
     data: {
@@ -110,7 +109,7 @@ const Summarizer = {
     },
 
     async checkApiStatus() {
-        const settings = await ipcRenderer.invoke('get-settings');
+        const settings = await window.ipcRenderer.invoke('get-settings');
         const statusEl = document.getElementById('api-status');
         const statusTextEl = document.getElementById('api-status-text');
 
@@ -137,7 +136,7 @@ const Summarizer = {
         // Show API configuration modal
         const apiKey = prompt('Enter your Google Gemini API Key:');
         if (apiKey) {
-            await ipcRenderer.invoke('update-setting', 'apiKey', apiKey);
+            await window.ipcRenderer.invoke('update-setting', 'apiKey', apiKey);
             showToast('API Key saved successfully!', 'success');
             await this.checkApiStatus();
         }
@@ -163,7 +162,7 @@ const Summarizer = {
         showLoading('Generating summary...');
 
         try {
-            const settings = await ipcRenderer.invoke('get-settings');
+            const settings = await window.ipcRenderer.invoke('get-settings');
             if (!settings.apiKey) {
                 throw new Error('API key not configured');
             }
@@ -193,7 +192,7 @@ const Summarizer = {
         showLoading('Creating quiz...');
 
         try {
-            const settings = await ipcRenderer.invoke('get-settings');
+            const settings = await window.ipcRenderer.invoke('get-settings');
             if (!settings.apiKey) {
                 throw new Error('API key not configured');
             }
@@ -223,7 +222,7 @@ const Summarizer = {
         showLoading('Generating memory tricks...');
 
         try {
-            const settings = await ipcRenderer.invoke('get-settings');
+            const settings = await window.ipcRenderer.invoke('get-settings');
             if (!settings.apiKey) {
                 throw new Error('API key not configured');
             }
@@ -300,7 +299,7 @@ const Summarizer = {
         showLoading('Exporting to PDF...');
         
         try {
-            await ipcRenderer.invoke('export-pdf', {
+            await window.ipcRenderer.invoke('export-pdf', {
                 title: output.title,
                 content: output.content
             });

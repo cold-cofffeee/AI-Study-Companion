@@ -1,5 +1,5 @@
 // Problem Generator Module
-const { ipcRenderer } = require('electron');
+// ipcRenderer is available globally via window.ipcRenderer from app.js
 const GeminiApiClient = require('../../helpers/GeminiApiClient');
 
 const ProblemGenerator = {
@@ -83,7 +83,7 @@ const ProblemGenerator = {
         showLoading('Generating problems...');
 
         try {
-            const settings = await ipcRenderer.invoke('get-settings');
+            const settings = await window.ipcRenderer.invoke('get-settings');
             if (!settings.apiKey) {
                 throw new Error('API key not configured. Please configure it in Settings.');
             }
@@ -149,7 +149,7 @@ const ProblemGenerator = {
         }
 
         try {
-            await ipcRenderer.invoke('export-pdf', {
+            await window.ipcRenderer.invoke('export-pdf', {
                 title: 'Practice Problems',
                 content: this.data.currentProblem
             });

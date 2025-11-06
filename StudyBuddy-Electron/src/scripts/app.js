@@ -1,6 +1,9 @@
 // Main Application Logic
 const { ipcRenderer } = require('electron');
 
+// Export ipcRenderer globally for modules to use
+window.ipcRenderer = ipcRenderer;
+
 // Global app state
 const AppState = {
     currentModule: 'dashboard',
@@ -80,32 +83,64 @@ async function loadModule(moduleName) {
             }
         });
         
-        // Load module content
+        // Check if module exists before trying to render
         let content = '';
         switch (moduleName) {
             case 'dashboard':
-                content = await Dashboard.render();
+                if (typeof Dashboard !== 'undefined') {
+                    content = await Dashboard.render();
+                } else {
+                    content = '<div class="card"><h2>Loading Dashboard...</h2><p>Please wait...</p></div>';
+                }
                 break;
             case 'summarizer':
-                content = await Summarizer.render();
+                if (typeof Summarizer !== 'undefined') {
+                    content = await Summarizer.render();
+                } else {
+                    content = '<div class="card"><h2>Loading Summarizer...</h2><p>Please wait...</p></div>';
+                }
                 break;
             case 'problems':
-                content = await ProblemGenerator.render();
+                if (typeof ProblemGenerator !== 'undefined') {
+                    content = await ProblemGenerator.render();
+                } else {
+                    content = '<div class="card"><h2>Loading Problem Generator...</h2><p>Please wait...</p></div>';
+                }
                 break;
             case 'optimizer':
-                content = await StudyOptimizer.render();
+                if (typeof StudyOptimizer !== 'undefined') {
+                    content = await StudyOptimizer.render();
+                } else {
+                    content = '<div class="card"><h2>Loading Optimizer...</h2><p>Please wait...</p></div>';
+                }
                 break;
             case 'flashcards':
-                content = await Flashcards.render();
+                if (typeof Flashcards !== 'undefined') {
+                    content = await Flashcards.render();
+                } else {
+                    content = '<div class="card"><h2>Loading Flashcards...</h2><p>Please wait...</p></div>';
+                }
                 break;
             case 'quiz':
-                content = await ReverseQuiz.render();
+                if (typeof ReverseQuiz !== 'undefined') {
+                    content = await ReverseQuiz.render();
+                } else {
+                    content = '<div class="card"><h2>Loading Quiz...</h2><p>Please wait...</p></div>';
+                }
                 break;
             case 'settings':
-                content = await Settings.render();
+                if (typeof Settings !== 'undefined') {
+                    content = await Settings.render();
+                } else {
+                    content = '<div class="card"><h2>Loading Settings...</h2><p>Please wait...</p></div>';
+                }
                 break;
             case 'about':
-                content = await About.render();
+                if (typeof About !== 'undefined') {
+                    content = await About.render();
+                } else {
+                    content = '<div class="card"><h2>Loading About...</h2><p>Please wait...</p></div>';
+                }
                 break;
             default:
                 content = '<h1>Module not found</h1>';
@@ -113,31 +148,47 @@ async function loadModule(moduleName) {
         
         container.innerHTML = content;
         
-        // Initialize module-specific functionality
+        // Initialize module-specific functionality only if module exists
         switch (moduleName) {
             case 'dashboard':
-                await Dashboard.init();
+                if (typeof Dashboard !== 'undefined' && Dashboard.init) {
+                    await Dashboard.init();
+                }
                 break;
             case 'summarizer':
-                await Summarizer.init();
+                if (typeof Summarizer !== 'undefined' && Summarizer.init) {
+                    await Summarizer.init();
+                }
                 break;
             case 'problems':
-                await ProblemGenerator.init();
+                if (typeof ProblemGenerator !== 'undefined' && ProblemGenerator.init) {
+                    await ProblemGenerator.init();
+                }
                 break;
             case 'optimizer':
-                await StudyOptimizer.init();
+                if (typeof StudyOptimizer !== 'undefined' && StudyOptimizer.init) {
+                    await StudyOptimizer.init();
+                }
                 break;
             case 'flashcards':
-                await Flashcards.init();
+                if (typeof Flashcards !== 'undefined' && Flashcards.init) {
+                    await Flashcards.init();
+                }
                 break;
             case 'quiz':
-                await ReverseQuiz.init();
+                if (typeof ReverseQuiz !== 'undefined' && ReverseQuiz.init) {
+                    await ReverseQuiz.init();
+                }
                 break;
             case 'settings':
-                await Settings.init();
+                if (typeof Settings !== 'undefined' && Settings.init) {
+                    await Settings.init();
+                }
                 break;
             case 'about':
-                await About.init();
+                if (typeof About !== 'undefined' && About.init) {
+                    await About.init();
+                }
                 break;
         }
         
@@ -186,6 +237,15 @@ function copyToClipboard(text) {
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
+    
+    // Setup navigation button handlers
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const module = button.dataset.module;
+            await loadModule(module);
+        });
+    });
 });
 
 // Export for use in other modules

@@ -1,5 +1,5 @@
 // Dashboard Module
-const { ipcRenderer } = require('electron');
+// ipcRenderer is available globally via window.ipcRenderer from app.js
 
 const Dashboard = {
     data: {
@@ -94,8 +94,8 @@ const Dashboard = {
 
     async loadData() {
         try {
-            this.data.sessions = await ipcRenderer.invoke('db-get-sessions', 5);
-            this.data.flashcards = await ipcRenderer.invoke('db-get-flashcards');
+            this.data.sessions = await window.ipcRenderer.invoke('db-get-sessions', 5);
+            this.data.flashcards = await window.ipcRenderer.invoke('db-get-flashcards');
         } catch (error) {
             console.error('Error loading dashboard data:', error);
         }

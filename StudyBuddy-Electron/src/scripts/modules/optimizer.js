@@ -1,5 +1,5 @@
 // Study Optimizer Module
-const { ipcRenderer } = require('electron');
+// ipcRenderer is available globally via window.ipcRenderer from app.js
 const GeminiApiClient = require('../../helpers/GeminiApiClient');
 
 const StudyOptimizer = {
@@ -80,7 +80,7 @@ const StudyOptimizer = {
     },
 
     async init() {
-        const settings = await ipcRenderer.invoke('get-settings');
+        const settings = await window.ipcRenderer.invoke('get-settings');
         this.data.sessionMinutes = settings.defaultStudySessionMinutes || 25;
     },
 
@@ -97,7 +97,7 @@ const StudyOptimizer = {
         showLoading('Generating optimized schedule...');
 
         try {
-            const settings = await ipcRenderer.invoke('get-settings');
+            const settings = await window.ipcRenderer.invoke('get-settings');
             if (!settings.apiKey) {
                 throw new Error('API key not configured');
             }
@@ -128,7 +128,7 @@ const StudyOptimizer = {
         
         // Save session to database
         const topic = document.getElementById('study-topic')?.value || 'Study Session';
-        ipcRenderer.invoke('db-save-session', {
+        window.ipcRenderer.invoke('db-save-session', {
             startTime: new Date().toISOString(),
             topic: topic,
             moduleUsed: 'optimizer',
@@ -163,7 +163,7 @@ const StudyOptimizer = {
                     
                     if (this.data.isBreak) {
                         showToast('Time for a break! 🎉', 'success');
-                        ipcRenderer.invoke('show-notification', 'Study Break', 'Time to take a 5-minute break!');
+                        window.ipcRenderer.invoke('show-notification', 'Study Break', 'Time to take a 5-minute break!');
                     } else {
                         showToast('Break over! Back to studying! 📚', 'success');
                     }
@@ -189,7 +189,7 @@ const StudyOptimizer = {
         }
 
         try {
-            await ipcRenderer.invoke('export-pdf', {
+            await window.ipcRenderer.invoke('export-pdf', {
                 title: 'Study Schedule',
                 content: this.data.schedule
             });

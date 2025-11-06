@@ -1,6 +1,5 @@
 // Reverse Quiz Generator Module
-const { ipcRenderer } = require('electron');
-const GeminiApiClient = require('../../helpers/GeminiApiClient');
+// ipcRenderer is available globally via window.ipcRenderer from app.js
 
 const ReverseQuiz = {
     data: {
@@ -75,7 +74,7 @@ const ReverseQuiz = {
         showLoading('Generating quiz...');
 
         try {
-            const settings = await ipcRenderer.invoke('get-settings');
+            const settings = await window.ipcRenderer.invoke('get-settings');
             if (!settings.apiKey) {
                 throw new Error('API key not configured');
             }
@@ -145,7 +144,7 @@ const ReverseQuiz = {
         }
 
         try {
-            await ipcRenderer.invoke('export-pdf', {
+            await window.ipcRenderer.invoke('export-pdf', {
                 title: 'Reverse Quiz',
                 content: this.data.currentQuiz
             });

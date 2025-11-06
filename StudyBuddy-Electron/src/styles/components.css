@@ -406,43 +406,14 @@ input:checked + .toggle-slider:before {
     margin-top: 20px;
 }
 
-/* Floating Timer Widget */
-.floating-timer {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 15px 20px;
-    border-radius: 50px;
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 1000;
-    animation: floatPulse 2s ease-in-out infinite;
-}
-
-.floating-timer:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
-}
-
+/* Floating Timer Widget - See main.css for full styles */
 .floating-timer.hidden {
-    display: none;
+    display: none !important;
 }
 
 .floating-timer-icon {
     font-size: 28px;
     animation: rotate 4s linear infinite;
-}
-
-.floating-timer-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
 }
 
 .floating-timer-time {

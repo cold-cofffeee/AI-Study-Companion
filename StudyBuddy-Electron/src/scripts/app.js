@@ -256,6 +256,30 @@ window.navigateToPomodoro = async function() {
     await loadModule('pomodoro');
 };
 
+// Music Player Float Controls
+window.toggleMusicFloat = function() {
+    const musicContainer = document.getElementById('persistent-music-container');
+    if (musicContainer) {
+        musicContainer.classList.toggle('minimized');
+        const isMinimized = musicContainer.classList.contains('minimized');
+        showToast(isMinimized ? '🎵 Music minimized' : '🎵 Music expanded', 'info');
+    }
+};
+
+window.stopPersistentMusic = function() {
+    if (typeof PomodoroModule !== 'undefined' && PomodoroModule.stopMusic) {
+        PomodoroModule.stopMusic();
+    } else if (window.MusicPlayer) {
+        window.MusicPlayer.stop();
+    }
+};
+
+// Timer Float Controls
+window.restoreTimerToPage = function(event) {
+    event.stopPropagation(); // Prevent triggering the navigate action
+    loadModule('pomodoro');
+};
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
@@ -271,6 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize sidebar repositioning
     initializeSidebarPositioning();
+    
+    // Initialize navigation menu reordering
+    initializeNavigationReordering();
     
     // Listen for window minimize/restore events for floating timer
     ipcRenderer.on('window-minimized', (event, isMinimized) => {
@@ -395,6 +422,107 @@ function applySidebarPosition(position) {
         sidebar.style.order = '2';
         mainContent.style.order = '1';
     }
+}
+
+// Navigation Menu Reordering Feature
+function initializeNavigationReordering() {
+    const navMenu = document.querySelector('.nav-menu');
+    if (!navMenu) return;
+    
+    // Load saved order
+    const savedOrder = JSON.parse(localStorage.getItem('navMenuOrder') || 'null');
+    if (savedOrder) {
+        applyNavigationOrder(savedOrder);
+    }
+    
+    // Make navigation buttons draggable
+    const navButtons = navMenu.querySelectorAll('.nav-btn');
+    navButtons.forEach((btn, index) => {
+        btn.draggable = true;
+        btn.style.cursor = 'move';
+        
+        // Add drag start handler
+        btn.addEventListener('dragstart', (e) => {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.target.innerHTML);
+            e.target.style.opacity = '0.4';
+            e.target.classList.add('dragging');
+        });
+        
+        // Add drag end handler
+        btn.addEventListener('dragend', (e) => {
+            e.target.style.opacity = '1';
+            e.target.classList.remove('dragging');
+        });
+        
+        // Add drag over handler
+        btn.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const draggingItem = navMenu.querySelector('.dragging');
+            if (draggingItem && draggingItem !== e.target) {
+                const allButtons = Array.from(navMenu.querySelectorAll('.nav-btn'));
+                const draggingIndex = allButtons.indexOf(draggingItem);
+                const targetIndex = allButtons.indexOf(e.target);
+                
+                if (draggingIndex < targetIndex) {
+                    e.target.parentNode.insertBefore(draggingItem, e.target.nextSibling);
+                } else {
+                    e.target.parentNode.insertBefore(draggingItem, e.target);
+                }
+            }
+        });
+        
+        // Add drop handler
+        btn.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            saveNavigationOrder();
+            showToast('Menu order saved! 📌', 'success');
+        });
+    });
+    
+    // Add visual indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'nav-reorder-hint';
+    indicator.innerHTML = '<i class="fas fa-grip-vertical"></i> Drag to reorder';
+    indicator.style.cssText = `
+        text-align: center;
+        padding: 8px;
+        font-size: 11px;
+        color: var(--text-secondary);
+        opacity: 0.7;
+        border-top: 1px solid var(--border-color);
+        margin-top: 10px;
+    `;
+    navMenu.appendChild(indicator);
+}
+
+function saveNavigationOrder() {
+    const navMenu = document.querySelector('.nav-menu');
+    const buttons = navMenu.querySelectorAll('.nav-btn');
+    const order = Array.from(buttons).map(btn => btn.dataset.module);
+    localStorage.setItem('navMenuOrder', JSON.stringify(order));
+}
+
+function applyNavigationOrder(order) {
+    const navMenu = document.querySelector('.nav-menu');
+    const buttons = navMenu.querySelectorAll('.nav-btn');
+    
+    // Create a map of module to button
+    const buttonMap = new Map();
+    buttons.forEach(btn => {
+        buttonMap.set(btn.dataset.module, btn);
+    });
+    
+    // Reorder buttons based on saved order
+    order.forEach((module, index) => {
+        const btn = buttonMap.get(module);
+        if (btn) {
+            navMenu.appendChild(btn);
+        }
+    });
 }
 
 // Export for use in other modules

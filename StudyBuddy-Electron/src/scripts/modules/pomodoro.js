@@ -255,6 +255,81 @@ const PomodoroModule = {
                             </div>
                         </div>
 
+                        <!-- Music Player Integration -->
+                        <div class="settings-group music-player-section">
+                            <h4><i class="fas fa-music"></i> Focus Music Player</h4>
+                            <p class="text-muted small">Play music from YouTube or Spotify during focus sessions (No login required!)</p>
+                            
+                            <!-- Music Service Tabs -->
+                            <div class="music-tabs">
+                                <button class="music-tab active" data-service="youtube" onclick="PomodoroModule.switchMusicService('youtube')">
+                                    <i class="fab fa-youtube"></i> YouTube
+                                </button>
+                                <button class="music-tab" data-service="spotify" onclick="PomodoroModule.switchMusicService('spotify')">
+                                    <i class="fab fa-spotify"></i> Spotify
+                                </button>
+                                <button class="music-tab" data-service="custom" onclick="PomodoroModule.switchMusicService('custom')">
+                                    <i class="fas fa-link"></i> Custom URL
+                                </button>
+                            </div>
+
+                            <!-- YouTube Playlists -->
+                            <div id="youtube-music-section" class="music-service-section">
+                                <label class="input-label">Select YouTube Playlist:</label>
+                                <select id="youtube-playlist-select" class="input-field">
+                                    <option value="">-- Choose a focus playlist --</option>
+                                </select>
+                            </div>
+
+                            <!-- Spotify Playlists -->
+                            <div id="spotify-music-section" class="music-service-section" style="display: none;">
+                                <label class="input-label">Select Spotify Playlist:</label>
+                                <select id="spotify-playlist-select" class="input-field">
+                                    <option value="">-- Choose a focus playlist --</option>
+                                </select>
+                            </div>
+
+                            <!-- Custom URL -->
+                            <div id="custom-music-section" class="music-service-section" style="display: none;">
+                                <label class="input-label">Enter Music URL:</label>
+                                <input type="text" id="custom-music-url" class="input-field" 
+                                       placeholder="YouTube, Spotify, or SoundCloud URL">
+                                <button class="btn btn-outline btn-sm" onclick="PomodoroModule.addCustomPlaylist()">
+                                    <i class="fas fa-plus"></i> Save to Library
+                                </button>
+                            </div>
+
+                            <!-- Music Controls -->
+                            <div class="music-controls-section">
+                                <div class="setting-row">
+                                    <label>
+                                        <input type="checkbox" id="music-auto-play-toggle">
+                                        Auto-play music during focus sessions
+                                    </label>
+                                </div>
+                                <div class="setting-row">
+                                    <label>
+                                        <input type="checkbox" id="music-stop-on-break-toggle" checked>
+                                        Stop music during breaks
+                                    </label>
+                                </div>
+
+                                <div class="music-player-buttons">
+                                    <button class="btn btn-primary" onclick="PomodoroModule.playMusic()">
+                                        <i class="fas fa-play"></i> Play Selected
+                                    </button>
+                                    <button class="btn btn-outline" onclick="PomodoroModule.stopMusic()">
+                                        <i class="fas fa-stop"></i> Stop Music
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Embedded Music Player Container -->
+                            <div id="music-player-container" class="music-player-container">
+                                <!-- Player will be embedded here -->
+                            </div>
+                        </div>
+
                         <!-- Session History -->
                         <div class="session-history">
                             <h3><i class="fas fa-history"></i> Today's Sessions</h3>
@@ -800,6 +875,109 @@ const PomodoroModule = {
                 body.dark .adhd-mode-container {
                     background: rgba(255, 193, 7, 0.15);
                 }
+
+                /* Music Player Styles */
+                .music-player-section {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 15px;
+                    padding: 20px;
+                    margin-top: 20px;
+                }
+
+                .music-player-section h4 {
+                    color: white;
+                    margin-bottom: 8px;
+                }
+
+                .music-player-section .text-muted {
+                    color: rgba(255, 255, 255, 0.8) !important;
+                    margin-bottom: 15px;
+                }
+
+                .music-tabs {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                }
+
+                .music-tab {
+                    flex: 1;
+                    padding: 12px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 2px solid transparent;
+                    border-radius: 10px;
+                    color: white;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    font-weight: 500;
+                }
+
+                .music-tab:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                }
+
+                .music-tab.active {
+                    background: rgba(255, 255, 255, 0.95);
+                    color: #667eea;
+                    border-color: white;
+                }
+
+                body.dark .music-tab.active {
+                    background: rgba(30, 30, 30, 0.95);
+                    color: #667eea;
+                }
+
+                .music-service-section {
+                    background: rgba(255, 255, 255, 0.95);
+                    border-radius: 10px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                }
+
+                body.dark .music-service-section {
+                    background: rgba(30, 30, 30, 0.95);
+                }
+
+                .music-controls-section {
+                    background: rgba(255, 255, 255, 0.95);
+                    border-radius: 10px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                }
+
+                body.dark .music-controls-section {
+                    background: rgba(30, 30, 30, 0.95);
+                }
+
+                .music-player-buttons {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 15px;
+                }
+
+                .music-player-buttons .btn {
+                    flex: 1;
+                }
+
+                .music-player-container {
+                    background: rgba(0, 0, 0, 0.1);
+                    border-radius: 10px;
+                    padding: 15px;
+                    min-height: 80px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .music-player-container:empty::before {
+                    content: 'No music playing';
+                    color: rgba(255, 255, 255, 0.6);
+                    font-style: italic;
+                }
+
+                .music-player-container iframe {
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                }
             </style>
         `;
     },
@@ -815,6 +993,9 @@ const PomodoroModule = {
             this.updateDisplay();
             this.updateSessionCount();
             await this.checkForSavedSchedule();
+            
+            // Initialize Music Player
+            this.initializeMusicPlayer();
         } catch (error) {
             console.error('Error initializing Pomodoro:', error);
             // Continue even if there's an error
@@ -1189,6 +1370,9 @@ const PomodoroModule = {
             this.toggleAmbientMusic(true);
         }
         
+        // Handle music player during session
+        this.handleMusicDuringSession();
+        
         this.data.interval = setInterval(() => {
             if (this.data.timeRemaining > 0) {
                 this.data.timeRemaining--;
@@ -1207,6 +1391,11 @@ const PomodoroModule = {
         // Pause ambient music
         this.toggleAmbientMusic(false);
         
+        // Stop music player
+        if (this.musicPlayer) {
+            this.stopMusic();
+        }
+        
         document.getElementById('pomodoro-start-btn').style.display = 'inline-flex';
         document.getElementById('pomodoro-start-btn').innerHTML = '<i class="fas fa-play"></i> Resume';
         document.getElementById('pomodoro-pause-btn').style.display = 'none';
@@ -1221,6 +1410,11 @@ const PomodoroModule = {
         
         // Stop ambient music
         this.toggleAmbientMusic(false);
+        
+        // Stop music player
+        if (this.musicPlayer) {
+            this.stopMusic();
+        }
         
         this.setMode(this.data.currentMode);
         
@@ -1345,6 +1539,150 @@ const PomodoroModule = {
         document.getElementById('sessions-completed').textContent = 
             `${this.data.completedSessions} session${this.data.completedSessions !== 1 ? 's' : ''} today`;
         this.loadSessionHistory();
+    },
+
+    // ==================== Music Player Integration Methods ====================
+
+    initializeMusicPlayer() {
+        try {
+            // Load MusicPlayer if not already loaded
+            if (typeof MusicPlayer === 'undefined') {
+                console.log('MusicPlayer not found, will be available after script load');
+                return;
+            }
+
+            this.musicPlayer = new MusicPlayer();
+            this.currentMusicService = 'youtube';
+            
+            // Populate playlist dropdowns
+            this.populateMusicPlaylists();
+        } catch (error) {
+            console.error('Error initializing music player:', error);
+        }
+    },
+
+    populateMusicPlaylists() {
+        if (!this.musicPlayer) return;
+
+        const allPlaylists = this.musicPlayer.getAllPlaylists();
+        
+        // Populate YouTube playlists
+        const youtubeSelect = document.getElementById('youtube-playlist-select');
+        if (youtubeSelect) {
+            youtubeSelect.innerHTML = '<option value="">-- Choose a focus playlist --</option>';
+            allPlaylists.youtube.forEach(playlist => {
+                const option = document.createElement('option');
+                option.value = playlist.url;
+                option.textContent = playlist.name;
+                youtubeSelect.appendChild(option);
+            });
+        }
+
+        // Populate Spotify playlists
+        const spotifySelect = document.getElementById('spotify-playlist-select');
+        if (spotifySelect) {
+            spotifySelect.innerHTML = '<option value="">-- Choose a focus playlist --</option>';
+            allPlaylists.spotify.forEach(playlist => {
+                const option = document.createElement('option');
+                option.value = playlist.url;
+                option.textContent = playlist.name;
+                spotifySelect.appendChild(option);
+            });
+        }
+    },
+
+    switchMusicService(service) {
+        this.currentMusicService = service;
+        
+        // Update tab UI
+        document.querySelectorAll('.music-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.service === service);
+        });
+
+        // Show/hide appropriate sections
+        document.getElementById('youtube-music-section').style.display = service === 'youtube' ? 'block' : 'none';
+        document.getElementById('spotify-music-section').style.display = service === 'spotify' ? 'block' : 'none';
+        document.getElementById('custom-music-section').style.display = service === 'custom' ? 'block' : 'none';
+    },
+
+    playMusic() {
+        if (!this.musicPlayer) {
+            showToast('Music player not initialized', 'error');
+            return;
+        }
+
+        let url = '';
+        let service = this.currentMusicService;
+
+        // Get URL based on selected service
+        if (service === 'youtube') {
+            url = document.getElementById('youtube-playlist-select').value;
+        } else if (service === 'spotify') {
+            url = document.getElementById('spotify-playlist-select').value;
+        } else if (service === 'custom') {
+            url = document.getElementById('custom-music-url').value;
+            if (url) {
+                service = this.musicPlayer.detectService(url);
+            }
+        }
+
+        if (!url) {
+            showToast('Please select or enter a music URL', 'warning');
+            return;
+        }
+
+        try {
+            this.musicPlayer.loadPlayer(url, service);
+            showToast('Music started! 🎵', 'success');
+        } catch (error) {
+            console.error('Error playing music:', error);
+            showToast('Failed to play music', 'error');
+        }
+    },
+
+    stopMusic() {
+        if (!this.musicPlayer) return;
+        
+        this.musicPlayer.stop();
+        showToast('Music stopped', 'info');
+    },
+
+    addCustomPlaylist() {
+        if (!this.musicPlayer) return;
+
+        const url = document.getElementById('custom-music-url').value;
+        if (!url) {
+            showToast('Please enter a URL', 'warning');
+            return;
+        }
+
+        const service = this.musicPlayer.detectService(url);
+        const name = prompt('Enter a name for this playlist:');
+        
+        if (name) {
+            this.musicPlayer.addCustomPlaylist(name, url, service);
+            this.populateMusicPlaylists();
+            showToast('Playlist added to library! 📚', 'success');
+        }
+    },
+
+    handleMusicDuringSession() {
+        const autoPlay = document.getElementById('music-auto-play-toggle')?.checked;
+        const stopOnBreak = document.getElementById('music-stop-on-break-toggle')?.checked;
+        
+        if (!this.musicPlayer || !autoPlay) {
+            return;
+        }
+
+        const isFocusSession = this.data.currentMode === 'focus';
+        
+        if (isFocusSession && !this.musicPlayer.isCurrentlyPlaying()) {
+            // Auto-play music during focus if enabled
+            this.playMusic();
+        } else if (!isFocusSession && stopOnBreak && this.musicPlayer.isCurrentlyPlaying()) {
+            // Stop music during breaks if enabled
+            this.stopMusic();
+        }
     }
 };
 

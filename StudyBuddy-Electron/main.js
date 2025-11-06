@@ -12,6 +12,8 @@ const store = new Store();
 let mainWindow;
 let dataStore;
 let settingsHandler;
+let spotifyAuthWindow = null;
+let spotifyAuthServer = null;
 
 function createWindow() {
   // Load window settings
@@ -267,6 +269,190 @@ ipcMain.handle('gemini-test-connection', async (event, apiKey) => {
     return result;
   } catch (error) {
     dataStore.logError('settings', error, { action: 'test-connection' });
+    throw error;
+  }
+});
+
+// Spotify Integration Handlers
+
+ipcMain.handle('open-spotify-auth', async (event, authUrl) => {
+  return new Promise((resolve, reject) => {
+    // Create a simple HTTP server to handle the callback
+    const http = require('http');
+    const url = require('url');
+    
+    // Close existing server if any
+    if (spotifyAuthServer) {
+      spotifyAuthServer.close();
+    }
+    
+    spotifyAuthServer = http.createServer((req, res) => {
+      const queryData = url.parse(req.url, true).query;
+      
+      if (queryData.code) {
+        // Success - send a nice response page
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Spotify Connected</title>
+            <style>
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+              }
+              .container {
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                text-align: center;
+              }
+              h1 { color: #1db954; margin-bottom: 20px; }
+              p { color: #666; font-size: 16px; }
+              .icon { font-size: 64px; margin-bottom: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="icon">✅</div>
+              <h1>Successfully Connected!</h1>
+              <p>You can now close this window and return to Study Buddy.</p>
+            </div>
+            <script>setTimeout(() => window.close(), 3000);</script>
+          </body>
+          </html>
+        `);
+        
+        // Close the server
+        setTimeout(() => {
+          if (spotifyAuthServer) {
+            spotifyAuthServer.close();
+            spotifyAuthServer = null;
+          }
+        }, 1000);
+        
+        // Close auth window if open
+        if (spotifyAuthWindow && !spotifyAuthWindow.isDestroyed()) {
+          spotifyAuthWindow.close();
+        }
+        
+        resolve(queryData.code);
+      } else if (queryData.error) {
+        // Error occurred
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Authorization Failed</title>
+            <style>
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+              }
+              .container {
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                text-align: center;
+              }
+              h1 { color: #ff6b6b; margin-bottom: 20px; }
+              p { color: #666; font-size: 16px; }
+              .icon { font-size: 64px; margin-bottom: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="icon">❌</div>
+              <h1>Authorization Failed</h1>
+              <p>Please try again.</p>
+            </div>
+            <script>setTimeout(() => window.close(), 3000);</script>
+          </body>
+          </html>
+        `);
+        
+        setTimeout(() => {
+          if (spotifyAuthServer) {
+            spotifyAuthServer.close();
+            spotifyAuthServer = null;
+          }
+        }, 1000);
+        
+        if (spotifyAuthWindow && !spotifyAuthWindow.isDestroyed()) {
+          spotifyAuthWindow.close();
+        }
+        
+        reject(new Error(queryData.error));
+      }
+    });
+    
+    // Start server on port 3000
+    spotifyAuthServer.listen(3000, () => {
+      console.log('Spotify auth callback server running on http://localhost:3000');
+    });
+    
+    // Open authorization window
+    spotifyAuthWindow = new BrowserWindow({
+      width: 800,
+      height: 700,
+      webPreferences: {
+        nodeIntegration: false
+      },
+      autoHideMenuBar: true,
+      title: 'Connect to Spotify'
+    });
+    
+    spotifyAuthWindow.loadURL(authUrl);
+    
+    spotifyAuthWindow.on('closed', () => {
+      spotifyAuthWindow = null;
+      if (spotifyAuthServer) {
+        spotifyAuthServer.close();
+        spotifyAuthServer = null;
+      }
+    });
+  });
+});
+
+ipcMain.handle('save-spotify-tokens', async (event, tokens) => {
+  try {
+    store.set('spotify', tokens);
+    return true;
+  } catch (error) {
+    console.error('Error saving Spotify tokens:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('load-spotify-tokens', async () => {
+  try {
+    return store.get('spotify', null);
+  } catch (error) {
+    console.error('Error loading Spotify tokens:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('clear-spotify-tokens', async () => {
+  try {
+    store.delete('spotify');
+    return true;
+  } catch (error) {
+    console.error('Error clearing Spotify tokens:', error);
     throw error;
   }
 });

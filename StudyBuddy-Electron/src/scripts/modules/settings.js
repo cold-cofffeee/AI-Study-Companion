@@ -206,9 +206,7 @@ const Settings = {
         showLoading('Testing API connection...');
         
         try {
-            const GeminiApiClient = require('../../helpers/GeminiApiClient');
-            const client = new GeminiApiClient(apiKey);
-            const isConnected = await client.testConnection();
+            const isConnected = await window.ipcRenderer.invoke('gemini-test-connection', apiKey);
             
             if (isConnected) {
                 resultDiv.innerHTML = '<div style="color: var(--success-color); padding: 10px; background: rgba(76, 175, 80, 0.1); border-radius: 6px;">✓ API connection successful!</div>';

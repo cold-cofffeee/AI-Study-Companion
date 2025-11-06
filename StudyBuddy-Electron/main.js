@@ -193,4 +193,10 @@ ipcMain.handle('gemini-generate-schedule', async (event, topics, hoursPerDay, ap
   return await client.generateStudySchedule(topics, hoursPerDay);
 });
 
+ipcMain.handle('gemini-test-connection', async (event, apiKey) => {
+  const GeminiApiClient = require('./src/helpers/GeminiApiClient');
+  const client = new GeminiApiClient(apiKey);
+  return await client.testConnection();
+});
+
 console.log('Study Buddy Pro - Electron App Started');

@@ -34,7 +34,9 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      webSecurity: false, // Allow iframes from external sources like YouTube
+      allowRunningInsecureContent: true
     },
     icon: path.join(__dirname, 'assets', 'icon.png'),
     title: 'Study Buddy Pro - AI-Powered Learning Companion',

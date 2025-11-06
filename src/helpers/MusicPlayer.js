@@ -71,16 +71,16 @@ if (typeof window.MusicPlayer === 'undefined') {
                     embedUrl += '&controls=1';
                 }
                 if (!url.includes('enablejsapi')) {
-                    embedUrl += `&enablejsapi=1&origin=${window.location.origin}`;
+                    embedUrl += '&enablejsapi=1';
                 }
             } else if (url.includes('youtube.com/watch?v=')) {
                 // Convert regular watch URL to embed format
                 const videoId = url.split('v=')[1].split('&')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0&enablejsapi=1&origin=${window.location.origin}`;
+                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&modestbranding=1&rel=0`;
             } else if (url.includes('youtu.be/')) {
                 // Convert short URL to embed format
                 const videoId = url.split('youtu.be/')[1].split('?')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0&enablejsapi=1&origin=${window.location.origin}`;
+                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&modestbranding=1&rel=0`;
             }
         } else if (service === 'spotify') {
             // Spotify URLs - check if already embed

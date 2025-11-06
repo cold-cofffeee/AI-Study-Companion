@@ -166,12 +166,12 @@ const PomodoroModule = {
                                         <label>Minutes:</label>
                                         <div class="time-stepper">
                                             <button class="stepper-btn" onclick="PomodoroModule.adjustCustomTime(-5)">
-                                                <i class="fas fa-minus"></i>
+                                                <span class="stepper-icon">−</span>
                                             </button>
                                             <input type="number" id="custom-timer-input" class="custom-time-input" 
                                                    value="30" min="1" max="180">
                                             <button class="stepper-btn" onclick="PomodoroModule.adjustCustomTime(5)">
-                                                <i class="fas fa-plus"></i>
+                                                <span class="stepper-icon">+</span>
                                             </button>
                                         </div>
                                     </div>
@@ -461,27 +461,42 @@ const PomodoroModule = {
                 }
 
                 .stepper-btn {
-                    width: 40px;
-                    height: 40px;
+                    width: 44px;
+                    height: 44px;
                     border-radius: 50%;
                     border: 2px solid var(--primary-color);
-                    background: white;
-                    color: var(--primary-color);
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    transition: all 0.3s;
+                    transition: all 0.3s ease;
+                    font-size: 16px;
+                    font-weight: bold;
+                    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
                 }
 
                 body.dark .stepper-btn {
-                    background: var(--bg-secondary);
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.5);
                 }
 
                 .stepper-btn:hover {
-                    background: var(--primary-color);
-                    color: white;
-                    transform: scale(1.1);
+                    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+                    transform: scale(1.15);
+                    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.5);
+                }
+
+                .stepper-btn:active {
+                    transform: scale(0.95);
+                }
+
+                .stepper-icon {
+                    font-size: 24px;
+                    font-weight: 700;
+                    line-height: 1;
+                    user-select: none;
                 }
 
                 .custom-time-input {

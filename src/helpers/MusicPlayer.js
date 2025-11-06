@@ -127,6 +127,9 @@ if (typeof window.MusicPlayer === 'undefined') {
             container.appendChild(player);
             this.isPlaying = true;
             console.log(`${service} player iframe added to container`);
+            
+            // Save state to AppState for persistence
+            this.savePlayerState(url, service);
         } else {
             console.error('Failed to create player');
         }
@@ -164,6 +167,9 @@ if (typeof window.MusicPlayer === 'undefined') {
         this.currentPlayer = null;
         this.isPlaying = false;
         this.playerContainer = null;
+        
+        // Clear saved state
+        this.savePlayerState(null, null);
         
         console.log('Music player stopped and cleared');
     }
@@ -267,6 +273,9 @@ if (typeof window.MusicPlayer === 'undefined') {
         this.currentVolume = volumePercent;
         console.log(`Setting music player volume to ${volumePercent}%`);
         
+        // Save volume to AppState
+        this.savePlayerState();
+        
         if (!this.currentPlayer) {
             console.log('No active player to set volume');
             return;
@@ -289,6 +298,40 @@ if (typeof window.MusicPlayer === 'undefined') {
             }
         } catch (error) {
             console.error('Error setting volume:', error);
+        }
+    }
+
+    // Save player state to AppState for persistence
+    savePlayerState(url = null, service = null) {
+        const appState = window.AppState;
+        if (appState && typeof appState.saveMusicPlayerState === 'function') {
+            appState.saveMusicPlayerState({
+                currentUrl: url || (this.currentPlayer ? this.currentPlayer.src : null),
+                currentService: service || this.currentService,
+                isPlaying: this.isPlaying,
+                currentVolume: this.currentVolume
+            });
+        }
+    }
+
+    // Restore player state from AppState on app startup
+    restorePlayerState(containerId = 'music-player-container') {
+        const appState = window.AppState;
+        if (!appState || typeof appState.getMusicPlayerState !== 'function') {
+            return;
+        }
+
+        const savedState = appState.getMusicPlayerState();
+        console.log('Restoring music player state:', savedState);
+
+        if (savedState && savedState.currentUrl && savedState.isPlaying) {
+            // Restore volume
+            this.currentVolume = savedState.currentVolume || 50;
+            
+            // Reload the player with saved URL and service
+            setTimeout(() => {
+                this.loadPlayer(savedState.currentUrl, savedState.currentService, containerId);
+            }, 500); // Small delay to ensure DOM is ready
         }
     }
 

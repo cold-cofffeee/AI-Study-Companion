@@ -116,6 +116,9 @@ async function loadModule(moduleName) {
             moduleCache[moduleName].style.display = 'block';
             AppState.currentModule = moduleName;
             
+            // Log module navigation
+            ipcRenderer.invoke('log-activity', 'navigation', 'load-module', { moduleName });
+            
             // Call module's onShow method if it exists (for refreshing data)
             const moduleObj = getModuleObject(moduleName);
             if (moduleObj && moduleObj.onShow) {
@@ -262,12 +265,16 @@ async function loadModule(moduleName) {
         
         AppState.currentModule = moduleName;
         
+        // Log module navigation (first time load)
+        ipcRenderer.invoke('log-activity', 'navigation', 'load-module-first-time', { moduleName });
+        
         // Save last module
         await ipcRenderer.invoke('update-setting', 'lastSelectedModule', moduleName);
         
         hideLoading();
     } catch (error) {
         console.error('Error loading module:', error);
+        ipcRenderer.invoke('log-error', 'navigation', { message: error.message, stack: error.stack }, { moduleName });
         container.innerHTML = `
             <div class="card">
                 <h2>Error Loading Module</h2>
@@ -556,3 +563,18 @@ window.loadModule = loadModule;
 window.copyToClipboard = copyToClipboard;
 window.formatDate = formatDate;
 window.formatTime = formatTime;
+
+// Save state before closing the app
+window.addEventListener('beforeunload', () => {
+    console.log('App closing, saving final state...');
+    
+    // Ensure AppState is saved one last time
+    if (window.AppState && typeof window.AppState.saveToLocalStorage === 'function') {
+        window.AppState.saveToLocalStorage();
+    }
+    
+    // Save pomodoro state if module is active
+    if (typeof PomodoroModule !== 'undefined' && PomodoroModule.saveTimerState) {
+        PomodoroModule.saveTimerState();
+    }
+});

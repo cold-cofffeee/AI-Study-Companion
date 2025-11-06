@@ -167,6 +167,9 @@ const Summarizer = {
         if (textarea && counter) {
             counter.textContent = `${textarea.value.length} characters`;
         }
+        // Auto-save input as user types (debounced)
+        clearTimeout(this._saveTimeout);
+        this._saveTimeout = setTimeout(() => this.saveState(), 1000);
     },
 
     async configureApi() {
@@ -305,6 +308,7 @@ const Summarizer = {
     addOutput(title, content, type) {
         this.data.outputs.push({ title, content, type, timestamp: Date.now() });
         this.renderOutputs();
+        this.saveState();
     },
 
     renderOutputs() {

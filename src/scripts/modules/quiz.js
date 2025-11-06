@@ -59,7 +59,47 @@ const ReverseQuiz = {
     },
 
     async init() {
-        // Module initialized
+        await this.restoreState();
+    },
+
+    async restoreState() {
+        try {
+            const savedState = await window.ipcRenderer.invoke('get-module-state', 'quiz');
+            if (savedState) {
+                // Restore input answers
+                const answersTextarea = document.getElementById('quiz-answers');
+                const quizTypeSelect = document.getElementById('quiz-type');
+                
+                if (savedState.answers && answersTextarea) answersTextarea.value = savedState.answers;
+                if (savedState.quizType && quizTypeSelect) quizTypeSelect.value = savedState.quizType;
+                
+                // Restore generated quiz
+                if (savedState.currentQuiz) {
+                    this.data.currentQuiz = savedState.currentQuiz;
+                    this.data.userAnswers = savedState.userAnswers || [];
+                    this.displayQuiz(savedState.currentQuiz, savedState.quizType);
+                }
+            }
+        } catch (error) {
+            console.error('Error restoring quiz state:', error);
+        }
+    },
+
+    saveState() {
+        try {
+            const answersTextarea = document.getElementById('quiz-answers');
+            const quizTypeSelect = document.getElementById('quiz-type');
+            
+            const state = {
+                answers: answersTextarea?.value,
+                quizType: quizTypeSelect?.value,
+                currentQuiz: this.data.currentQuiz,
+                userAnswers: this.data.userAnswers
+            };
+            window.ipcRenderer.invoke('save-module-state', 'quiz', state);
+        } catch (error) {
+            console.error('Error saving quiz state:', error);
+        }
     },
 
     async generate() {
@@ -118,6 +158,8 @@ const ReverseQuiz = {
                 </p>
             </div>
         `;
+        
+        this.saveState();
     },
 
     submitQuiz() {

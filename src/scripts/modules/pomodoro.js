@@ -1396,6 +1396,13 @@ const PomodoroModule = {
         document.getElementById('timer-status-text').textContent = 'Focusing...';
         document.getElementById('status-dot').style.background = '#007bff';
         
+        // Log activity
+        window.ipcRenderer.invoke('log-activity', 'pomodoro', 'start-timer', { 
+            mode: this.data.currentMode, 
+            duration: this.data.totalTime,
+            isADHDMode: this.data.isADHDMode
+        });
+        
         // Play ambient music if enabled and in focus mode
         if (this.data.currentMode === 'focus' && this.data.ambientMusicEnabled) {
             this.toggleAmbientMusic(true);
@@ -1474,6 +1481,13 @@ const PomodoroModule = {
         this.toggleAmbientMusic(false);
         
         const wasBreak = this.data.currentMode !== 'focus';
+        
+        // Log completion
+        window.ipcRenderer.invoke('log-activity', 'pomodoro', wasBreak ? 'break-complete' : 'session-complete', {
+            mode: this.data.currentMode,
+            duration: this.data.totalTime,
+            completedSessions: this.data.completedSessions + (wasBreak ? 0 : 1)
+        });
         
         if (!wasBreak) {
             // Play session complete sound
@@ -1620,6 +1634,10 @@ const PomodoroModule = {
                 // Just make sure it's in the right container
                 this.musicPlayer.restorePlayer('music-player-container');
                 console.log('Music player restored to Pomodoro container');
+            } else if (this.musicPlayer && typeof this.musicPlayer.restorePlayerState === 'function') {
+                // Try to restore from saved state (on app restart)
+                this.musicPlayer.restorePlayerState('music-player-container');
+                console.log('Attempting to restore music player from saved state');
             }
         } catch (error) {
             console.error('Error initializing music player:', error);
@@ -1714,9 +1732,17 @@ const PomodoroModule = {
             console.log(`Playing ${service} music:`, url);
             // Load music into the embedded container within the pomodoro module
             this.musicPlayer.loadPlayer(url, service, 'music-player-container');
+            
+            // Log music activity
+            window.ipcRenderer.invoke('log-activity', 'music-player', 'play-music', {
+                service: service,
+                url: url.substring(0, 100)
+            });
+            
             showToast(`🎵 ${service === 'youtube' ? 'YouTube' : service === 'spotify' ? 'Spotify' : 'Music'} player started!`, 'success');
         } catch (error) {
             console.error('Error playing music:', error);
+            window.ipcRenderer.invoke('log-error', 'music-player', { message: error.message }, { action: 'play-music', service });
             showToast('Failed to play music', 'error');
         }
     },

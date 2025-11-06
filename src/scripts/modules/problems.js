@@ -71,7 +71,56 @@ const ProblemGenerator = {
     },
 
     async init() {
-        // Module initialized
+        await this.restoreState();
+    },
+
+    async restoreState() {
+        try {
+            const savedState = await window.ipcRenderer.invoke('get-module-state', 'problems');
+            if (savedState) {
+                // Restore subject, difficulty, count
+                const subjectSelect = document.getElementById('problem-subject');
+                const difficultySelect = document.getElementById('problem-difficulty');
+                const countInput = document.getElementById('problem-count');
+                
+                if (savedState.subject && subjectSelect) subjectSelect.value = savedState.subject;
+                if (savedState.difficulty && difficultySelect) difficultySelect.value = savedState.difficulty;
+                if (savedState.count && countInput) countInput.value = savedState.count;
+                
+                // Restore generated problems
+                if (savedState.currentProblem) {
+                    this.data.currentProblem = savedState.currentProblem;
+                    this.displayProblems(savedState.currentProblem);
+                }
+                
+                // Restore timer state
+                if (savedState.elapsedSeconds) {
+                    this.data.elapsedSeconds = savedState.elapsedSeconds;
+                    this.updateTimerDisplay();
+                }
+            }
+        } catch (error) {
+            console.error('Error restoring problems state:', error);
+        }
+    },
+
+    saveState() {
+        try {
+            const subjectSelect = document.getElementById('problem-subject');
+            const difficultySelect = document.getElementById('problem-difficulty');
+            const countInput = document.getElementById('problem-count');
+            
+            const state = {
+                subject: subjectSelect?.value,
+                difficulty: difficultySelect?.value,
+                count: countInput?.value,
+                currentProblem: this.data.currentProblem,
+                elapsedSeconds: this.data.elapsedSeconds
+            };
+            window.ipcRenderer.invoke('save-module-state', 'problems', state);
+        } catch (error) {
+            console.error('Error saving problems state:', error);
+        }
     },
 
     async generate() {
@@ -108,6 +157,7 @@ const ProblemGenerator = {
             </div>
         `;
         this.data.currentProblem = content;
+        this.saveState();
     },
 
     toggleTimer() {
@@ -121,6 +171,7 @@ const ProblemGenerator = {
             this.data.timerInterval = setInterval(() => {
                 this.data.elapsedSeconds++;
                 this.updateTimerDisplay();
+                this.saveState();
             }, 1000);
         }
     },

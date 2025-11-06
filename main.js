@@ -170,11 +170,24 @@ ipcMain.handle('db-get-stats', async () => {
 // Module state persistence
 ipcMain.handle('save-module-state', async (event, moduleName, state) => {
   dataStore.saveModuleState(moduleName, state);
+  dataStore.logActivity('module', 'save-state', { moduleName });
   return true;
 });
 
 ipcMain.handle('get-module-state', async (event, moduleName) => {
   return dataStore.getModuleState(moduleName);
+});
+
+// Activity logging
+ipcMain.handle('log-activity', async (event, moduleName, action, details = {}) => {
+  dataStore.logActivity(moduleName, action, details);
+  return true;
+});
+
+// Error logging
+ipcMain.handle('log-error', async (event, moduleName, error, context = {}) => {
+  dataStore.logError(moduleName, error, context);
+  return true;
 });
 
 // File dialogs

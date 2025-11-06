@@ -117,6 +117,53 @@ const StudyOptimizer = {
     async init() {
         const settings = await window.ipcRenderer.invoke('get-settings');
         this.data.sessionMinutes = settings.defaultStudySessionMinutes || 25;
+        await this.restoreState();
+    },
+
+    async restoreState() {
+        try {
+            const savedState = await window.ipcRenderer.invoke('get-module-state', 'optimizer');
+            if (savedState) {
+                // Restore input fields
+                const subjectInput = document.getElementById('study-subject');
+                const topicsTextarea = document.getElementById('study-topics');
+                const durationInput = document.getElementById('study-duration');
+                const difficultySelect = document.getElementById('study-difficulty');
+                
+                if (savedState.subject && subjectInput) subjectInput.value = savedState.subject;
+                if (savedState.topics && topicsTextarea) topicsTextarea.value = savedState.topics;
+                if (savedState.duration && durationInput) durationInput.value = savedState.duration;
+                if (savedState.difficulty && difficultySelect) difficultySelect.value = savedState.difficulty;
+                
+                // Restore generated schedule
+                if (savedState.schedule) {
+                    this.data.schedule = savedState.schedule;
+                    this.displaySchedule(savedState.schedule.content);
+                }
+            }
+        } catch (error) {
+            console.error('Error restoring optimizer state:', error);
+        }
+    },
+
+    saveState() {
+        try {
+            const subjectInput = document.getElementById('study-subject');
+            const topicsTextarea = document.getElementById('study-topics');
+            const durationInput = document.getElementById('study-duration');
+            const difficultySelect = document.getElementById('study-difficulty');
+            
+            const state = {
+                subject: subjectInput?.value,
+                topics: topicsTextarea?.value,
+                duration: durationInput?.value,
+                difficulty: difficultySelect?.value,
+                schedule: this.data.schedule
+            };
+            window.ipcRenderer.invoke('save-module-state', 'optimizer', state);
+        } catch (error) {
+            console.error('Error saving optimizer state:', error);
+        }
     },
 
     async generateSchedule() {
@@ -244,6 +291,7 @@ const StudyOptimizer = {
         }
         
         container.innerHTML = processedLines.join('');
+        this.saveState();
     },
 
     async sendToPomodoroTimer() {

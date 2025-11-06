@@ -94,15 +94,16 @@ const Dashboard = {
 
     async loadData() {
         try {
-            this.data.sessions = await window.ipcRenderer.invoke('db-get-sessions', 5);
+            this.data.sessions = await window.ipcRenderer.invoke('db-get-sessions', 10);
             this.data.flashcards = await window.ipcRenderer.invoke('db-get-flashcards');
+            this.data.stats = await window.ipcRenderer.invoke('db-get-stats');
         } catch (error) {
             console.error('Error loading dashboard data:', error);
         }
     },
 
     updateStats() {
-        // Update stat cards
+        // Update stat cards with real data
         document.getElementById('stat-sessions').textContent = this.data.sessions.length;
         document.getElementById('stat-flashcards').textContent = this.data.flashcards.length;
         
@@ -111,8 +112,9 @@ const Dashboard = {
         const hours = Math.floor(totalMinutes / 60);
         document.getElementById('stat-time').textContent = `${hours}h`;
         
-        // Streak calculation (simplified)
-        document.getElementById('stat-streak').textContent = '0';
+        // Display streak from database
+        const streak = this.data.stats?.streak || 0;
+        document.getElementById('stat-streak').textContent = streak;
     },
 
     renderRecentSessions() {

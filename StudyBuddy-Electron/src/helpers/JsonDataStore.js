@@ -225,9 +225,66 @@ class JsonDataStore {
             totalSchedules: this.data.schedules.length,
             totalActivities: this.data.activities.length,
             totalErrors: this.data.errors.length,
+            streak: this.calculateStreak(),
             lastActivity: this.data.activities[this.data.activities.length - 1]?.timestamp || null,
             dataFileSize: this.getFileSize()
         };
+    }
+
+    // Calculate study streak
+    calculateStreak() {
+        if (this.data.sessions.length === 0) return 0;
+
+        const sessions = this.data.sessions.sort((a, b) => 
+            new Date(b.startTime) - new Date(a.startTime)
+        );
+
+        let streak = 0;
+        let currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
+        // Check if there's a session today
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const hasSessionToday = sessions.some(s => {
+            const sessionDate = new Date(s.startTime);
+            sessionDate.setHours(0, 0, 0, 0);
+            return sessionDate.getTime() === today.getTime();
+        });
+
+        if (!hasSessionToday) {
+            // Check if last session was yesterday
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            const hasSessionYesterday = sessions.some(s => {
+                const sessionDate = new Date(s.startTime);
+                sessionDate.setHours(0, 0, 0, 0);
+                return sessionDate.getTime() === yesterday.getTime();
+            });
+            
+            if (!hasSessionYesterday) return 0;
+            currentDate = yesterday;
+        }
+
+        // Count consecutive days
+        while (true) {
+            const hasSession = sessions.some(s => {
+                const sessionDate = new Date(s.startTime);
+                sessionDate.setHours(0, 0, 0, 0);
+                return sessionDate.getTime() === currentDate.getTime();
+            });
+
+            if (hasSession) {
+                streak++;
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+
+        return streak;
     }
 
     getFileSize() {

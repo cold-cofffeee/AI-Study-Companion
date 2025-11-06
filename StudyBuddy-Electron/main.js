@@ -145,6 +145,11 @@ ipcMain.handle('db-delete-flashcard', async (event, id) => {
   return dataStore.deleteFlashcard(id);
 });
 
+// Get database statistics
+ipcMain.handle('db-get-stats', async () => {
+  return dataStore.getStats();
+});
+
 // Module state persistence
 ipcMain.handle('save-module-state', async (event, moduleName, state) => {
   dataStore.saveModuleState(moduleName, state);

@@ -1723,21 +1723,47 @@ const PomodoroModule = {
     },
 
     addCustomPlaylist() {
-        if (!this.musicPlayer) return;
+        if (!this.musicPlayer) {
+            showToast('Music player not initialized', 'error');
+            return;
+        }
 
-        const url = document.getElementById('custom-music-url').value;
+        const urlInput = document.getElementById('custom-music-url');
+        const url = urlInput ? urlInput.value.trim() : '';
+        
         if (!url) {
             showToast('Please enter a URL', 'warning');
             return;
         }
 
         const service = this.musicPlayer.detectService(url);
-        const name = prompt('Enter a name for this playlist:');
+        console.log('Detected service:', service, 'for URL:', url);
         
-        if (name) {
-            this.musicPlayer.addCustomPlaylist(name, url, service);
-            this.populateMusicPlaylists();
-            showToast('Playlist added to library! 📚', 'success');
+        const name = prompt(`Enter a name for this ${service === 'youtube' ? 'YouTube' : service === 'spotify' ? 'Spotify' : ''} playlist:`);
+        
+        if (name && name.trim()) {
+            try {
+                this.musicPlayer.addCustomPlaylist(name.trim(), url, service);
+                console.log('Custom playlist added:', name, url, service);
+                
+                // Refresh the playlist dropdowns
+                this.populateMusicPlaylists();
+                
+                // Clear the input
+                if (urlInput) {
+                    urlInput.value = '';
+                }
+                
+                // Switch to the appropriate tab to show the new playlist
+                this.switchMusicService(service);
+                
+                showToast(`✅ "${name}" added to ${service === 'youtube' ? 'YouTube' : service === 'spotify' ? 'Spotify' : 'custom'} library!`, 'success');
+            } catch (error) {
+                console.error('Error adding custom playlist:', error);
+                showToast('Failed to add playlist', 'error');
+            }
+        } else if (name === '') {
+            showToast('Playlist name cannot be empty', 'warning');
         }
     },
 

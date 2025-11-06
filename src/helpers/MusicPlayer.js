@@ -180,12 +180,27 @@ if (typeof window.MusicPlayer === 'undefined') {
 
     // Add custom playlist
     addCustomPlaylist(name, url, service) {
+        console.log('Adding custom playlist:', { name, url, service });
+        
         if (!this.customPlaylists[service]) {
             this.customPlaylists[service] = [];
+            console.log(`Created new array for service: ${service}`);
+        }
+        
+        // Check if playlist already exists
+        const exists = this.customPlaylists[service].find(p => p.url === url);
+        if (exists) {
+            console.warn('Playlist already exists:', url);
+            return false;
         }
         
         this.customPlaylists[service].push({ name, url });
+        console.log(`Custom playlists for ${service}:`, this.customPlaylists[service]);
+        
         this.saveCustomPlaylists();
+        console.log('Custom playlists saved to localStorage');
+        
+        return true;
     }
 
     // Remove custom playlist
@@ -199,7 +214,13 @@ if (typeof window.MusicPlayer === 'undefined') {
     // Save custom playlists to localStorage
     saveCustomPlaylists() {
         if (typeof window !== 'undefined' && window.localStorage) {
-            localStorage.setItem('customMusicPlaylists', JSON.stringify(this.customPlaylists));
+            try {
+                const data = JSON.stringify(this.customPlaylists);
+                localStorage.setItem('customMusicPlaylists', data);
+                console.log('Saved custom playlists to localStorage:', this.customPlaylists);
+            } catch (e) {
+                console.error('Error saving custom playlists:', e);
+            }
         }
     }
 
@@ -209,12 +230,15 @@ if (typeof window.MusicPlayer === 'undefined') {
             const saved = localStorage.getItem('customMusicPlaylists');
             if (saved) {
                 try {
-                    return JSON.parse(saved);
+                    const parsed = JSON.parse(saved);
+                    console.log('Loaded custom playlists from localStorage:', parsed);
+                    return parsed;
                 } catch (e) {
                     console.error('Error loading custom playlists:', e);
                 }
             }
         }
+        console.log('No custom playlists found, returning empty object');
         return { youtube: [], spotify: [], soundcloud: [] };
     }
 

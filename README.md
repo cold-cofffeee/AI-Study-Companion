@@ -193,10 +193,11 @@ Built applications will be in the `dist` folder.
 
 - **Electron.js** - Cross-platform desktop framework
 - **Node.js** - JavaScript runtime
-- **better-sqlite3** - Fast SQLite database (flashcards)
+- **JSON File Storage** - All data stored in study-buddy-data.json
 - **axios** - HTTP client for API calls
 - **electron-store** - Settings persistence
 - **pdfkit** - PDF generation
+- **blob-stream** - PDF generation helper
 - **Google Gemini AI** - AI-powered features
 - **YouTube IFrame API** - Embedded music player
 - **Spotify Web Embed** - Integrated playlists
@@ -206,6 +207,7 @@ Built applications will be in the `dist` folder.
 - **Module Caching** - DOM elements preserved across navigation
 - **JSON Data Store** - Comprehensive activity & response logging
 - **localStorage + IPC** - Dual-layer state persistence
+- **No Database Server** - Everything in JSON files for simplicity
 
 ## 📖 Usage Guide
 
@@ -321,21 +323,20 @@ Comprehensive logging and caching system:
 - **Activities**: Complete user interaction history (navigation, timer actions, music playback)
 - **Module States**: All inputs and outputs from every module
 - **Sessions**: Pomodoro session history with timestamps
+- **Flashcards**: All flashcards with difficulty ratings and review schedules
 - **Errors**: Detailed error logs with stack traces for debugging
 - **Settings**: All preferences and configurations
-
-### SQLite Database (`studybuddy.db`)
-- Flashcards with SM-2 algorithm data
-- Review schedules and difficulty ratings
-- Category organization
 
 **Storage Location**:
 - Windows: `C:\Users\[YourName]\AppData\Roaming\study-buddy-pro\`
 - macOS: `~/Library/Application Support/study-buddy-pro/`
 - Linux: `~/.config/study-buddy-pro/`
 
+**Note**: Everything is stored in a single JSON file for simplicity - no database server required!
+
 ### What Gets Saved Automatically:
 ✅ All AI-generated content (summaries, quizzes, problems, schedules)  
+✅ Flashcards with difficulty ratings and category organization  
 ✅ User inputs in all modules (auto-saved as you type)  
 ✅ Pomodoro timer state (time, mode, sessions completed)  
 ✅ Music player state (current song, volume, playlists)  
@@ -410,11 +411,11 @@ embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&modes
 - Restart app to clear module cache
 - Close unused browser dev tools
 
-### Database Errors
-- Check if `studybuddy.db` is accessible
+### Data Issues
+- Check if `study-buddy-data.json` is accessible in AppData folder
 - Ensure write permissions in user data folder
-- Reinstall better-sqlite3: `npm install better-sqlite3`
-- Reset database: Delete `.db` file (will lose flashcards!)
+- Backup and delete JSON file to reset: `study-buddy-data.json` (will lose all data!)
+- Check Developer Tools console (F12) for JSON parsing errors
 
 ## 📝 License
 
@@ -425,7 +426,7 @@ MIT License - See LICENSE file for details
 - **AI Provider**: Google Gemini AI
 - **Framework**: Electron.js
 - **Music Integration**: YouTube IFrame API, Spotify Web Embed
-- **Database**: better-sqlite3
+- **Data Storage**: JSON file-based system (electron-store, custom JsonDataStore)
 - **UI Design**: Custom CSS with modern aesthetics
 - **Icon & Branding**: Study Buddy Pro original design
 

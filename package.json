@@ -43,19 +43,42 @@
     "files": [
       "**/*",
       "!**/*.ts",
-      "!*.map"
+      "!*.map",
+      "!dist/**/*",
+      "!.git/**/*",
+      "!*.md",
+      "!LICENSE"
     ],
     "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "StudyBuddyPro-${version}-portable.exe"
     },
     "mac": {
-      "target": "dmg",
-      "icon": "assets/icon.icns"
+      "target": "dmg"
     },
     "linux": {
-      "target": "AppImage",
-      "icon": "assets/icon.png"
+      "target": "AppImage"
     }
   }
 }

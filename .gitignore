@@ -2,8 +2,15 @@
 node_modules/
 package-lock.json
 
-# Build outputs
-dist/
+# Build outputs (keep installers, ignore intermediate files)
+dist/*.yml
+dist/*.yaml
+dist/builder-*.yml
+dist/win-unpacked/
+dist/mac/
+dist/linux-unpacked/
+dist/.icon-icns/
+dist/.icon-ico/
 build/
 out/
 

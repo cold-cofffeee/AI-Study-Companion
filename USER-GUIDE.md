@@ -2,7 +2,7 @@
 
 ## Welcome Tester! 👋
 
-Thank you for helping test Study Buddy Pro v2.5.0. This guide will help you get started.
+Thank you for helping test Study Buddy Pro v2.7.0. This guide will help you get started.
 
 ## System Requirements
 
@@ -16,7 +16,7 @@ Thank you for helping test Study Buddy Pro v2.5.0. This guide will help you get 
 You'll receive one of these files:
 
 ### Option A: Full Installer (Recommended)
-**File:** `Study Buddy Pro Setup 2.5.0.exe`
+**File:** `Study Buddy Pro Setup 2.7.0.exe`
 
 1. Double-click the installer
 2. If Windows SmartScreen appears, click "More info" → "Run anyway"
@@ -25,7 +25,7 @@ You'll receive one of these files:
 5. Launch Study Buddy Pro from Desktop or Start Menu
 
 ### Option B: Portable Version
-**File:** `StudyBuddyPro-2.5.0-portable.exe`
+**File:** `StudyBuddyPro-2.7.0-portable.exe`
 
 1. Save to any folder (Desktop, Documents, USB drive)
 2. Double-click to run
@@ -58,12 +58,31 @@ Please test these features and report any issues:
 
 ### 1. AI Features (Requires API Key)
 - [ ] **Summarizer** - Paste text, get AI summary
+  - [ ] Copy to clipboard button works
+  - [ ] Save as PDF exports correctly
+  - [ ] Multiple outputs saved and restored
 - [ ] **Quiz Generator** - Generate questions from content
+  - [ ] Copy quiz button works
+  - [ ] PDF export includes all questions
 - [ ] **Study Optimizer** - Get personalized study schedules
-- [ ] **Problem Solver** - Solve math/science problems
+  - [ ] Copy schedule button works
+  - [ ] PDF shows formatted schedule
+- [ ] **Problem Generator** - Solve math/science problems
+  - [ ] Progressive disclosure (Question → Hints → Solution)
+  - [ ] Individual timers per problem
+  - [ ] Copy all problems works
+  - [ ] PDF export formats problems correctly
+- [ ] **HSC Bangladesh Context** - Enable HSC checkbox
+  - [ ] HSC syllabus-aligned responses
+  - [ ] Bengali terminology appears
 
 ### 2. Study Tools
-- [ ] **Pomodoro Timer** - 25-minute focus sessions
+- [ ] **Pomodoro Timer** - Focus sessions
+  - [ ] Generate detailed study plan
+  - [ ] Task durations: Easy=25min, Medium=35min, Hard=45min
+  - [ ] Copy schedule to clipboard
+  - [ ] PDF export with task breakdown
+  - [ ] HSC context checkbox works
 - [ ] **Flashcards** - Create and review flashcards
 - [ ] **Dashboard** - Overview of study stats
 
@@ -73,19 +92,60 @@ Please test these features and report any issues:
 - [ ] **Volume Control** - Adjust music volume (YouTube only)
 - [ ] **Custom Playlists** - Add your own YouTube videos
 
-### 4. Persistence (Very Important!)
-- [ ] Close and reopen app - settings should be saved
-- [ ] Timer state persists across sessions
-- [ ] Music player remembers last played
-- [ ] AI responses are cached (offline viewing)
-- [ ] Flashcards are saved automatically
+### 4. Export & Persistence (NEW! Very Important!)
+- [ ] **Copy to Clipboard** - All modules have Copy button
+  - [ ] Content copies successfully
+  - [ ] Toast notification appears
+- [ ] **PDF Export** - All modules have Save as PDF button
+  - [ ] Print dialog opens
+  - [ ] PDF includes metadata (date, subject, etc.)
+  - [ ] Difficulty colors appear correctly
+  - [ ] Problems formatted as cards
+- [ ] **State Persistence**
+  - [ ] Close and reopen app - all content restored
+  - [ ] Generated summaries still visible
+  - [ ] Generated problems with timer states saved
+  - [ ] Quiz questions persist
+  - [ ] Study schedules remain
+  - [ ] Pomodoro task lists restored
+  - [ ] Settings saved automatically
+
+## 📋 New Features in v2.7.0
+
+### Copy & PDF Export
+Every AI-generated content now has:
+- **📋 Copy Button** - Instantly copy to clipboard
+- **📄 Save as PDF** - Export professional PDFs with:
+  - Header with title and module type
+  - Metadata (date, subject, difficulty, etc.)
+  - Formatted content with color coding
+  - Footer with generation info
+
+### Enhanced Pomodoro
+- Difficulty-based durations: Easy (25min), Medium (35min), Hard (45min)
+- Detailed task breakdowns with subtopics
+- Export schedules as formatted PDFs
+- HSC Bangladesh curriculum support
+
+### Problem Generator Improvements
+- Progressive hints system (show hints before solution)
+- Individual timers for each problem
+- Better PDF formatting with problem cards
+- Timer states persist across sessions
+
+### Complete State Persistence
+All your work is saved automatically:
+- Generated AI content never lost
+- Close app anytime - everything restores
+- Individual problem timer tracking
+- Settings persist automatically
 
 ## 📝 Reporting Issues
 
 When reporting bugs, please include:
 
-1. **What you were doing** (e.g., "Generating a quiz")
-2. **What happened** (e.g., "Error message appeared")
+1. **What you were doing** (e.g., "Exporting problems to PDF")
+2. **What happened** (e.g., "PDF didn't include hints section")
 3. **Error message** (if any - take a screenshot)
 4. **Steps to reproduce** (so I can fix it)
 5. **Your Windows version** (Win 10 or 11)

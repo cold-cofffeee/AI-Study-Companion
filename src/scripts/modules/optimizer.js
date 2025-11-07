@@ -67,8 +67,11 @@ const StudyOptimizer = {
                 </div>
                 <div id="schedule-content" class="schedule-content"></div>
                 <div class="flex gap-10 mt-20">
+                    <button class="btn btn-primary" onclick="StudyOptimizer.copySchedule()">
+                        📋 Copy
+                    </button>
                     <button class="btn btn-secondary" onclick="StudyOptimizer.exportSchedule()">
-                        📄 Export Schedule
+                        📄 Save as PDF
                     </button>
                 </div>
             </div>
@@ -326,21 +329,52 @@ const StudyOptimizer = {
         }
     },
 
+    copySchedule() {
+        if (!this.data.schedule) {
+            showToast('No schedule to copy', 'warning');
+            return;
+        }
+        
+        ExportUtils.copyToClipboard(
+            this.data.schedule.content,
+            'Schedule copied to clipboard!'
+        );
+    },
+
     async exportSchedule() {
         if (!this.data.schedule) {
             showToast('No schedule to export', 'warning');
             return;
         }
 
-        try {
-            await window.ipcRenderer.invoke('export-pdf', {
-                title: 'Study Schedule',
-                content: this.data.schedule
-            });
-            showToast('Schedule exported successfully!', 'success');
-        } catch (error) {
-            showToast('Failed to export: ' + error.message, 'error');
+        const subject = document.getElementById('study-subject')?.value || 'Study';
+        const duration = document.getElementById('study-duration')?.value || 'Unknown';
+        const difficulty = document.getElementById('study-difficulty')?.value || 'Medium';
+
+        // Get the formatted HTML content from the schedule display
+        const scheduleElement = document.getElementById('schedule-content');
+        let formattedContent = '';
+        
+        if (scheduleElement) {
+            // Clone the content and enhance it for PDF
+            formattedContent = scheduleElement.innerHTML;
+        } else {
+            // Fallback to raw content
+            formattedContent = `<pre style="white-space: pre-wrap;">${this.data.schedule.content}</pre>`;
         }
+
+        await ExportUtils.exportToPDF(
+            formattedContent,
+            `Study Schedule - ${subject}`,
+            {
+                moduleType: 'Study Optimizer',
+                metadata: {
+                    'Subject': subject,
+                    'Total Duration': `${duration} days`,
+                    'Difficulty Level': difficulty
+                }
+            }
+        );
     }
 };
 

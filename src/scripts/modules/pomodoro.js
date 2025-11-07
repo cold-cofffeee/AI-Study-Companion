@@ -13,6 +13,7 @@ const PomodoroModule = {
         completedSessions: 0,
         autoStart: true,
         sessionStartTime: null,
+        scheduleData: null, // Store generated schedule for export
         
         // Audio elements for sounds
         sounds: {
@@ -111,6 +112,14 @@ const PomodoroModule = {
                     </div>
                     <div id="pomodoro-task-list" class="task-list">
                         <!-- Tasks will be populated here -->
+                    </div>
+                    <div class="flex gap-10 mt-20">
+                        <button class="btn btn-primary" onclick="PomodoroModule.copySchedule()">
+                            📋 Copy Schedule
+                        </button>
+                        <button class="btn btn-secondary" onclick="PomodoroModule.exportSchedule()">
+                            📄 Save as PDF
+                        </button>
                     </div>
                 </div>
 
@@ -1230,10 +1239,12 @@ IMPORTANT: Set duration based on difficulty:
             const scheduleData = {
                 subject: subject,
                 topics: parsedTasks,
+                tasks: parsedTasks, // Alias for compatibility
                 rawContent: result,
                 hscContext: hscContext
             };
             
+            this.data.scheduleData = scheduleData; // Store in module data
             await window.ipcRenderer.invoke('update-setting', 'pomodoroSchedule', scheduleData);
             this.displayScheduleTasks(scheduleData);
             showToast('Detailed study plan generated! 📚', 'success');
@@ -1249,6 +1260,7 @@ IMPORTANT: Set duration based on difficulty:
         try {
             const settings = await window.ipcRenderer.invoke('get-settings');
             if (settings.pomodoroSchedule) {
+                this.data.scheduleData = settings.pomodoroSchedule; // Store in module data
                 this.displayScheduleTasks(settings.pomodoroSchedule);
                 showToast('Schedule loaded! 🍅', 'success');
             }
@@ -2058,7 +2070,103 @@ IMPORTANT: Set duration based on difficulty:
             this.updateDisplay();
             this.updateSessionCount();
         }
+    },
+
+    copySchedule() {
+        if (!this.data.scheduleData) {
+            showToast('No schedule to copy', 'warning');
+            return;
+        }
+        
+        // Convert schedule to plain text
+        let text = `${this.data.scheduleData.subject || 'Study Schedule'}\n\n`;
+        
+        if (this.data.scheduleData.tasks && Array.isArray(this.data.scheduleData.tasks)) {
+            this.data.scheduleData.tasks.forEach((task, index) => {
+                if (typeof task === 'object') {
+                    text += `${index + 1}. ${task.topic || 'Task'}\n`;
+                    text += `   Duration: ${task.duration || 25} minutes\n`;
+                    text += `   Difficulty: ${task.difficulty || 'Medium'}\n`;
+                    if (task.subtopics && task.subtopics.length) {
+                        text += `   Subtopics:\n`;
+                        task.subtopics.forEach(sub => text += `   - ${sub}\n`);
+                    }
+                    text += '\n';
+                } else {
+                    text += `${index + 1}. ${task}\n`;
+                }
+            });
+        }
+        
+        ExportUtils.copyToClipboard(text, 'Schedule copied to clipboard!');
+    },
+
+    async exportSchedule() {
+        if (!this.data.scheduleData) {
+            showToast('No schedule to export', 'warning');
+            return;
+        }
+        
+        // Convert schedule to HTML for PDF
+        let html = '';
+        
+        if (this.data.scheduleData.tasks && Array.isArray(this.data.scheduleData.tasks)) {
+            this.data.scheduleData.tasks.forEach((task, index) => {
+                if (typeof task === 'object') {
+                    const difficultyClass = task.difficulty === 'Easy' ? 'difficulty-easy' : 
+                                          task.difficulty === 'Hard' ? 'difficulty-hard' : 'difficulty-medium';
+                    
+                    html += `
+                        <div class="task-breakdown">
+                            <h4>
+                                📌 Task ${index + 1}: ${task.topic || 'Task'}
+                                <span class="difficulty-badge ${difficultyClass}">${task.difficulty || 'Medium'}</span>
+                            </h4>
+                            <p><strong>⏱️ Duration:</strong> ${task.duration || 25} minutes</p>
+                            ${task.subtopics && task.subtopics.length ? `
+                                <div style="margin-top: 10px;">
+                                    <strong>📚 Subtopics to Cover:</strong>
+                                    <ul style="margin: 5px 0; padding-left: 20px;">
+                                        ${task.subtopics.map(sub => `<li>${sub}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${task.keyPoints && task.keyPoints.length ? `
+                                <div style="margin-top: 10px;">
+                                    <strong>🎯 Key Focus Points:</strong>
+                                    <ul style="margin: 5px 0; padding-left: 20px;">
+                                        ${task.keyPoints.map(point => `<li>${point}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="task-breakdown">
+                            <h4>📌 Task ${index + 1}</h4>
+                            <p>${task}</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+        
+        await ExportUtils.exportToPDF(
+            html,
+            `Pomodoro Study Schedule - ${this.data.scheduleData.subject || 'Study Plan'}`,
+            {
+                moduleType: 'Pomodoro Timer',
+                metadata: {
+                    'Subject': this.data.scheduleData.subject || 'General',
+                    'Total Tasks': this.data.scheduleData.tasks?.length || 0,
+                    'Total Duration': this.data.scheduleData.tasks?.reduce((sum, task) => 
+                        sum + (typeof task === 'object' ? (task.duration || 25) : 25), 0) + ' minutes'
+                }
+            }
+        );
     }
 };
 
 window.PomodoroModule = PomodoroModule;
+

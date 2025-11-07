@@ -59,20 +59,14 @@ const ProblemGenerator = {
             <div class="card" id="problem-display" style="display: none;">
                 <div class="flex-between mb-20">
                     <h2 class="card-title">📝 Generated Problems</h2>
-                    <div class="problem-timer" id="problem-timer">
-                        ⏱️ <span id="timer-display">00:00</span>
-                    </div>
                 </div>
                 <div id="problems-container"></div>
                 <div class="flex gap-10 mt-20">
-                    <button class="btn btn-primary" onclick="ProblemGenerator.toggleTimer()">
-                        <span id="timer-btn-text">Start Timer</span>
+                    <button class="btn btn-primary" onclick="ProblemGenerator.copyProblems()">
+                        📋 Copy All
                     </button>
-                    <button class="btn btn-secondary" onclick="ProblemGenerator.resetTimer()">
-                        Reset Timer
-                    </button>
-                    <button class="btn btn-outline" onclick="ProblemGenerator.exportProblems()">
-                        📄 Export
+                    <button class="btn btn-secondary" onclick="ProblemGenerator.exportProblems()">
+                        📄 Save as PDF
                     </button>
                 </div>
             </div>
@@ -226,48 +220,65 @@ Make sure each problem follows this format exactly.`;
             }
             
             problemsHTML += `
-                <div class="problem-card" style="margin-bottom: 25px; padding: 20px; background: var(--surface-color); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3 style="color: var(--primary-color); margin: 0;">
-                            📝 Problem ${i}: ${title}
-                        </h3>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="background: var(--primary-color); color: white; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 600;" id="timer-${i}">
+                <div class="problem-card" style="margin-bottom: 30px; padding: 25px; background: var(--surface-color); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div class="problem-header-section" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h3 style="color: var(--primary-color); margin: 0 0 5px 0; font-size: 18px;">
+                                📝 Problem ${i}
+                            </h3>
+                            <p style="margin: 0; color: var(--text-secondary); font-size: 13px;">${title}</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="background: var(--primary-color); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap;">
                                 ⏱️ <span id="timer-display-${i}">00:00</span>
                             </span>
-                            <button class="btn btn-sm" id="timer-toggle-${i}" onclick="ProblemGenerator.toggleProblemTimer(${i})" style="padding: 6px 12px; font-size: 13px;">
+                            <button class="btn btn-sm btn-outline" id="timer-toggle-${i}" onclick="ProblemGenerator.toggleProblemTimer(${i})" style="padding: 6px 14px; font-size: 13px; white-space: nowrap;">
                                 ▶️ Start
                             </button>
                         </div>
                     </div>
                     
-                    <div class="problem-question" style="background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                        <h4 style="color: var(--text-color); margin-bottom: 10px; font-size: 14px; font-weight: 600;">Question:</h4>
-                        <div style="white-space: pre-wrap; line-height: 1.6; color: var(--text-color);">${question}</div>
+                    <div class="problem-question" style="background: var(--bg-secondary); padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid var(--primary-color);">
+                        <h4 style="color: var(--text-color); margin: 0 0 12px 0; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                            <span>❓</span> Question:
+                        </h4>
+                        <div style="white-space: pre-wrap; line-height: 1.8; color: var(--text-color); font-size: 14px;">${question}</div>
                     </div>
                     
-                    <div class="problem-hints" id="hints-${i}" style="display: none; background: #fff8e1; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #ffc107;">
-                        <h4 style="color: #f57c00; margin-bottom: 10px; font-size: 14px; font-weight: 600;">💡 Hints:</h4>
-                        <div style="white-space: pre-wrap; line-height: 1.6; color: #5d4037;">${hints}</div>
+                    <div class="problem-hints" id="hints-${i}" style="display: none; background: #fff8e1; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #ffa726;">
+                        <h4 style="color: #f57c00; margin: 0 0 12px 0; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                            <span>💡</span> Hints:
+                        </h4>
+                        <div style="white-space: pre-wrap; line-height: 1.8; color: #5d4037; font-size: 14px;">${hints}</div>
                     </div>
                     
-                    <div class="problem-solution" id="solution-${i}" style="display: none; background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #4caf50;">
-                        <h4 style="color: #2e7d32; margin-bottom: 10px; font-size: 14px; font-weight: 600;">📖 Step-by-Step Solution:</h4>
-                        <div style="white-space: pre-wrap; line-height: 1.6; color: #1b5e20;">${solution}</div>
+                    <div class="problem-solution" id="solution-${i}" style="display: none; background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #66bb6a;">
+                        <h4 style="color: #2e7d32; margin: 0 0 12px 0; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                            <span>📖</span> Step-by-Step Solution:
+                        </h4>
+                        <div style="white-space: pre-wrap; line-height: 1.8; color: #1b5e20; font-size: 14px;">${solution}</div>
                         ${answer ? `
-                            <div style="margin-top: 15px; padding: 10px; background: white; border-radius: 6px; border: 2px solid #4caf50;">
-                                <strong style="color: #2e7d32;">✅ Final Answer:</strong>
-                                <div style="margin-top: 5px; color: #1b5e20; font-weight: 600;">${answer}</div>
+                            <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px; border: 2px solid #4caf50; box-shadow: 0 2px 4px rgba(76, 175, 80, 0.1);">
+                                <strong style="color: #2e7d32; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                                    <span>✅</span> Final Answer:
+                                </strong>
+                                <div style="margin-top: 8px; color: #1b5e20; font-weight: 600; font-size: 15px;">${answer}</div>
                             </div>
                         ` : ''}
                     </div>
                     
-                    <div class="problem-actions" style="display: flex; gap: 10px;">
-                        <button class="btn btn-warning" id="hint-btn-${i}" onclick="ProblemGenerator.showHints(${i})" style="font-size: 14px;">
+                    <div class="problem-actions" style="display: flex; gap: 10px; flex-wrap: wrap; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 15px;">
+                        <button class="btn btn-warning" id="hint-btn-${i}" onclick="ProblemGenerator.showHints(${i})" style="font-size: 14px; flex: 1; min-width: 140px;">
                             💡 Show Hints
                         </button>
-                        <button class="btn btn-success" id="solution-btn-${i}" onclick="ProblemGenerator.showSolution(${i})" style="display: none; font-size: 14px;">
+                        <button class="btn btn-success" id="solution-btn-${i}" onclick="ProblemGenerator.showSolution(${i})" style="display: none; font-size: 14px; flex: 1; min-width: 140px;">
                             📖 Show Solution
+                        </button>
+                        <button class="btn btn-outline" onclick="ProblemGenerator.copyProblem(${i})" style="font-size: 14px; padding: 10px 20px;">
+                            📋 Copy
+                        </button>
+                        <button class="btn btn-outline" onclick="ProblemGenerator.exportSingleProblem(${i})" style="font-size: 14px; padding: 10px 20px;">
+                            📄 PDF
                         </button>
                     </div>
                 </div>
@@ -372,21 +383,161 @@ Make sure each problem follows this format exactly.`;
         }
     },
 
+    copyProblems() {
+        if (!this.data.currentProblem) {
+            showToast('No problems to copy', 'warning');
+            return;
+        }
+        
+        ExportUtils.copyToClipboard(
+            this.data.currentProblem,
+            'Problems copied to clipboard!'
+        );
+    },
+
     async exportProblems() {
         if (!this.data.currentProblem) {
             showToast('No problems to export', 'warning');
             return;
         }
 
-        try {
-            await window.ipcRenderer.invoke('export-pdf', {
-                title: 'Practice Problems',
-                content: this.data.currentProblem
-            });
-            showToast('Problems exported successfully!', 'success');
-        } catch (error) {
-            showToast('Failed to export: ' + error.message, 'error');
+        const subject = document.getElementById('problem-subject')?.value || 'Unknown';
+        const difficulty = document.getElementById('problem-difficulty')?.value || 'Medium';
+        
+        // Parse problems for better PDF formatting
+        const problemsHtml = this.data.currentProblem
+            .split(/\*\*Problem \d+:\*\*/)
+            .filter(p => p.trim())
+            .map((problem, index) => {
+                const parts = problem.split(/\*\*Hints?:\*\*/i);
+                const questionPart = parts[0] || '';
+                const hintAndSolution = parts[1] || '';
+                const solutionParts = hintAndSolution.split(/\*\*Solution:\*\*/i);
+                const hints = solutionParts[0] || '';
+                const solution = solutionParts[1] || '';
+                
+                return `
+                    <div class="problem-card">
+                        <div class="problem-header">Problem ${index + 1}</div>
+                        <div>${questionPart.trim()}</div>
+                        ${hints.trim() ? `<div class="hints"><strong>Hints:</strong><br>${hints.trim()}</div>` : ''}
+                        ${solution.trim() ? `<div class="solution"><strong>Solution:</strong><br>${solution.trim()}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+        await ExportUtils.exportToPDF(
+            problemsHtml,
+            `Practice Problems - ${subject}`,
+            {
+                moduleType: 'Problem Generator',
+                metadata: {
+                    'Subject': subject,
+                    'Difficulty': difficulty,
+                    'Total Problems': this.data.currentProblem.split(/\*\*Problem \d+:\*\*/).length - 1
+                }
+            }
+        );
+    },
+
+    copyProblem(problemNumber) {
+        const problemSections = this.data.currentProblem.split(/\*\*Problem \d+:\*\*/);
+        if (problemNumber >= problemSections.length) {
+            showToast('Problem not found', 'error');
+            return;
         }
+        
+        const section = problemSections[problemNumber];
+        const questionMatch = section.match(/\*\*Question:\*\*\s*([\s\S]*?)\s*\*\*Hints:/);
+        const hintsMatch = section.match(/\*\*Hints:\*\*\s*([\s\S]*?)\s*\*\*Solution:/);
+        const solutionMatch = section.match(/\*\*Solution:\*\*\s*([\s\S]*?)\s*\*\*Answer:/);
+        const answerMatch = section.match(/\*\*Answer:\*\*\s*([\s\S]*?)(?=---|$)/);
+        
+        let problemText = `Problem ${problemNumber}\n\n`;
+        problemText += `Question:\n${questionMatch ? questionMatch[1].trim() : 'N/A'}\n\n`;
+        
+        if (hintsMatch && hintsMatch[1].trim()) {
+            problemText += `Hints:\n${hintsMatch[1].trim()}\n\n`;
+        }
+        
+        if (solutionMatch && solutionMatch[1].trim()) {
+            problemText += `Solution:\n${solutionMatch[1].trim()}\n\n`;
+        }
+        
+        if (answerMatch && answerMatch[1].trim()) {
+            problemText += `Answer:\n${answerMatch[1].trim()}`;
+        }
+        
+        ExportUtils.copyToClipboard(problemText, `Problem ${problemNumber} copied to clipboard!`);
+    },
+
+    async exportSingleProblem(problemNumber) {
+        const problemSections = this.data.currentProblem.split(/\*\*Problem \d+:\*\*/);
+        if (problemNumber >= problemSections.length) {
+            showToast('Problem not found', 'error');
+            return;
+        }
+        
+        const section = problemSections[problemNumber];
+        const titleMatch = section.match(/^([^\*]+)\*\*/);
+        const questionMatch = section.match(/\*\*Question:\*\*\s*([\s\S]*?)\s*\*\*Hints:/);
+        const hintsMatch = section.match(/\*\*Hints:\*\*\s*([\s\S]*?)\s*\*\*Solution:/);
+        const solutionMatch = section.match(/\*\*Solution:\*\*\s*([\s\S]*?)\s*\*\*Answer:/);
+        const answerMatch = section.match(/\*\*Answer:\*\*\s*([\s\S]*?)(?=---|$)/);
+        
+        const title = titleMatch ? titleMatch[1].trim() : `Problem ${problemNumber}`;
+        const question = questionMatch ? questionMatch[1].trim() : 'Question not found';
+        const hints = hintsMatch ? hintsMatch[1].trim() : '';
+        const solution = solutionMatch ? solutionMatch[1].trim() : '';
+        const answer = answerMatch ? answerMatch[1].trim() : '';
+        
+        const subject = document.getElementById('problem-subject')?.value || 'Unknown';
+        const difficulty = document.getElementById('problem-difficulty')?.value || 'Medium';
+        
+        const problemHtml = `
+            <div class="problem-card">
+                <div class="problem-header">Problem ${problemNumber}: ${title}</div>
+                <div style="margin: 15px 0;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">❓ Question:</h4>
+                    <div style="white-space: pre-wrap; line-height: 1.8;">${question}</div>
+                </div>
+                ${hints ? `
+                    <div class="hints">
+                        <strong>💡 Hints:</strong><br>
+                        <div style="margin-top: 8px; white-space: pre-wrap;">${hints}</div>
+                    </div>
+                ` : ''}
+                ${solution ? `
+                    <div class="solution">
+                        <strong>📖 Solution:</strong><br>
+                        <div style="margin-top: 8px; white-space: pre-wrap;">${solution}</div>
+                        ${answer ? `
+                            <div style="margin-top: 15px; padding: 12px; background: white; border-radius: 6px; border: 2px solid #28a745;">
+                                <strong style="color: #155724;">✅ Final Answer:</strong>
+                                <div style="margin-top: 5px; font-weight: 600; color: #1b5e20;">${answer}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        
+        const timeSpent = this.data.problemTimers[problemNumber] || 0;
+        const timeFormatted = formatTime(timeSpent);
+        
+        await ExportUtils.exportToPDF(
+            problemHtml,
+            `Problem ${problemNumber} - ${subject}`,
+            {
+                moduleType: 'Problem Generator',
+                metadata: {
+                    'Subject': subject,
+                    'Difficulty': difficulty,
+                    'Problem Number': problemNumber,
+                    'Time Spent': timeFormatted
+                }
+            }
+        );
     }
 };
 

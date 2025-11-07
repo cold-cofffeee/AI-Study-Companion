@@ -5,6 +5,93 @@ All notable changes to Study Buddy Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2025-11-07
+
+### 🎯 Major UX Improvements - Export & Persistence
+
+#### Added
+- **📋 Copy to Clipboard Feature**:
+  - All AI-generated content can now be copied with one click
+  - Added "Copy" button to all modules: Summarizer, Problems, Quiz, Optimizer, Pomodoro
+  - Toast notifications confirm successful copy
+  - Plain text formatting for easy pasting
+
+- **📄 PDF Export Feature**:
+  - Professional PDF export for all AI-generated content
+  - "Save as PDF" button in all modules
+  - Beautifully formatted PDFs with:
+    - Professional header and footer
+    - Metadata (generation date, subject, difficulty, etc.)
+    - Color-coded difficulty levels (Easy=Green, Medium=Orange, Hard=Red)
+    - Structured problem cards with hints and solutions
+    - Task breakdowns with subtopics and key points
+    - Optimized for A4 printing
+  - Uses browser's native print dialog for saving
+
+- **💾 Enhanced State Persistence**:
+  - All AI-generated content now persists in `study-buddy-data.json`
+  - Content survives app restarts
+  - Modules restore exactly as you left them:
+    - Summarizer: All generated summaries, quizzes, and mnemonics
+    - Problems: Generated problems with individual timer states
+    - Quiz: Current quiz questions and user answers
+    - Optimizer: Study schedules with all metadata
+    - Pomodoro: Generated task schedules with details
+  - Individual problem timers persist across sessions
+
+- **🛠️ Export Utilities (`ExportUtils.js`)**:
+  - Centralized export functionality
+  - `copyToClipboard()` - Copy with custom success messages
+  - `exportToPDF()` - Generate professional PDFs
+  - `htmlToPlainText()` - Convert HTML to plain text
+  - Consistent styling across all modules
+
+#### Enhanced
+- **🍅 Pomodoro Timer Durations**:
+  - Updated task durations based on difficulty:
+    - Easy: 25 minutes (was 15)
+    - Medium: 35 minutes (was 25)
+    - Hard: 45 minutes (was 35)
+  - More realistic time allocation for deep study
+  - AI prompt aligned with duration settings
+  - Post-processing ensures correct durations
+
+- **🧮 Problem Generator**:
+  - Added Copy and PDF export buttons
+  - Smart problem parsing for PDF export
+  - Individual timers for each problem
+  - Timer states saved and restored
+  - Problems display hidden until generation
+
+- **📝 Summarizer Output**:
+  - Enhanced PDF export with input/output statistics
+  - Multiple output tabs preserved
+  - All outputs saved to JSON
+
+- **⏰ Study Optimizer**:
+  - Added Copy and PDF export buttons
+  - Schedule content now persists correctly
+  - PDF includes complete schedule breakdown
+
+- **❓ Reverse Quiz**:
+  - Added Copy and PDF export buttons
+  - Quiz content persists across sessions
+  - PDF includes subject and question count
+
+#### Fixed
+- State persistence now working correctly for all modules
+- Generated content saves immediately after creation
+- Module state restoration on app startup
+- Export buttons consistently styled across all modules
+
+#### Technical
+- Added `ExportUtils.js` helper module
+- Integrated into `index.html` script loading order
+- All modules updated to use centralized export functions
+- Pomodoro module now stores `scheduleData` for export
+- Problems module saves `problemTimers` object
+- Consistent metadata tracking across all exports
+
 ## [2.6.0] - 2025-11-07
 
 ### 🎓 Bangladesh HSC Student Feature

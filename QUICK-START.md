@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-## Study Buddy Pro v2.5.0 - AI Learning Companion
+## Study Buddy Pro v2.7.0 - AI Learning Companion
 
 ### 🚀 5-Minute Setup
 
@@ -34,6 +34,7 @@
    - Everything auto-saves - just close anytime!
    - Timer and music run in background
    - All your work is preserved
+   - Copy & export any AI content to PDF!
 
 ### 🎓 First Study Session
 
@@ -46,18 +47,32 @@
    - Navigate freely - timer keeps running! ⏰
 
 4. **Start Creating**:
-   - **Summarizer**: Paste notes → Generate summary
-   - **Problems**: Select subject → Generate practice
-   - **Optimizer**: Plan study schedule → Send to timer
+   - **Summarizer**: Paste notes → Generate summary → 📋 Copy or 📄 Save as PDF
+   - **Problems**: Select subject → Generate practice → 📋 Copy all → 📄 Export PDF
+   - **Optimizer**: Plan study schedule → 📋 Copy → 📄 PDF → Send to timer
+   - **Pomodoro**: Generate detailed schedule → 📋 Copy → 📄 Export as PDF
 
 ### ✨ Key Features
 
+#### 📋 Copy & PDF Export (NEW!)
+- **Copy to clipboard** - One-click copying in all modules
+- **PDF export** - Professional formatted PDFs with:
+  - Metadata (date, subject, difficulty)
+  - Color-coded difficulty levels
+  - Problem cards with hints/solutions
+  - Task breakdowns with subtopics
+- **Print or save** - Use browser print dialog
+- **Share easily** - Send to classmates or study groups
+
 #### 🍅 Pomodoro Timer
+- **AI-powered schedules** - Detailed task breakdowns with subtopics
+- **Smart durations** - Easy (25min), Medium (35min), Hard (45min)
 - **Background timer** - Runs while you work in other modules
 - **Integrated music** - YouTube & Spotify playlists
 - **ADHD Mode** - Shorter sessions (10-2-5 min)
 - **Auto-save** - Timer state preserved
 - **Notifications** - Desktop alerts when done
+- **📋 Copy & 📄 Export** - Share your study plan
 
 #### 🎵 Music Player
 - **Pre-loaded playlists**: Lofi, Classical, Piano, Ambient
@@ -65,13 +80,22 @@
 - **Volume control**: Unified slider
 - **Persistent playback**: Music continues everywhere
 
-#### 💾 Auto-Save Everything
-- ✅ AI responses (summaries, quizzes, problems)
+#### 💾 Complete State Persistence
+- ✅ **All AI content saved** - Summaries, quizzes, problems, schedules
 - ✅ All text inputs (auto-saved as you type)
+- ✅ Individual problem timers per problem
 - ✅ Timer state and sessions
 - ✅ Music playlists and volume
 - ✅ Settings and preferences
-- **Close anytime - nothing is lost!**
+- **Close anytime - everything restores perfectly!**
+
+#### 🇧🇩 HSC Bangladesh Support
+- ✅ Checkbox in all AI modules
+- ✅ 500+ chapter curriculum database
+- ✅ Syllabus-aligned content
+- ✅ Bengali terminology
+- ✅ Board exam patterns
+- ✅ All major subjects covered
 
 ### 📚 Module Guide
 

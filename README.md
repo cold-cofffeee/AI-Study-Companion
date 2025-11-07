@@ -1,7 +1,7 @@
 # Study Buddy Pro - AI-Powered Learning Companion
 
 ![Study Buddy Pro](https://img.shields.io/badge/Platform-Electron-blue)
-![Version](https://img.shields.io/badge/Version-2.5.0-green)
+![Version](https://img.shields.io/badge/Version-2.7.0-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## 📚 Overview
@@ -9,9 +9,12 @@
 Study Buddy Pro is a comprehensive AI-powered learning companion built with Electron.js. It combines intelligent study tools with a built-in Pomodoro timer and integrated music player to create the ultimate productivity environment for students.
 
 **Key Highlights:**
-- 🎯 **Persistent State Management** - Never lose your work! All data saved across app restarts
+- 🎯 **Complete State Persistence** - Never lose your work! All AI content saved across app restarts
+- 📋 **Copy to Clipboard** - One-click copy for all AI-generated content
+- 📄 **PDF Export** - Professional PDFs with metadata and formatting
+- 🇧🇩 **HSC Bangladesh Support** - Curriculum-aligned content for HSC students
 - 🎵 **Integrated Music Player** - YouTube & Spotify support with custom playlists
-- 🍅 **Advanced Pomodoro Timer** - ADHD mode, auto-start, ambient sounds
+- 🍅 **Advanced Pomodoro Timer** - ADHD mode, auto-start, ambient sounds, detailed schedules
 - 🤖 **AI-Powered Tools** - Summaries, quizzes, problems, and study schedules
 - 📊 **Comprehensive Activity Tracking** - Complete usage history and analytics
 - 🌐 **Cross-Platform** - Runs on Windows, macOS, and Linux
@@ -32,19 +35,28 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - Memory tricks and mnemonics generation
    - **Multi-tab output system** - Keep all AI responses
    - Support for 10+ languages
-   - Export to PDF
-   - **Auto-save input text** - Never lose your study material
+   - **📋 Copy to clipboard** - Instant content sharing
+   - **📄 Export to PDF** - Professional formatted documents
+   - **Auto-save all outputs** - Never lose generated content
+   - HSC Bangladesh context support
 
 3. **🧮 Random Problem Generator** - Practice Made Easy
    - Generate problems for Math, Physics, Chemistry, Biology, CS
    - 4 difficulty levels: Easy, Medium, Hard, Expert
-   - Step-by-step solutions included
-   - Built-in timer with pause/resume
-   - **State persistence** - Problems saved across sessions
-   - Export to PDF
+   - **Progressive disclosure** - Question → Hints → Solution workflow
+   - **Individual timers per problem** - Track solving time
+   - Step-by-step solutions with final answer highlighting
+   - **📋 Copy all problems** - Share with classmates
+   - **📄 PDF export** - Formatted problem cards with hints/solutions
+   - **Complete state persistence** - All problems and timer states saved
+   - HSC Bangladesh syllabus-aligned problems
 
 4. **🍅 Enhanced Pomodoro Timer** - Ultimate Focus Tool
    - **Persistent timer** - Continues running across module navigation
+   - **AI-powered detailed schedules** - Topic breakdowns with subtopics
+   - **Difficulty-based durations** - Easy (25min), Medium (35min), Hard (45min)
+   - **📋 Copy schedule** - Share study plans
+   - **📄 PDF export** - Formatted task lists with metadata
    - **Integrated music player** - YouTube & Spotify embeds
    - **ADHD Mode** - Shorter sessions (10-2-5 minutes)
    - **Custom playlists** - Add your favorite study music
@@ -55,6 +67,7 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - Daily session counter
    - Motivational quotes
    - Desktop notifications
+   - HSC Bangladesh curriculum-based plans
 
 5. **🎵 Music Player** - Built-in Study Music
    - **YouTube embed support** - Play any YouTube video/playlist
@@ -70,8 +83,10 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - AI-generated topic breakdowns
    - Adaptive time blocks by difficulty
    - Send schedules to Pomodoro timer
-   - **State persistence** - Schedules saved
-   - Export to PDF
+   - **📋 Copy schedule** - Share with study groups
+   - **📄 PDF export** - Professional study plans
+   - **Complete state persistence** - Schedules never lost
+   - HSC Bangladesh context support
 
 7. **🎴 Flashcard System** - Spaced Repetition Learning
    - SM-2 algorithm for optimal review scheduling
@@ -83,9 +98,11 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
 8. **❓ Reverse Quiz Generator** - Learn from Answers
    - Generate questions from answers/definitions
    - Multiple quiz types (Multiple Choice, True/False, Fill in the Blank)
+   - **📋 Copy quiz** - Share with classmates
+   - **📄 PDF export** - Formatted quiz documents
    - **Auto-save quiz inputs**
-   - **State persistence** - Generated quizzes saved
-   - Export capabilities
+   - **Complete state persistence** - Generated quizzes saved
+   - HSC Bangladesh context support
 
 9. **⚙️ Settings & Preferences** - Full Customization
    - Secure API key management with testing
@@ -95,9 +112,83 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - Language preferences
    - **All settings auto-saved**
 
-## 🎯 New Features (v2.5.0)
+## 🎯 What's New in v2.7.0
 
-### 🔄 Persistent State Management
+### 📋 Copy to Clipboard Feature
+- **One-click copying** for all AI-generated content
+- Available in all modules: Summarizer, Problems, Quiz, Optimizer, Pomodoro
+- Toast notifications confirm successful copy
+- Plain text formatting for easy pasting anywhere
+- Share content instantly with classmates or study groups
+
+### 📄 Professional PDF Export
+- **Export all AI content as beautifully formatted PDFs**
+- Available in all AI modules
+- Professional styling with:
+  - Header with title and module information
+  - Metadata (generation date, subject, difficulty level, etc.)
+  - Color-coded difficulty indicators (Easy=Green, Medium=Orange, Hard=Red)
+  - Structured problem cards with hints and solutions
+  - Task breakdowns with subtopics and key points
+  - Footer with generation info
+  - Optimized for A4 printing
+- Uses browser's native print dialog
+- Perfect for offline studying or printing handouts
+
+### 💾 Enhanced State Persistence
+- **All AI-generated content now persists permanently**
+- Close and reopen the app - everything stays exactly as you left it:
+  - **Summarizer**: All generated summaries, quizzes, and mnemonics
+  - **Problems**: Generated problems with individual timer states
+  - **Quiz**: Current quiz questions and user answers
+  - **Optimizer**: Complete study schedules with metadata
+  - **Pomodoro**: Generated task schedules with detailed breakdowns
+- Individual problem timers saved per problem
+- Never lose your work again!
+
+### 🍅 Improved Pomodoro Timer
+- **Realistic difficulty-based durations**:
+  - Easy topics: 25 minutes (sufficient for basic concepts)
+  - Medium topics: 35 minutes (ideal for practice problems)
+  - Hard topics: 45 minutes (deep focus for complex topics)
+- AI-generated detailed study plans with:
+  - Topic and subtopic breakdowns
+  - Difficulty classification per task
+  - Key focus points for each session
+  - Color-coded difficulty indicators
+- Export schedules as formatted PDFs
+- Copy schedules to clipboard
+
+### 🧮 Problem Generator Enhancements
+- **Progressive disclosure system**:
+  - First see the question only
+  - Click "Show Hints" to reveal helpful tips
+  - Click "Show Solution" to see complete answer
+- **Individual timers per problem**:
+  - Track how long each problem takes
+  - Start/pause/resume per problem
+  - Timer states persist across sessions
+- Better PDF formatting with problem cards
+- Copy all problems at once
+
+### 🇧🇩 HSC Bangladesh Support
+- **Checkbox in all AI modules** to enable HSC-specific content
+- Comprehensive HSC syllabus database (500+ chapters)
+- Curriculum-aligned responses for:
+  - Physics (1st & 2nd Paper)
+  - Higher Math (1st & 2nd Paper)
+  - Chemistry (1st & 2nd Paper)
+  - Biology (Botany & Zoology)
+  - ICT (Programming, Networking, Web Design)
+  - Statistics, IBA, General Knowledge
+  - English & Bangla (গদ্য, পদ্য, ব্যাকরণ)
+- Bengali terminology alongside English
+- HSC board exam question patterns
+- Chapter-specific problem generation
+
+## 🔄 Previous Features (v2.5.0 & v2.6.0)
+
+### Persistent State Management
 - **Never lose your work!** All data automatically saved to JSON
 - Module states persist across app restarts
 - **Auto-save** - Your inputs saved as you type (1-second debounce)

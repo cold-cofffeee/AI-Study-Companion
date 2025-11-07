@@ -346,17 +346,17 @@ const Summarizer = {
         // Render current tab content
         const currentOutput = this.data.outputs[this.data.currentTab];
         contentContainer.innerHTML = `
-            <div class="output-content">
-                <pre style="white-space: pre-wrap; font-family: 'Segoe UI', sans-serif;">${currentOutput.content}</pre>
+            <div class="output-content" style="background: var(--surface-color); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+                <div style="white-space: pre-wrap; font-family: 'Segoe UI', sans-serif; line-height: 1.8; font-size: 14px; color: var(--text-color);">${currentOutput.content}</div>
             </div>
-            <div class="output-actions">
-                <button class="btn btn-primary" onclick="Summarizer.copyOutput(${this.data.currentTab})">
+            <div class="output-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="Summarizer.copyOutput(${this.data.currentTab})" style="flex: 1; min-width: 140px;">
                     📋 Copy
                 </button>
-                <button class="btn btn-secondary" onclick="Summarizer.exportPDF(${this.data.currentTab})">
-                    📄 Export PDF
+                <button class="btn btn-secondary" onclick="Summarizer.exportPDF(${this.data.currentTab})" style="flex: 1; min-width: 140px;">
+                    📄 Save as PDF
                 </button>
-                <button class="btn btn-outline" onclick="Summarizer.shareOutput(${this.data.currentTab})">
+                <button class="btn btn-outline" onclick="Summarizer.shareOutput(${this.data.currentTab})" style="padding: 10px 24px;">
                     🔗 Share
                 </button>
             </div>
@@ -370,30 +370,47 @@ const Summarizer = {
 
     copyOutput(index) {
         const output = this.data.outputs[index];
-        copyToClipboard(output.content);
+        ExportUtils.copyToClipboard(output.content, `${output.title} copied to clipboard!`);
     },
 
     async exportPDF(index) {
         const output = this.data.outputs[index];
-        showLoading('Exporting to PDF...');
+        const inputText = document.getElementById('input-text')?.value || '';
         
-        try {
-            await window.ipcRenderer.invoke('export-pdf', {
-                title: output.title,
-                content: output.content
-            });
-            showToast('Exported to PDF successfully!', 'success');
-        } catch (error) {
-            showToast('Failed to export PDF: ' + error.message, 'error');
-        } finally {
-            hideLoading();
-        }
+        // Format content with better HTML structure
+        const formattedContent = output.content
+            .split('\n')
+            .map(line => {
+                line = line.trim();
+                if (!line) return '<br>';
+                if (line.startsWith('###')) return `<h3>${line.replace(/^###\s*/, '')}</h3>`;
+                if (line.startsWith('##')) return `<h2>${line.replace(/^##\s*/, '')}</h2>`;
+                if (line.startsWith('#')) return `<h2>${line.replace(/^#\s*/, '')}</h2>`;
+                if (line.startsWith('- ') || line.startsWith('* ')) return `<li>${line.substring(2)}</li>`;
+                if (/^\d+\./.test(line)) return `<li>${line.replace(/^\d+\.\s*/, '')}</li>`;
+                return `<p>${line}</p>`;
+            })
+            .join('\n')
+            .replace(/(<li>.*<\/li>\n?)+/g, match => `<ul>${match}</ul>`)
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        await ExportUtils.exportToPDF(
+            formattedContent,
+            output.title,
+            {
+                moduleType: 'AI Summarizer',
+                metadata: {
+                    'Content Type': output.type || 'Summary',
+                    'Input Length': `${inputText.length} characters`,
+                    'Generated Length': `${output.content.length} characters`
+                }
+            }
+        );
     },
 
     shareOutput(index) {
         const output = this.data.outputs[index];
-        copyToClipboard(output.content);
-        showToast('Content copied! You can now share it anywhere.', 'success');
+        ExportUtils.copyToClipboard(output.content, 'Content copied! You can now share it anywhere.');
     }
 };
 

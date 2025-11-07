@@ -42,8 +42,11 @@ const ReverseQuiz = {
                     <button class="btn btn-success" onclick="ReverseQuiz.submitQuiz()">
                         ✓ Submit Answers
                     </button>
+                    <button class="btn btn-primary" onclick="ReverseQuiz.copyQuiz()">
+                        📋 Copy
+                    </button>
                     <button class="btn btn-secondary" onclick="ReverseQuiz.exportQuiz()">
-                        📄 Export Quiz
+                        📄 Save as PDF
                     </button>
                 </div>
             </div>
@@ -149,12 +152,12 @@ const ReverseQuiz = {
         this.data.userAnswers = [];
         
         container.innerHTML = `
-            <div style="background: var(--background-color); padding: 20px; border-radius: 8px;">
-                <pre style="white-space: pre-wrap; font-family: 'Segoe UI', sans-serif;">${content}</pre>
+            <div style="background: var(--surface-color); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);">
+                <div style="white-space: pre-wrap; font-family: 'Segoe UI', sans-serif; line-height: 1.8; font-size: 14px; color: var(--text-color);">${content}</div>
             </div>
-            <div class="mt-20">
-                <p style="color: var(--text-secondary); font-size: 14px;">
-                    📝 Review the quiz above and prepare your answers.
+            <div class="mt-20" style="padding: 15px; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                <p style="color: var(--text-color); font-size: 14px; margin: 0; line-height: 1.6;">
+                    📝 Review the quiz questions above and prepare your answers.
                 </p>
             </div>
         `;
@@ -179,21 +182,56 @@ const ReverseQuiz = {
         `;
     },
 
+    copyQuiz() {
+        if (!this.data.currentQuiz) {
+            showToast('No quiz to copy', 'warning');
+            return;
+        }
+        
+        ExportUtils.copyToClipboard(
+            this.data.currentQuiz,
+            'Quiz copied to clipboard!'
+        );
+    },
+
     async exportQuiz() {
         if (!this.data.currentQuiz) {
             showToast('No quiz to export', 'warning');
             return;
         }
 
-        try {
-            await window.ipcRenderer.invoke('export-pdf', {
-                title: 'Reverse Quiz',
-                content: this.data.currentQuiz
-            });
-            showToast('Quiz exported successfully!', 'success');
-        } catch (error) {
-            showToast('Failed to export: ' + error.message, 'error');
-        }
+        const subject = document.getElementById('quiz-subject')?.value || 'Subject';
+        const count = document.getElementById('quiz-count')?.value || '5';
+
+        // Format quiz content with better HTML structure
+        const formattedContent = this.data.currentQuiz
+            .split('\n')
+            .map(line => {
+                line = line.trim();
+                if (!line) return '<br>';
+                if (/^\d+\./.test(line)) {
+                    return `<div class="problem-card"><strong>${line}</strong></div>`;
+                }
+                if (line.startsWith('Answer:') || line.startsWith('Correct Answer:')) {
+                    return `<div class="solution">${line}</div>`;
+                }
+                return `<p>${line}</p>`;
+            })
+            .join('\n')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        await ExportUtils.exportToPDF(
+            formattedContent,
+            `Reverse Quiz - ${subject}`,
+            {
+                moduleType: 'Reverse Quiz Generator',
+                metadata: {
+                    'Subject': subject,
+                    'Number of Questions': count,
+                    'Quiz Type': 'Reverse Learning'
+                }
+            }
+        );
     },
 
     resetQuiz() {

@@ -5,6 +5,95 @@ All notable changes to Study Buddy Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2025-11-07
+
+### 🎓 Bangladesh HSC Student Feature
+
+#### Added
+- **🇧🇩 HSC Bangladesh Context**:
+  - Checkbox in all AI modules to enable HSC-specific responses
+  - Comprehensive HSC syllabus database (500+ chapters)
+  - All major subjects: Physics, Higher Math, Chemistry, Biology, ICT, Statistics, IBA
+  - AI responses aligned with Bangladesh HSC curriculum
+  - Bilingual support (Bengali + English terminology)
+  - HSC board exam question patterns
+  - Subject-specific chapter organization
+
+- **HSC Syllabus Data (`HSCSyllabusData.js`)**:
+  - Physics (1st & 2nd Paper) - Complete chapter mapping
+  - Higher Math (1st & 2nd Paper) - All topics included
+  - Chemistry (1st & 2nd Paper) - Lab to Economic Chemistry
+  - ICT - Programming, Networking, Database, HTML, Web Design
+  - Biology - Botany and Zoology chapters
+  - Statistics - পরিসংখ্যান 1st & 2nd Paper
+  - General Knowledge - Bangladesh & International affairs
+  - Mental Ability - Test patterns
+  - IBA Admission - DU, JU, BUP formats
+  - English & Bangla - গদ্য, পদ্য, ব্যাকরণ
+
+- **Enhanced Pomodoro Study Plan Generator**:
+  - Detailed topic breakdown with subtopics
+  - Difficulty levels for each topic (Easy/Medium/Hard)
+  - Duration estimation per topic
+  - Key focus points for each topic
+  - HSC syllabus-aligned task generation
+  - Visual difficulty indicators (color-coded)
+  - Structured JSON output with metadata
+
+- **Interactive Problem Generator**:
+  - Progressive disclosure: Question → Hints → Solution
+  - Three-stage problem solving workflow
+  - "Show Hints" button reveals helpful tips first
+  - "Show Solution" appears after viewing hints
+  - Color-coded sections (yellow hints, green solution)
+  - Structured problem format with clear sections
+  - Final answer highlighted in solution box
+
+- **Module Integration**:
+  - Summarizer: HSC curriculum-aligned summaries
+  - Problem Generator: HSC board question patterns with hints
+  - Study Optimizer: HSC exam preparation schedules
+  - Pomodoro Timer: Detailed HSC-based study plans
+  - Quiz Generator: MCQ format similar to board exams
+  - Memory Tricks: Bengali cultural references
+
+- **Documentation**:
+  - HSC-FEATURE.md - Complete feature guide
+  - Usage examples and comparisons
+  - Technical implementation details
+
+#### Changed
+- **GeminiApiClient.js**:
+  - Converted from axios to native fetch API
+  - Browser and Node.js compatible
+  - Enhanced error handling with detailed messages
+
+- **Problem Display**:
+  - Interactive three-stage revelation (Question → Hints → Solution)
+  - Better visual hierarchy with color coding
+  - Improved readability with proper spacing
+
+- **Pomodoro Schedule Display**:
+  - Rich task cards with subtopics
+  - Difficulty and duration indicators
+  - Key points highlighted
+  - Better organization and visual appeal
+
+#### Fixed
+- Settings page null reference error
+- GeminiApiClient not loading in browser context
+- Missing HSC checkbox in Pomodoro module
+
+#### Benefits for HSC Students
+- ✅ Content matches exact HSC syllabus
+- ✅ Familiar textbook terminology
+- ✅ Board exam-style questions
+- ✅ Both Bengali and English support
+- ✅ No irrelevant content
+- ✅ Exam-focused preparation
+- ✅ Step-by-step learning with hints
+- ✅ Detailed study breakdowns
+
 ## [2.5.0] - 2025-11-06
 
 ### 🎵 Major Update - Music Player & State Persistence

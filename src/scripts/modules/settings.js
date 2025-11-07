@@ -148,15 +148,24 @@ const Settings = {
         try {
             this.data.settings = await window.ipcRenderer.invoke('get-settings');
             
-            // Populate fields
-            document.getElementById('setting-api-key').value = this.data.settings.apiKey || '';
-            document.getElementById('setting-theme').value = this.data.settings.theme || 'light';
-            document.getElementById('setting-language').value = this.data.settings.preferredLanguage || 'en';
-            document.getElementById('setting-session-minutes').value = this.data.settings.defaultStudySessionMinutes || 25;
-            document.getElementById('setting-break-minutes').value = this.data.settings.defaultBreakMinutes || 5;
-            document.getElementById('setting-notifications').checked = this.data.settings.enableNotifications !== false;
-            document.getElementById('setting-remember-position').checked = this.data.settings.rememberWindowPosition !== false;
-            document.getElementById('setting-start-maximized').checked = this.data.settings.startMaximized !== false;
+            // Populate fields with null checks
+            const apiKeyEl = document.getElementById('setting-api-key');
+            const themeEl = document.getElementById('setting-theme');
+            const languageEl = document.getElementById('setting-language');
+            const sessionEl = document.getElementById('setting-session-minutes');
+            const breakEl = document.getElementById('setting-break-minutes');
+            const notificationsEl = document.getElementById('setting-notifications');
+            const rememberPosEl = document.getElementById('setting-remember-position');
+            const startMaxEl = document.getElementById('setting-start-maximized');
+
+            if (apiKeyEl) apiKeyEl.value = this.data.settings.apiKey || '';
+            if (themeEl) themeEl.value = this.data.settings.theme || 'light';
+            if (languageEl) languageEl.value = this.data.settings.preferredLanguage || 'en';
+            if (sessionEl) sessionEl.value = this.data.settings.defaultStudySessionMinutes || 25;
+            if (breakEl) breakEl.value = this.data.settings.defaultBreakMinutes || 5;
+            if (notificationsEl) notificationsEl.checked = this.data.settings.enableNotifications !== false;
+            if (rememberPosEl) rememberPosEl.checked = this.data.settings.rememberWindowPosition !== false;
+            if (startMaxEl) startMaxEl.checked = this.data.settings.startMaximized !== false;
         } catch (error) {
             console.error('Error loading settings:', error);
         }

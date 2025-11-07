@@ -67,6 +67,16 @@ const Summarizer = {
                         ${languageOptions}
                     </select>
                 </div>
+
+                <div class="input-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="hsc-context-checkbox">
+                        <span>🎓 HSC Bangladesh Student (Adds curriculum context to AI)</span>
+                    </label>
+                    <small style="color: var(--text-secondary); margin-left: 24px; display: block; margin-top: 4px;">
+                        Enable this if you're an HSC student in Bangladesh for curriculum-specific content
+                    </small>
+                </div>
             </div>
 
             <!-- Processing Options -->
@@ -217,6 +227,7 @@ const Summarizer = {
     async generateSummary() {
         const text = document.getElementById('input-text')?.value;
         const language = document.getElementById('language-select')?.value || 'en';
+        const hscContext = document.getElementById('hsc-context-checkbox')?.checked || false;
 
         if (!text || text.trim().length < 50) {
             showToast('Please enter at least 50 characters', 'warning');
@@ -232,7 +243,7 @@ const Summarizer = {
             }
 
             const client = new GeminiApiClient(settings.apiKey);
-            const result = await client.generateSummary(text, language);
+            const result = await client.generateSummary(text, language, hscContext);
             
             this.addOutput('Summary', result, 'summary');
             this.saveState(); // Save state after generating
@@ -248,6 +259,7 @@ const Summarizer = {
     async createQuiz() {
         const text = document.getElementById('input-text')?.value;
         const language = document.getElementById('language-select')?.value || 'en';
+        const hscContext = document.getElementById('hsc-context-checkbox')?.checked || false;
 
         if (!text || text.trim().length < 50) {
             showToast('Please enter at least 50 characters', 'warning');
@@ -263,7 +275,7 @@ const Summarizer = {
             }
 
             const client = new GeminiApiClient(settings.apiKey);
-            const result = await client.generateQuiz(text, language);
+            const result = await client.generateQuiz(text, language, hscContext);
             
             this.addOutput('Quiz Questions', result, 'quiz');
             showToast('Quiz created successfully!', 'success');
@@ -278,6 +290,7 @@ const Summarizer = {
     async generateMnemonics() {
         const text = document.getElementById('input-text')?.value;
         const language = document.getElementById('language-select')?.value || 'en';
+        const hscContext = document.getElementById('hsc-context-checkbox')?.checked || false;
 
         if (!text || text.trim().length < 50) {
             showToast('Please enter at least 50 characters', 'warning');
@@ -293,7 +306,7 @@ const Summarizer = {
             }
 
             const client = new GeminiApiClient(settings.apiKey);
-            const result = await client.generateMnemonics(text, language);
+            const result = await client.generateMnemonics(text, language, hscContext);
             
             this.addOutput('Memory Tricks', result, 'mnemonics');
             showToast('Memory tricks generated!', 'success');

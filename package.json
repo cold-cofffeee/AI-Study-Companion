@@ -1,7 +1,7 @@
 {
   "name": "study-buddy-pro",
-  "version": "2.5.0",
-  "description": "AI-Powered Study Companion with Integrated Music Player & Persistent State Management",
+  "version": "2.6.0",
+  "description": "AI-Powered Study Companion with HSC Bangladesh Support, Integrated Music Player & Persistent State Management",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

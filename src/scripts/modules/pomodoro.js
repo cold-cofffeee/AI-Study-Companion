@@ -85,6 +85,15 @@ const PomodoroModule = {
                         <textarea id="pomodoro-topics" class="input-field" rows="2"
                                placeholder="e.g., Algebra, Geometry, Calculus"></textarea>
                     </div>
+                    <div class="input-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="hsc-context-checkbox-pomodoro">
+                            <span>🎓 HSC Bangladesh Student (Generate HSC-aligned schedule)</span>
+                        </label>
+                        <small style="color: var(--text-secondary); margin-left: 24px; display: block; margin-top: 4px;">
+                            Enable for HSC Bangladesh curriculum-based study plans
+                        </small>
+                    </div>
                     <div class="flex gap-10">
                         <button class="btn btn-primary" onclick="PomodoroModule.generateSchedule()">
                             <i class="fas fa-sparkles"></i> Generate Schedule
@@ -1120,6 +1129,7 @@ const PomodoroModule = {
     async generateSchedule() {
         const subject = document.getElementById('pomodoro-subject')?.value;
         const topicsText = document.getElementById('pomodoro-topics')?.value;
+        const hscContext = document.getElementById('hsc-context-checkbox-pomodoro')?.checked || false;
 
         if (!subject || subject.trim() === '') {
             showToast('Please enter a main subject', 'warning');
@@ -1132,9 +1142,8 @@ const PomodoroModule = {
         }
 
         const topics = topicsText.split(',').map(t => t.trim()).filter(t => t);
-        const studyPlan = `${subject}: ${topics.join(', ')}`;
 
-        showLoading('Generating study plan...');
+        showLoading('Generating detailed study plan...');
 
         try {
             const settings = await window.ipcRenderer.invoke('get-settings');
@@ -1142,19 +1151,71 @@ const PomodoroModule = {
                 throw new Error('API key not configured. Please configure it in Settings.');
             }
 
-            const duration = 120; // Default 2 hours
-            const result = await window.ipcRenderer.invoke('gemini-generate-schedule', studyPlan, duration, settings.apiKey);
+            // Enhanced prompt for detailed breakdown
+            let prompt = `Create a detailed Pomodoro study plan for ${subject}.
+
+Topics to cover: ${topics.join(', ')}
+
+For each topic, provide:
+1. Main topic name
+2. Subtopics to study (2-4 subtopics)
+3. Difficulty level (Easy/Medium/Hard)
+4. Estimated time in minutes
+5. Key points to focus on
+
+Format as a JSON array with this structure:
+[
+  {
+    "topic": "Topic Name",
+    "subtopics": ["Subtopic 1", "Subtopic 2", "Subtopic 3"],
+    "difficulty": "Medium",
+    "duration": 25,
+    "keyPoints": ["Point 1", "Point 2", "Point 3"]
+  }
+]`;
+
+            if (hscContext) {
+                prompt += `\n\n[HSC BANGLADESH CONTEXT]: This is for HSC Bangladesh students. Please:
+- Use chapter names from HSC syllabus for ${subject}
+- Include Bengali terms alongside English where relevant
+- Break down topics according to HSC textbook structure
+- Mention which HSC paper (1st/2nd) if applicable
+- Focus on board exam-relevant subtopics
+- Consider HSC exam difficulty patterns`;
+            }
+
+            const client = new GeminiApiClient(settings.apiKey);
+            const result = await client.generateContent(prompt);
+            
+            // Try to parse JSON response
+            let parsedTasks;
+            try {
+                // Extract JSON from markdown code blocks if present
+                const jsonMatch = result.match(/```json\n([\s\S]*?)\n```/) || result.match(/```\n([\s\S]*?)\n```/);
+                const jsonText = jsonMatch ? jsonMatch[1] : result;
+                parsedTasks = JSON.parse(jsonText.trim());
+            } catch (parseError) {
+                console.warn('Could not parse as JSON, using fallback format');
+                // Fallback: create simple task list
+                parsedTasks = topics.map(topic => ({
+                    topic: topic,
+                    subtopics: [],
+                    difficulty: 'Medium',
+                    duration: 25,
+                    keyPoints: []
+                }));
+            }
             
             const scheduleData = {
                 subject: subject,
-                topics: topics,
-                duration: duration,
-                content: result
+                topics: parsedTasks,
+                rawContent: result,
+                hscContext: hscContext
             };
             
             await window.ipcRenderer.invoke('update-setting', 'pomodoroSchedule', scheduleData);
             this.displayScheduleTasks(scheduleData);
-            showToast('Study plan generated! 📚', 'success');
+            showToast('Detailed study plan generated! 📚', 'success');
         } catch (error) {
             console.error('Error generating schedule:', error);
             showToast('Failed to generate schedule: ' + error.message, 'error');
@@ -1183,23 +1244,79 @@ const PomodoroModule = {
         // Extract tasks from the content
         const tasks = scheduleData.topics || [];
         
-        taskList.innerHTML = `
-            <div style="margin-bottom: 15px;">
-                <h4 style="color: var(--primary-color); margin-bottom: 10px;">
-                    <i class="fas fa-book"></i> ${scheduleData.subject}
-                </h4>
-                <p style="color: var(--text-muted); font-size: 14px;">
-                    Total Duration: ${scheduleData.duration} minutes
-                </p>
-            </div>
-            ${tasks.map((task, index) => `
-                <div class="task-item" data-task-index="${index}">
-                    <input type="checkbox" class="task-checkbox" id="task-${index}" 
-                           onchange="PomodoroModule.toggleTask(${index})">
-                    <label for="task-${index}" class="task-text">${task}</label>
+        // Check if tasks are detailed objects or simple strings
+        const isDetailedTasks = tasks.length > 0 && typeof tasks[0] === 'object';
+        
+        if (isDetailedTasks) {
+            // Display detailed task breakdown
+            taskList.innerHTML = `
+                <div style="margin-bottom: 20px; padding: 15px; background: var(--surface-color); border-radius: 8px;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 5px;">
+                        📚 ${scheduleData.subject}
+                    </h4>
+                    ${scheduleData.hscContext ? '<span style="color: var(--success-color); font-size: 12px;">🎓 HSC Bangladesh Aligned</span>' : ''}
                 </div>
-            `).join('')}
-        `;
+                ${tasks.map((task, index) => {
+                    const difficultyColor = {
+                        'Easy': 'var(--success-color)',
+                        'Medium': 'var(--warning-color)',
+                        'Hard': 'var(--error-color)'
+                    }[task.difficulty] || 'var(--text-secondary)';
+                    
+                    return `
+                        <div class="task-item-detailed" data-task-index="${index}" style="margin-bottom: 15px; border-left: 4px solid ${difficultyColor}; padding-left: 15px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <input type="checkbox" class="task-checkbox" id="task-${index}" 
+                                       onchange="PomodoroModule.toggleTask(${index})">
+                                <label for="task-${index}" style="flex: 1; font-weight: 600; font-size: 16px; color: var(--text-color);">
+                                    ${task.topic}
+                                </label>
+                                <span style="background: ${difficultyColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">
+                                    ${task.difficulty}
+                                </span>
+                                <span style="color: var(--text-secondary); font-size: 13px;">
+                                    ⏱️ ${task.duration} min
+                                </span>
+                            </div>
+                            
+                            ${task.subtopics && task.subtopics.length > 0 ? `
+                                <div style="margin: 8px 0 8px 30px;">
+                                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">📋 Subtopics:</div>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: var(--text-color);">
+                                        ${task.subtopics.map(sub => `<li>${sub}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            
+                            ${task.keyPoints && task.keyPoints.length > 0 ? `
+                                <div style="margin: 8px 0 0 30px;">
+                                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">💡 Key Focus Areas:</div>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: var(--text-color);">
+                                        ${task.keyPoints.map(point => `<li>${point}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('')}
+            `;
+        } else {
+            // Fallback for simple task list
+            taskList.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 10px;">
+                        <i class="fas fa-book"></i> ${scheduleData.subject}
+                    </h4>
+                </div>
+                ${tasks.map((task, index) => `
+                    <div class="task-item" data-task-index="${index}">
+                        <input type="checkbox" class="task-checkbox" id="task-${index}" 
+                               onchange="PomodoroModule.toggleTask(${index})">
+                        <label for="task-${index}" class="task-text">${task}</label>
+                    </div>
+                `).join('')}
+            `;
+        }
     },
 
     toggleTask(index) {

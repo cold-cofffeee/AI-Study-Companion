@@ -1,10 +1,10 @@
 // Gemini API Client
-const axios = require('axios');
+// Compatible with both Node.js (main process) and Browser (renderer process)
 
 class GeminiApiClient {
     constructor(apiKey) {
         // Use provided API key or fallback to environment variable
-        this.apiKey = apiKey || process.env.GEMINI_API_KEY || '';
+        this.apiKey = apiKey || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '') || '';
         this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
         
         if (!this.apiKey) {
@@ -14,25 +14,33 @@ class GeminiApiClient {
 
     async generateContent(prompt) {
         try {
-            const response = await axios.post(
+            // Use fetch API (works in both browser and Node.js 18+)
+            const response = await fetch(
                 `${this.baseUrl}?key=${this.apiKey}`,
                 {
-                    contents: [{
-                        parts: [{
-                            text: prompt
-                        }]
-                    }]
-                },
-                {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    timeout: 60000
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }]
+                    })
                 }
             );
 
-            if (response.data && response.data.candidates && response.data.candidates[0]) {
-                return response.data.candidates[0].content.parts[0].text;
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data && data.candidates && data.candidates[0]) {
+                return data.candidates[0].content.parts[0].text;
             }
 
             throw new Error('Invalid response from Gemini API');
@@ -42,11 +50,12 @@ class GeminiApiClient {
         }
     }
 
-    async generateSummary(text, language = 'en') {
+    async generateSummary(text, language = 'en', hscContext = false) {
         const languageInstruction = language !== 'en' ? ` Please respond in ${this.getLanguageName(language)}.` : '';
+        const hscInstruction = hscContext ? `\n\n[HSC BANGLADESH CONTEXT]: You are helping a Higher Secondary Certificate (HSC) student from Bangladesh. Please provide explanations that align with the Bangladesh HSC curriculum. Use both Bengali and English terms where appropriate. Reference HSC exam patterns and standard textbook approaches when relevant.` : '';
         
         const prompt = `
-            Analyze the following text and create a comprehensive study summary.${languageInstruction}
+            Analyze the following text and create a comprehensive study summary.${languageInstruction}${hscInstruction}
             
             Please provide:
             1. Key points in bullet format
@@ -62,11 +71,12 @@ class GeminiApiClient {
         return await this.generateContent(prompt);
     }
 
-    async generateQuiz(text, language = 'en') {
+    async generateQuiz(text, language = 'en', hscContext = false) {
         const languageInstruction = language !== 'en' ? ` Please respond in ${this.getLanguageName(language)}.` : '';
+        const hscInstruction = hscContext ? `\n\n[HSC BANGLADESH CONTEXT]: Create quiz questions that align with HSC Bangladesh exam patterns. Use MCQ format similar to HSC board questions. Include both Bengali and English terms where appropriate.` : '';
         
         const prompt = `
-            Based on the following text, create 5 multiple-choice quiz questions.${languageInstruction}
+            Based on the following text, create 5 multiple-choice quiz questions.${languageInstruction}${hscInstruction}
             
             Format each question as:
             Q#: [Question]
@@ -84,11 +94,12 @@ class GeminiApiClient {
         return await this.generateContent(prompt);
     }
 
-    async generateMnemonics(text, language = 'en') {
+    async generateMnemonics(text, language = 'en', hscContext = false) {
         const languageInstruction = language !== 'en' ? ` Please respond in ${this.getLanguageName(language)}.` : '';
+        const hscInstruction = hscContext ? `\n\n[HSC BANGLADESH CONTEXT]: Create memory tricks that resonate with Bangladeshi HSC students. Use Bengali cultural references, local examples, and both Bengali/English terms where helpful.` : '';
         
         const prompt = `
-            Create memory tricks and mnemonics for the key concepts in this text.${languageInstruction}
+            Create memory tricks and mnemonics for the key concepts in this text.${languageInstruction}${hscInstruction}
             
             Provide:
             1. Acronyms for lists
@@ -103,11 +114,12 @@ class GeminiApiClient {
         return await this.generateContent(prompt);
     }
 
-    async generateProblems(subject, difficulty, count, language = 'en') {
+    async generateProblems(subject, difficulty, count, language = 'en', hscContext = false) {
         const languageInstruction = language !== 'en' ? ` Please respond in ${this.getLanguageName(language)}.` : '';
+        const hscInstruction = hscContext ? `\n\n[HSC BANGLADESH CONTEXT]: Generate problems that match HSC Bangladesh syllabus and exam difficulty. Follow HSC board question patterns and use standard notation from HSC textbooks.` : '';
         
         const prompt = `
-            Generate ${count} ${difficulty} difficulty practice problems for ${subject}.${languageInstruction}
+            Generate ${count} ${difficulty} difficulty practice problems for ${subject}.${languageInstruction}${hscInstruction}
             
             For each problem, provide:
             1. The problem statement
@@ -120,12 +132,13 @@ class GeminiApiClient {
         return await this.generateContent(prompt);
     }
 
-    async generateStudySchedule(topic, duration, difficulty, language = 'en') {
+    async generateStudySchedule(topic, duration, difficulty, language = 'en', hscContext = false) {
         const languageInstruction = language !== 'en' ? ` Please respond in ${this.getLanguageName(language)}.` : '';
+        const hscInstruction = hscContext ? `\n\n[HSC BANGLADESH CONTEXT]: Create a study schedule optimized for HSC Bangladesh exam preparation. Consider HSC syllabus structure, board exam patterns, and typical study practices in Bangladesh.` : '';
         
         const prompt = `
             Create an optimized ${duration}-minute study schedule for learning: ${topic}
-            Difficulty level: ${difficulty}${languageInstruction}
+            Difficulty level: ${difficulty}${languageInstruction}${hscInstruction}
             
             Use the Pomodoro technique with:
             - 25-minute focused study blocks

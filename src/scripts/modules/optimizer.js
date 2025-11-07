@@ -44,6 +44,15 @@ const StudyOptimizer = {
                         </select>
                     </div>
                 </div>
+                <div class="input-group mt-10">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="hsc-context-checkbox-optimizer">
+                        <span>🎓 HSC Bangladesh Student (Optimize for HSC exam preparation)</span>
+                    </label>
+                    <small style="color: var(--text-secondary); margin-left: 24px; display: block; margin-top: 4px;">
+                        Enable for HSC Bangladesh curriculum-based study schedules
+                    </small>
+                </div>
                 <button class="btn btn-primary mt-20" onclick="StudyOptimizer.generateSchedule()">
                     📅 Generate Schedule
                 </button>
@@ -171,6 +180,7 @@ const StudyOptimizer = {
         const topicsText = document.getElementById('study-topics')?.value;
         const duration = parseInt(document.getElementById('study-duration')?.value) || 120;
         const difficulty = document.getElementById('study-difficulty')?.value;
+        const hscContext = document.getElementById('hsc-context-checkbox-optimizer')?.checked || false;
 
         if (!subject || subject.trim() === '') {
             showToast('Please enter a main subject', 'warning');
@@ -193,7 +203,8 @@ const StudyOptimizer = {
                 throw new Error('API key not configured');
             }
 
-            const result = await window.ipcRenderer.invoke('gemini-generate-schedule', studyPlan, duration, settings.apiKey);
+            const client = new GeminiApiClient(settings.apiKey);
+            const result = await client.generateStudySchedule(studyPlan, duration, difficulty, 'en', hscContext);
             
             // Store the schedule data
             this.data.schedule = {

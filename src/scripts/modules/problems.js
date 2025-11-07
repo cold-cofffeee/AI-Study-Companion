@@ -4,8 +4,8 @@
 const ProblemGenerator = {
     data: {
         currentProblem: null,
-        timerInterval: null,
-        elapsedSeconds: 0
+        problemTimers: {}, // Track individual problem timers
+        timerIntervals: {} // Track interval IDs for each problem
     },
 
     async render() {
@@ -81,6 +81,11 @@ const ProblemGenerator = {
 
     async init() {
         await this.restoreState();
+        // Hide problem display initially if no saved state
+        if (!this.data.currentProblem) {
+            const displayEl = document.getElementById('problem-display');
+            if (displayEl) displayEl.style.display = 'none';
+        }
     },
 
     async restoreState() {
@@ -99,13 +104,13 @@ const ProblemGenerator = {
                 // Restore generated problems
                 if (savedState.currentProblem) {
                     this.data.currentProblem = savedState.currentProblem;
+                    
+                    // Restore timers
+                    if (savedState.problemTimers) {
+                        this.data.problemTimers = savedState.problemTimers;
+                    }
+                    
                     this.displayProblems(savedState.currentProblem);
-                }
-                
-                // Restore timer state
-                if (savedState.elapsedSeconds) {
-                    this.data.elapsedSeconds = savedState.elapsedSeconds;
-                    this.updateTimerDisplay();
                 }
             }
         } catch (error) {
@@ -124,7 +129,7 @@ const ProblemGenerator = {
                 difficulty: difficultySelect?.value,
                 count: countInput?.value,
                 currentProblem: this.data.currentProblem,
-                elapsedSeconds: this.data.elapsedSeconds
+                problemTimers: this.data.problemTimers
             };
             window.ipcRenderer.invoke('save-module-state', 'problems', state);
         } catch (error) {
@@ -215,11 +220,26 @@ Make sure each problem follows this format exactly.`;
             const solution = solutionMatch ? solutionMatch[1].trim() : '';
             const answer = answerMatch ? answerMatch[1].trim() : '';
             
+            // Initialize timer for this problem
+            if (!this.data.problemTimers[i]) {
+                this.data.problemTimers[i] = 0;
+            }
+            
             problemsHTML += `
                 <div class="problem-card" style="margin-bottom: 25px; padding: 20px; background: var(--surface-color); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-                    <h3 style="color: var(--primary-color); margin-bottom: 15px;">
-                        📝 Problem ${i}: ${title}
-                    </h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="color: var(--primary-color); margin: 0;">
+                            📝 Problem ${i}: ${title}
+                        </h3>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="background: var(--primary-color); color: white; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 600;" id="timer-${i}">
+                                ⏱️ <span id="timer-display-${i}">00:00</span>
+                            </span>
+                            <button class="btn btn-sm" id="timer-toggle-${i}" onclick="ProblemGenerator.toggleProblemTimer(${i})" style="padding: 6px 12px; font-size: 13px;">
+                                ▶️ Start
+                            </button>
+                        </div>
+                    </div>
                     
                     <div class="problem-question" style="background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                         <h4 style="color: var(--text-color); margin-bottom: 10px; font-size: 14px; font-weight: 600;">Question:</h4>
@@ -263,10 +283,44 @@ Make sure each problem follows this format exactly.`;
             `;
         } else {
             container.innerHTML = problemsHTML;
+            
+            // Update timer displays after rendering
+            Object.keys(this.data.problemTimers).forEach(problemNum => {
+                this.updateProblemTimerDisplay(parseInt(problemNum));
+            });
         }
         
         this.data.currentProblem = content;
         this.saveState();
+    },
+
+    toggleProblemTimer(problemNumber) {
+        const toggleBtn = document.getElementById(`timer-toggle-${problemNumber}`);
+        
+        if (this.data.timerIntervals[problemNumber]) {
+            // Pause timer
+            clearInterval(this.data.timerIntervals[problemNumber]);
+            delete this.data.timerIntervals[problemNumber];
+            toggleBtn.innerHTML = '▶️ Resume';
+        } else {
+            // Start timer
+            toggleBtn.innerHTML = '⏸️ Pause';
+            this.data.timerIntervals[problemNumber] = setInterval(() => {
+                this.data.problemTimers[problemNumber] = (this.data.problemTimers[problemNumber] || 0) + 1;
+                this.updateProblemTimerDisplay(problemNumber);
+                this.saveState();
+            }, 1000);
+        }
+    },
+
+    updateProblemTimerDisplay(problemNumber) {
+        const seconds = this.data.problemTimers[problemNumber] || 0;
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        const displayEl = document.getElementById(`timer-display-${problemNumber}`);
+        if (displayEl) {
+            displayEl.textContent = `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
     },
 
     showHints(problemNumber) {

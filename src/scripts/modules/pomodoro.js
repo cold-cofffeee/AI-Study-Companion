@@ -1160,7 +1160,10 @@ For each topic, provide:
 1. Main topic name
 2. Subtopics to study (2-4 subtopics)
 3. Difficulty level (Easy/Medium/Hard)
-4. Estimated time in minutes
+4. Estimated time in minutes based on difficulty:
+   - Easy topics: 25 minutes
+   - Medium topics: 35 minutes
+   - Hard topics: 45 minutes
 5. Key points to focus on
 
 Format as a JSON array with this structure:
@@ -1169,10 +1172,15 @@ Format as a JSON array with this structure:
     "topic": "Topic Name",
     "subtopics": ["Subtopic 1", "Subtopic 2", "Subtopic 3"],
     "difficulty": "Medium",
-    "duration": 25,
+    "duration": 35,
     "keyPoints": ["Point 1", "Point 2", "Point 3"]
   }
-]`;
+]
+
+IMPORTANT: Set duration based on difficulty:
+- Easy = 25 minutes
+- Medium = 35 minutes  
+- Hard = 45 minutes`;
 
             if (hscContext) {
                 prompt += `\n\n[HSC BANGLADESH CONTEXT]: This is for HSC Bangladesh students. Please:
@@ -1194,6 +1202,19 @@ Format as a JSON array with this structure:
                 const jsonMatch = result.match(/```json\n([\s\S]*?)\n```/) || result.match(/```\n([\s\S]*?)\n```/);
                 const jsonText = jsonMatch ? jsonMatch[1] : result;
                 parsedTasks = JSON.parse(jsonText.trim());
+                
+                // Ensure duration matches difficulty
+                parsedTasks = parsedTasks.map(task => {
+                    const durationByDifficulty = {
+                        'Easy': 25,
+                        'Medium': 35,
+                        'Hard': 45
+                    };
+                    return {
+                        ...task,
+                        duration: durationByDifficulty[task.difficulty] || task.duration || 25
+                    };
+                });
             } catch (parseError) {
                 console.warn('Could not parse as JSON, using fallback format');
                 // Fallback: create simple task list

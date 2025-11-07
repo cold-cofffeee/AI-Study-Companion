@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-## Study Buddy Pro v2.7.0 - AI Learning Companion
+## Study Buddy Pro v2.8.0 - AI Learning Companion
 
 ### 🚀 5-Minute Setup
 
@@ -33,7 +33,8 @@
 6. **You're Ready! 🎉**
    - Everything auto-saves - just close anytime!
    - Timer and music run in background
-   - All your work is preserved
+   - All your work is preserved with complete caching!
+   - Resume exactly where you left off!
    - Copy & export any AI content to PDF!
 
 ### 🎓 First Study Session
@@ -52,11 +53,26 @@
    - **Optimizer**: Plan study schedule → 📋 Copy → 📄 PDF → Send to timer
    - **Pomodoro**: Generate detailed schedule → 📋 Copy → 📄 Export as PDF
 
+5. **Test Persistence**:
+   - Generate some content in any module
+   - Close the app
+   - Reopen → Everything restored! ✨
+
 ### ✨ Key Features
 
-#### 📋 Copy & PDF Export (NEW!)
+#### � Complete Data Caching (NEW in v2.8.0!)
+- **All inputs cached** - Form fields, selections, checkboxes saved
+- **All AI responses saved** - Never lose generated content
+- **Error tracking** - Failed operations logged with context
+- **Generation history** - Last 20-50 generations tracked per module
+- **Auto-restore** - Resume exactly where you left off
+- **Cached data location**: `%AppData%/study-buddy-pro/study-buddy-data.json`
+- **Smart cleanup** - History auto-trims to prevent unlimited growth
+
+#### �📋 Copy & PDF Export
 - **Copy to clipboard** - One-click copying in all modules
 - **PDF export** - Professional formatted PDFs with:
+  - "STUDY BUDDY PRO" watermark
   - Metadata (date, subject, difficulty)
   - Color-coded difficulty levels
   - Problem cards with hints/solutions
@@ -73,6 +89,7 @@
 - **Auto-save** - Timer state preserved
 - **Notifications** - Desktop alerts when done
 - **📋 Copy & 📄 Export** - Share your study plan
+- **💾 Schedule caching** - All inputs and generated plans saved
 
 #### 🎵 Music Player
 - **Pre-loaded playlists**: Lofi, Classical, Piano, Ambient
@@ -80,14 +97,25 @@
 - **Volume control**: Unified slider
 - **Persistent playback**: Music continues everywhere
 
-#### 💾 Complete State Persistence
-- ✅ **All AI content saved** - Summaries, quizzes, problems, schedules
-- ✅ All text inputs (auto-saved as you type)
+#### 💾 Complete Data Caching & State Persistence
+- ✅ **All user inputs cached** - Form fields, selections, checkboxes
+- ✅ **All AI responses saved** - Summaries, quizzes, problems, schedules
+- ✅ **Error tracking** - Failed operations logged with context
+- ✅ **Generation history** - Last 20-50 per module
 - ✅ Individual problem timers per problem
 - ✅ Timer state and sessions
 - ✅ Music playlists and volume
 - ✅ Settings and preferences
 - **Close anytime - everything restores perfectly!**
+- **JSON storage**: `%AppData%/study-buddy-pro/study-buddy-data.json`
+
+**What gets cached per module:**
+- **Summarizer**: Text, language, HSC context, outputs (30)
+- **Problems**: Subject, difficulty, count, problems, timers (30)
+- **Quiz**: Answers, type, generated quizzes (20)
+- **Optimizer**: Subject, topics, schedules (20)
+- **Pomodoro**: Subject, topics, schedules (20)
+- **Flashcards**: Inputs, created cards (50)
 
 #### 🇧🇩 HSC Bangladesh Support
 - ✅ Checkbox in all AI modules

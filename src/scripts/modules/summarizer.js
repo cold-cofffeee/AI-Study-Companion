@@ -4,7 +4,9 @@
 const Summarizer = {
     data: {
         outputs: [],
-        currentTab: 0
+        currentTab: 0,
+        lastError: null,
+        generationHistory: [] // Track all generations
     },
 
     async render() {
@@ -131,23 +133,49 @@ const Summarizer = {
                         this.updateCharCount();
                     }
                 }
+                
+                // Restore language and HSC context
+                const languageSelect = document.getElementById('language-select');
+                const hscCheckbox = document.getElementById('hsc-context-checkbox');
+                if (savedState.language && languageSelect) languageSelect.value = savedState.language;
+                if (savedState.hscContext !== undefined && hscCheckbox) hscCheckbox.checked = savedState.hscContext;
+                
                 // Restore outputs
                 if (savedState.outputs && savedState.outputs.length > 0) {
                     this.data.outputs = savedState.outputs;
                     this.displayAllOutputs();
                 }
+                
+                // Restore generation history
+                if (savedState.generationHistory) {
+                    this.data.generationHistory = savedState.generationHistory;
+                }
+                
+                // Restore last error
+                if (savedState.lastError) {
+                    this.data.lastError = savedState.lastError;
+                }
             }
         } catch (error) {
             console.error('Error restoring summarizer state:', error);
+            this.data.lastError = { timestamp: new Date().toISOString(), error: error.message, action: 'restore-state' };
         }
     },
 
     saveState() {
         try {
             const textarea = document.getElementById('input-text');
+            const languageSelect = document.getElementById('language-select');
+            const hscCheckbox = document.getElementById('hsc-context-checkbox');
+            
             const state = {
                 inputText: textarea?.value || '',
-                outputs: this.data.outputs
+                language: languageSelect?.value || 'en',
+                hscContext: hscCheckbox?.checked || false,
+                outputs: this.data.outputs,
+                generationHistory: this.data.generationHistory,
+                lastError: this.data.lastError,
+                timestamp: new Date().toISOString()
             };
             window.ipcRenderer.invoke('save-module-state', 'summarizer', state);
         } catch (error) {
@@ -245,11 +273,31 @@ const Summarizer = {
             const client = new GeminiApiClient(settings.apiKey);
             const result = await client.generateSummary(text, language, hscContext);
             
+            // Cache the generation
+            this.data.generationHistory.push({
+                timestamp: new Date().toISOString(),
+                type: 'summary',
+                inputs: { text: text.substring(0, 200) + '...', language, hscContext },
+                result: result
+            });
+            
+            // Keep only last 30 generations
+            if (this.data.generationHistory.length > 30) {
+                this.data.generationHistory = this.data.generationHistory.slice(-30);
+            }
+            
             this.addOutput('Summary', result, 'summary');
             this.saveState(); // Save state after generating
             showToast('Summary generated successfully!', 'success');
         } catch (error) {
             console.error('Error generating summary:', error);
+            this.data.lastError = {
+                timestamp: new Date().toISOString(),
+                error: error.message,
+                action: 'generate-summary',
+                inputs: { textLength: text.length, language, hscContext }
+            };
+            this.saveState();
             showToast('Failed to generate summary: ' + error.message, 'error');
         } finally {
             hideLoading();
@@ -277,10 +325,30 @@ const Summarizer = {
             const client = new GeminiApiClient(settings.apiKey);
             const result = await client.generateQuiz(text, language, hscContext);
             
+            // Cache the generation
+            this.data.generationHistory.push({
+                timestamp: new Date().toISOString(),
+                type: 'quiz',
+                inputs: { text: text.substring(0, 200) + '...', language, hscContext },
+                result: result
+            });
+            
+            // Keep only last 30 generations
+            if (this.data.generationHistory.length > 30) {
+                this.data.generationHistory = this.data.generationHistory.slice(-30);
+            }
+            
             this.addOutput('Quiz Questions', result, 'quiz');
             showToast('Quiz created successfully!', 'success');
         } catch (error) {
             console.error('Error creating quiz:', error);
+            this.data.lastError = {
+                timestamp: new Date().toISOString(),
+                error: error.message,
+                action: 'create-quiz',
+                inputs: { textLength: text.length, language, hscContext }
+            };
+            this.saveState();
             showToast('Failed to create quiz: ' + error.message, 'error');
         } finally {
             hideLoading();
@@ -308,10 +376,30 @@ const Summarizer = {
             const client = new GeminiApiClient(settings.apiKey);
             const result = await client.generateMnemonics(text, language, hscContext);
             
+            // Cache the generation
+            this.data.generationHistory.push({
+                timestamp: new Date().toISOString(),
+                type: 'mnemonics',
+                inputs: { text: text.substring(0, 200) + '...', language, hscContext },
+                result: result
+            });
+            
+            // Keep only last 30 generations
+            if (this.data.generationHistory.length > 30) {
+                this.data.generationHistory = this.data.generationHistory.slice(-30);
+            }
+            
             this.addOutput('Memory Tricks', result, 'mnemonics');
             showToast('Memory tricks generated!', 'success');
         } catch (error) {
             console.error('Error generating mnemonics:', error);
+            this.data.lastError = {
+                timestamp: new Date().toISOString(),
+                error: error.message,
+                action: 'generate-mnemonics',
+                inputs: { textLength: text.length, language, hscContext }
+            };
+            this.saveState();
             showToast('Failed to generate memory tricks: ' + error.message, 'error');
         } finally {
             hideLoading();

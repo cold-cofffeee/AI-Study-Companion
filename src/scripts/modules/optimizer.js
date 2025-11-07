@@ -7,7 +7,9 @@ const StudyOptimizer = {
         timerInterval: null,
         elapsedMinutes: 0,
         isBreak: false,
-        sessionMinutes: 25
+        sessionMinutes: 25,
+        lastError: null,
+        generationHistory: [] // Track all generated schedules
     },
 
     async render() {
@@ -141,20 +143,33 @@ const StudyOptimizer = {
                 const topicsTextarea = document.getElementById('study-topics');
                 const durationInput = document.getElementById('study-duration');
                 const difficultySelect = document.getElementById('study-difficulty');
+                const hscCheckbox = document.getElementById('hsc-context-checkbox-optimizer');
                 
                 if (savedState.subject && subjectInput) subjectInput.value = savedState.subject;
                 if (savedState.topics && topicsTextarea) topicsTextarea.value = savedState.topics;
                 if (savedState.duration && durationInput) durationInput.value = savedState.duration;
                 if (savedState.difficulty && difficultySelect) difficultySelect.value = savedState.difficulty;
+                if (savedState.hscContext !== undefined && hscCheckbox) hscCheckbox.checked = savedState.hscContext;
                 
                 // Restore generated schedule
                 if (savedState.schedule) {
                     this.data.schedule = savedState.schedule;
                     this.displaySchedule(savedState.schedule.content);
                 }
+                
+                // Restore generation history
+                if (savedState.generationHistory) {
+                    this.data.generationHistory = savedState.generationHistory;
+                }
+                
+                // Restore last error
+                if (savedState.lastError) {
+                    this.data.lastError = savedState.lastError;
+                }
             }
         } catch (error) {
             console.error('Error restoring optimizer state:', error);
+            this.data.lastError = { timestamp: new Date().toISOString(), error: error.message, action: 'restore-state' };
         }
     },
 
@@ -164,13 +179,18 @@ const StudyOptimizer = {
             const topicsTextarea = document.getElementById('study-topics');
             const durationInput = document.getElementById('study-duration');
             const difficultySelect = document.getElementById('study-difficulty');
+            const hscCheckbox = document.getElementById('hsc-context-checkbox-optimizer');
             
             const state = {
                 subject: subjectInput?.value,
                 topics: topicsTextarea?.value,
                 duration: durationInput?.value,
                 difficulty: difficultySelect?.value,
-                schedule: this.data.schedule
+                hscContext: hscCheckbox?.checked,
+                schedule: this.data.schedule,
+                generationHistory: this.data.generationHistory,
+                lastError: this.data.lastError,
+                timestamp: new Date().toISOString()
             };
             window.ipcRenderer.invoke('save-module-state', 'optimizer', state);
         } catch (error) {
@@ -215,13 +235,33 @@ const StudyOptimizer = {
                 topics: topics,
                 duration: duration,
                 difficulty: difficulty,
+                hscContext: hscContext,
                 content: result
             };
+            
+            // Cache the generation
+            this.data.generationHistory.push({
+                timestamp: new Date().toISOString(),
+                inputs: { subject, topics, duration, difficulty, hscContext },
+                result: result
+            });
+            
+            // Keep only last 20 generations
+            if (this.data.generationHistory.length > 20) {
+                this.data.generationHistory = this.data.generationHistory.slice(-20);
+            }
             
             this.displaySchedule(result);
             showToast('Schedule generated successfully!', 'success');
         } catch (error) {
             console.error('Error generating schedule:', error);
+            this.data.lastError = {
+                timestamp: new Date().toISOString(),
+                error: error.message,
+                action: 'generate-schedule',
+                inputs: { subject, topics, duration, difficulty, hscContext }
+            };
+            this.saveState();
             showToast('Failed to generate schedule: ' + error.message, 'error');
         } finally {
             hideLoading();

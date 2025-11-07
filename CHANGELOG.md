@@ -5,6 +5,87 @@ All notable changes to Study Buddy Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2025-11-07
+
+### 🗄️ Comprehensive Data Caching & Persistence System
+
+#### Added
+- **💾 Complete State Caching System**:
+  - All modules now cache user inputs, AI responses, and errors to JSON
+  - Data persists in `study-buddy-data.json` with module-specific states
+  - Comprehensive error tracking with timestamps and context
+  - Generation history for all AI-powered features
+
+- **📊 Module-Specific Caching**:
+  
+  **Flashcards Module**:
+  - Caches: Question, Answer, Category, Difficulty inputs
+  - Tracks last 50 created cards with timestamps
+  - Stores errors with full context (inputs, action, timestamp)
+  - Auto-restores incomplete card creation
+  
+  **Quiz Generator**:
+  - Caches: Input answers, quiz type, generated content
+  - Generation history (last 20 quizzes) with timestamps
+  - Error tracking with input parameters
+  - Preserves user answers and quiz state
+  
+  **Study Optimizer**:
+  - Caches: Subject, topics, duration, difficulty, HSC context
+  - Generated schedules with complete metadata
+  - Generation history (last 20 schedules)
+  - Error logs with scheduling parameters
+  
+  **Summarizer**:
+  - Caches: Input text, language, HSC context
+  - All outputs (summaries, quizzes, mnemonics) persisted
+  - Generation history (last 30) categorized by type
+  - Comprehensive error logging for each generation type
+  
+  **Pomodoro Quick Schedule**:
+  - Caches: Subject, topics, HSC context, schedule data
+  - Generated study plans with task breakdowns
+  - Generation history (last 20 schedules)
+  - Error tracking during schedule generation
+  
+  **Problem Generator**:
+  - Caches: Subject, difficulty, count, HSC context
+  - Generated problems with complete solutions
+  - Generation history (last 30 problem sets)
+  - Individual problem timer states
+  - Error tracking with generation parameters
+
+#### Enhanced
+- **🔄 State Restoration**:
+  - All modules implement `restoreState()` and `saveState()` methods
+  - State automatically restored on module load
+  - Seamless continuation of work across app restarts
+  - Input fields repopulated with previous values
+  - Generated content immediately available
+
+- **🐛 Error Tracking**:
+  - Every error captured with:
+    - Timestamp (ISO 8601 format)
+    - Error message
+    - Action that caused the error
+    - Input context at time of error
+  - Helps debugging and improves user experience
+  - Errors stored in `lastError` field per module
+
+- **📈 Generation History**:
+  - Configurable history limits (20-50 items per module)
+  - Prevents unlimited JSON growth
+  - Includes input parameters and output data
+  - Timestamped for audit trail
+  - Useful for reviewing past generations
+
+#### Technical Details
+- **JSON Structure**: Each module has dedicated state in `moduleStates` object
+- **Automatic Cleanup**: History arrays auto-trim to configured limits
+- **Error Resilience**: Failed saves/restores don't crash the app
+- **IPC Integration**: Uses electron IPC for secure state management
+- **Type Safety**: All cached data includes timestamps for versioning
+
 ## [2.7.0] - 2025-11-07
 
 ### 🎯 Major UX Improvements - Export & Persistence

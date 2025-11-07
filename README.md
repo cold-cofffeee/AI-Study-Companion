@@ -1,7 +1,7 @@
 # Study Buddy Pro - AI-Powered Learning Companion
 
 ![Study Buddy Pro](https://img.shields.io/badge/Platform-Electron-blue)
-![Version](https://img.shields.io/badge/Version-2.7.0-green)
+![Version](https://img.shields.io/badge/Version-2.8.0-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## 📚 Overview
@@ -9,14 +9,16 @@
 Study Buddy Pro is a comprehensive AI-powered learning companion built with Electron.js. It combines intelligent study tools with a built-in Pomodoro timer and integrated music player to create the ultimate productivity environment for students.
 
 **Key Highlights:**
-- 🎯 **Complete State Persistence** - Never lose your work! All AI content saved across app restarts
+- 💾 **Complete Data Caching** - All user inputs, AI responses, and errors cached in JSON
+- 🔄 **Automatic State Persistence** - Never lose your work! Resume exactly where you left off
 - 📋 **Copy to Clipboard** - One-click copy for all AI-generated content
-- 📄 **PDF Export** - Professional PDFs with metadata and formatting
+- 📄 **Professional PDF Export** - Beautifully formatted documents with watermarks
 - 🇧🇩 **HSC Bangladesh Support** - Curriculum-aligned content for HSC students
 - 🎵 **Integrated Music Player** - YouTube & Spotify support with custom playlists
 - 🍅 **Advanced Pomodoro Timer** - ADHD mode, auto-start, ambient sounds, detailed schedules
 - 🤖 **AI-Powered Tools** - Summaries, quizzes, problems, and study schedules
 - 📊 **Comprehensive Activity Tracking** - Complete usage history and analytics
+- 🐛 **Error Tracking** - All errors logged with context for debugging
 - 🌐 **Cross-Platform** - Runs on Windows, macOS, and Linux
 
 ## ✨ Features
@@ -37,7 +39,9 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - Support for 10+ languages
    - **📋 Copy to clipboard** - Instant content sharing
    - **📄 Export to PDF** - Professional formatted documents
-   - **Auto-save all outputs** - Never lose generated content
+   - **💾 Complete caching** - All inputs, outputs, and errors saved
+   - **📈 Generation history** - Last 30 generations tracked
+   - **🔄 Auto-restore** - Resume with all previous outputs
    - HSC Bangladesh context support
 
 3. **🧮 Random Problem Generator** - Practice Made Easy
@@ -46,8 +50,10 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - **Progressive disclosure** - Question → Hints → Solution workflow
    - **Individual timers per problem** - Track solving time
    - Step-by-step solutions with final answer highlighting
-   - **📋 Copy all problems** - Share with classmates
-   - **📄 PDF export** - Formatted problem cards with hints/solutions
+   - **📋 Copy individual/all problems** - Share with classmates
+   - **📄 PDF export per problem** - Formatted problem cards with metadata
+   - **💾 Complete persistence** - Problems and timers saved
+   - **📈 Generation history** - Last 30 problem sets tracked
    - **Complete state persistence** - All problems and timer states saved
    - HSC Bangladesh syllabus-aligned problems
 
@@ -57,6 +63,9 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - **Difficulty-based durations** - Easy (25min), Medium (35min), Hard (45min)
    - **📋 Copy schedule** - Share study plans
    - **📄 PDF export** - Formatted task lists with metadata
+   - **💾 Schedule caching** - All generated plans saved
+   - **📈 Generation history** - Last 20 schedules tracked
+   - **🔄 Auto-restore** - Resume with saved schedules
    - **Integrated music player** - YouTube & Spotify embeds
    - **ADHD Mode** - Shorter sessions (10-2-5 minutes)
    - **Custom playlists** - Add your favorite study music
@@ -85,13 +94,19 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - Send schedules to Pomodoro timer
    - **📋 Copy schedule** - Share with study groups
    - **📄 PDF export** - Professional study plans
-   - **Complete state persistence** - Schedules never lost
+   - **💾 Complete caching** - Schedules, inputs, errors saved
+   - **📈 Generation history** - Last 20 schedules tracked
+   - **🔄 Auto-restore** - Resume with all inputs and schedules
    - HSC Bangladesh context support
 
 7. **🎴 Flashcard System** - Spaced Repetition Learning
    - SM-2 algorithm for optimal review scheduling
    - Create custom flashcards with categories
    - Difficulty ratings (Easy, Medium, Hard)
+   - **💾 Input caching** - Never lose incomplete cards
+   - **📈 Creation history** - Last 50 cards tracked
+   - **🔄 Auto-restore** - Resume card creation
+   - **🐛 Error tracking** - Failed saves logged
    - Track review progress
    - **Database storage** - Permanent flashcard library
 
@@ -100,8 +115,10 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - Multiple quiz types (Multiple Choice, True/False, Fill in the Blank)
    - **📋 Copy quiz** - Share with classmates
    - **📄 PDF export** - Formatted quiz documents
-   - **Auto-save quiz inputs**
-   - **Complete state persistence** - Generated quizzes saved
+   - **💾 Complete caching** - Inputs, quizzes, answers saved
+   - **📈 Generation history** - Last 20 quizzes tracked
+   - **🔄 Auto-restore** - Resume with saved quizzes
+   - **🐛 Error tracking** - Generation failures logged
    - HSC Bangladesh context support
 
 9. **⚙️ Settings & Preferences** - Full Customization
@@ -111,6 +128,30 @@ Study Buddy Pro is a comprehensive AI-powered learning companion built with Elec
    - Volume control
    - Language preferences
    - **All settings auto-saved**
+
+## 🎯 What's New in v2.8.0
+
+### 🗄️ Comprehensive Data Caching System
+- **Complete State Persistence**: All user inputs, AI responses, and errors cached in JSON
+- **Generation History**: Track last 20-50 generations per module with timestamps
+- **Error Tracking**: All errors logged with context (timestamp, action, inputs)
+- **Auto-Restore**: Resume exactly where you left off across app restarts
+- **Smart Cleanup**: History auto-trims to prevent unlimited growth
+
+### Module-Specific Caching
+- **Flashcards**: Input fields, created cards (last 50), error logs
+- **Quiz Generator**: Answers, quiz types, generated content (last 20), errors
+- **Study Optimizer**: Subject, topics, schedules (last 20), HSC context, errors
+- **Summarizer**: Text, language, all outputs (last 30), generation type, errors
+- **Pomodoro**: Subjects, topics, schedules (last 20), HSC context, errors
+- **Problems**: Settings, generated problems (last 30), timers, errors
+
+### Technical Improvements
+- IPC-based secure state management
+- Atomic save operations
+- Error resilience (failures don't crash app)
+- Timestamp-based versioning
+- Configurable history limits per module
 
 ## 🎯 What's New in v2.7.0
 

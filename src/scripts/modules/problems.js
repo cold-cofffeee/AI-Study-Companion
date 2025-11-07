@@ -5,7 +5,9 @@ const ProblemGenerator = {
     data: {
         currentProblem: null,
         problemTimers: {}, // Track individual problem timers
-        timerIntervals: {} // Track interval IDs for each problem
+        timerIntervals: {}, // Track interval IDs for each problem
+        lastError: null,
+        generationHistory: [] // Track all generated problems
     },
 
     async render() {
@@ -104,11 +106,22 @@ const ProblemGenerator = {
                         this.data.problemTimers = savedState.problemTimers;
                     }
                     
+                    // Restore generation history
+                    if (savedState.generationHistory) {
+                        this.data.generationHistory = savedState.generationHistory;
+                    }
+                    
+                    // Restore last error
+                    if (savedState.lastError) {
+                        this.data.lastError = savedState.lastError;
+                    }
+                    
                     this.displayProblems(savedState.currentProblem);
                 }
             }
         } catch (error) {
             console.error('Error restoring problems state:', error);
+            this.data.lastError = { timestamp: new Date().toISOString(), error: error.message, action: 'restore-state' };
         }
     },
 
@@ -117,13 +130,18 @@ const ProblemGenerator = {
             const subjectSelect = document.getElementById('problem-subject');
             const difficultySelect = document.getElementById('problem-difficulty');
             const countInput = document.getElementById('problem-count');
+            const hscCheckbox = document.getElementById('hsc-context-checkbox-problems');
             
             const state = {
                 subject: subjectSelect?.value,
                 difficulty: difficultySelect?.value,
                 count: countInput?.value,
+                hscContext: hscCheckbox?.checked,
                 currentProblem: this.data.currentProblem,
-                problemTimers: this.data.problemTimers
+                problemTimers: this.data.problemTimers,
+                generationHistory: this.data.generationHistory,
+                lastError: this.data.lastError,
+                timestamp: new Date().toISOString()
             };
             window.ipcRenderer.invoke('save-module-state', 'problems', state);
         } catch (error) {
@@ -178,11 +196,31 @@ Make sure each problem follows this format exactly.`;
             const result = await client.generateContent(prompt);
             
             this.data.currentProblem = result;
+            
+            // Cache the generation
+            this.data.generationHistory.push({
+                timestamp: new Date().toISOString(),
+                inputs: { subject, difficulty, count, hscContext },
+                result: result
+            });
+            
+            // Keep only last 30 generations
+            if (this.data.generationHistory.length > 30) {
+                this.data.generationHistory = this.data.generationHistory.slice(-30);
+            }
+            
             this.displayProblems(result);
             this.saveState();
             showToast('Problems generated successfully!', 'success');
         } catch (error) {
             console.error('Error generating problems:', error);
+            this.data.lastError = {
+                timestamp: new Date().toISOString(),
+                error: error.message,
+                action: 'generate-problems',
+                inputs: { subject, difficulty, count, hscContext }
+            };
+            this.saveState();
             showToast('Failed to generate problems: ' + error.message, 'error');
         } finally {
             hideLoading();

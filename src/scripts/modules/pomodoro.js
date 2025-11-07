@@ -14,6 +14,8 @@ const PomodoroModule = {
         autoStart: true,
         sessionStartTime: null,
         scheduleData: null, // Store generated schedule for export
+        lastError: null,
+        generationHistory: [], // Track schedule generations
         
         // Audio elements for sounds
         sounds: {
@@ -1030,6 +1032,7 @@ const PomodoroModule = {
             this.updateDisplay();
             this.updateSessionCount();
             await this.checkForSavedSchedule();
+            await this.restoreScheduleState(); // Restore schedule state
             
             // Initialize Music Player and restore if playing
             this.initializeMusicPlayer();
@@ -1040,6 +1043,7 @@ const PomodoroModule = {
             }
         } catch (error) {
             console.error('Error initializing Pomodoro:', error);
+            this.data.lastError = { timestamp: new Date().toISOString(), error: error.message, action: 'init' };
             // Continue even if there's an error
             try {
                 this.setupEventListeners();
@@ -1047,6 +1051,61 @@ const PomodoroModule = {
             } catch (e) {
                 console.error('Failed to setup event listeners:', e);
             }
+        }
+    },
+
+    async restoreScheduleState() {
+        try {
+            const savedState = await window.ipcRenderer.invoke('get-module-state', 'pomodoro');
+            if (savedState) {
+                // Restore input fields
+                const subjectInput = document.getElementById('pomodoro-subject');
+                const topicsInput = document.getElementById('pomodoro-topics');
+                const hscCheckbox = document.getElementById('hsc-context-checkbox-pomodoro');
+                
+                if (savedState.subject && subjectInput) subjectInput.value = savedState.subject;
+                if (savedState.topics && topicsInput) topicsInput.value = savedState.topics;
+                if (savedState.hscContext !== undefined && hscCheckbox) hscCheckbox.checked = savedState.hscContext;
+                
+                // Restore schedule data
+                if (savedState.scheduleData) {
+                    this.data.scheduleData = savedState.scheduleData;
+                }
+                
+                // Restore generation history
+                if (savedState.generationHistory) {
+                    this.data.generationHistory = savedState.generationHistory;
+                }
+                
+                // Restore last error
+                if (savedState.lastError) {
+                    this.data.lastError = savedState.lastError;
+                }
+            }
+        } catch (error) {
+            console.error('Error restoring pomodoro schedule state:', error);
+            this.data.lastError = { timestamp: new Date().toISOString(), error: error.message, action: 'restore-state' };
+        }
+    },
+
+    saveScheduleState() {
+        try {
+            const subjectInput = document.getElementById('pomodoro-subject');
+            const topicsInput = document.getElementById('pomodoro-topics');
+            const hscCheckbox = document.getElementById('hsc-context-checkbox-pomodoro');
+            
+            const state = {
+                subject: subjectInput?.value,
+                topics: topicsInput?.value,
+                hscContext: hscCheckbox?.checked,
+                scheduleData: this.data.scheduleData,
+                generationHistory: this.data.generationHistory,
+                lastError: this.data.lastError,
+                timestamp: new Date().toISOString()
+            };
+            window.ipcRenderer.invoke('save-module-state', 'pomodoro', state);
+        } catch (error) {
+            console.error('Error saving pomodoro schedule state:', error);
         }
     },
 
@@ -1245,11 +1304,32 @@ IMPORTANT: Set duration based on difficulty:
             };
             
             this.data.scheduleData = scheduleData; // Store in module data
+            
+            // Cache the generation
+            this.data.generationHistory.push({
+                timestamp: new Date().toISOString(),
+                inputs: { subject, topics, hscContext },
+                result: scheduleData
+            });
+            
+            // Keep only last 20 generations
+            if (this.data.generationHistory.length > 20) {
+                this.data.generationHistory = this.data.generationHistory.slice(-20);
+            }
+            
             await window.ipcRenderer.invoke('update-setting', 'pomodoroSchedule', scheduleData);
             this.displayScheduleTasks(scheduleData);
+            this.saveScheduleState(); // Save state after generating
             showToast('Detailed study plan generated! 📚', 'success');
         } catch (error) {
             console.error('Error generating schedule:', error);
+            this.data.lastError = {
+                timestamp: new Date().toISOString(),
+                error: error.message,
+                action: 'generate-schedule',
+                inputs: { subject, topics, hscContext }
+            };
+            this.saveScheduleState();
             showToast('Failed to generate schedule: ' + error.message, 'error');
         } finally {
             hideLoading();

@@ -4,7 +4,9 @@
 const ReverseQuiz = {
     data: {
         currentQuiz: null,
-        userAnswers: []
+        userAnswers: [],
+        lastError: null,
+        generationHistory: [] // Track all generated quizzes
     },
 
     async render() {
@@ -82,9 +84,20 @@ const ReverseQuiz = {
                     this.data.userAnswers = savedState.userAnswers || [];
                     this.displayQuiz(savedState.currentQuiz, savedState.quizType);
                 }
+                
+                // Restore generation history
+                if (savedState.generationHistory) {
+                    this.data.generationHistory = savedState.generationHistory;
+                }
+                
+                // Restore last error
+                if (savedState.lastError) {
+                    this.data.lastError = savedState.lastError;
+                }
             }
         } catch (error) {
             console.error('Error restoring quiz state:', error);
+            this.data.lastError = { timestamp: new Date().toISOString(), error: error.message, action: 'restore-state' };
         }
     },
 
@@ -97,7 +110,10 @@ const ReverseQuiz = {
                 answers: answersTextarea?.value,
                 quizType: quizTypeSelect?.value,
                 currentQuiz: this.data.currentQuiz,
-                userAnswers: this.data.userAnswers
+                userAnswers: this.data.userAnswers,
+                generationHistory: this.data.generationHistory,
+                lastError: this.data.lastError,
+                timestamp: new Date().toISOString()
             };
             window.ipcRenderer.invoke('save-module-state', 'quiz', state);
         } catch (error) {
@@ -133,10 +149,30 @@ const ReverseQuiz = {
             `;
             
             const result = await client.generateContent(prompt);
+            
+            // Cache the generation
+            this.data.generationHistory.push({
+                timestamp: new Date().toISOString(),
+                inputs: { answers, quizType },
+                result: result
+            });
+            
+            // Keep only last 20 generations
+            if (this.data.generationHistory.length > 20) {
+                this.data.generationHistory = this.data.generationHistory.slice(-20);
+            }
+            
             this.displayQuiz(result, quizType);
             showToast('Quiz generated successfully!', 'success');
         } catch (error) {
             console.error('Error generating quiz:', error);
+            this.data.lastError = {
+                timestamp: new Date().toISOString(),
+                error: error.message,
+                action: 'generate-quiz',
+                inputs: { answers, quizType }
+            };
+            this.saveState();
             showToast('Failed to generate quiz: ' + error.message, 'error');
         } finally {
             hideLoading();

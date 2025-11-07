@@ -2,7 +2,7 @@
 
 ## Welcome Tester! 👋
 
-Thank you for helping test Study Buddy Pro v2.7.0. This guide will help you get started.
+Thank you for helping test Study Buddy Pro v2.8.0. This guide will help you get started.
 
 ## System Requirements
 
@@ -16,7 +16,7 @@ Thank you for helping test Study Buddy Pro v2.7.0. This guide will help you get 
 You'll receive one of these files:
 
 ### Option A: Full Installer (Recommended)
-**File:** `Study Buddy Pro Setup 2.7.0.exe`
+**File:** `Study Buddy Pro Setup 2.8.0.exe`
 
 1. Double-click the installer
 2. If Windows SmartScreen appears, click "More info" → "Run anyway"
@@ -25,7 +25,7 @@ You'll receive one of these files:
 5. Launch Study Buddy Pro from Desktop or Start Menu
 
 ### Option B: Portable Version
-**File:** `StudyBuddyPro-2.7.0-portable.exe`
+**File:** `StudyBuddyPro-2.8.0-portable.exe`
 
 1. Save to any folder (Desktop, Documents, USB drive)
 2. Double-click to run
@@ -61,20 +61,35 @@ Please test these features and report any issues:
   - [ ] Copy to clipboard button works
   - [ ] Save as PDF exports correctly
   - [ ] Multiple outputs saved and restored
+  - [ ] **NEW: Resume with all outputs after app restart**
+  - [ ] **NEW: Language and HSC context restored**
+  - [ ] **NEW: Generation history tracked**
 - [ ] **Quiz Generator** - Generate questions from content
   - [ ] Copy quiz button works
   - [ ] PDF export includes all questions
+  - [ ] **NEW: Input answers persist after restart**
+  - [ ] **NEW: Generated quiz restored on reload**
+  - [ ] **NEW: Error tracking (try invalid API key)**
 - [ ] **Study Optimizer** - Get personalized study schedules
   - [ ] Copy schedule button works
   - [ ] PDF shows formatted schedule
+  - [ ] **NEW: Inputs (subject, topics, etc.) restored**
+  - [ ] **NEW: Generated schedules persist**
+  - [ ] **NEW: HSC context checkbox state saved**
 - [ ] **Problem Generator** - Solve math/science problems
   - [ ] Progressive disclosure (Question → Hints → Solution)
   - [ ] Individual timers per problem
+  - [ ] Copy individual problem works
   - [ ] Copy all problems works
+  - [ ] PDF export per problem works
   - [ ] PDF export formats problems correctly
+  - [ ] **NEW: Problems persist after app restart**
+  - [ ] **NEW: Timer states saved per problem**
+  - [ ] **NEW: Settings (subject, difficulty) restored**
 - [ ] **HSC Bangladesh Context** - Enable HSC checkbox
   - [ ] HSC syllabus-aligned responses
   - [ ] Bengali terminology appears
+  - [ ] **NEW: HSC checkbox state persists**
 
 ### 2. Study Tools
 - [ ] **Pomodoro Timer** - Focus sessions
@@ -83,7 +98,13 @@ Please test these features and report any issues:
   - [ ] Copy schedule to clipboard
   - [ ] PDF export with task breakdown
   - [ ] HSC context checkbox works
+  - [ ] **NEW: Schedule inputs (subject, topics) persist**
+  - [ ] **NEW: Generated schedules restored on reload**
+  - [ ] **NEW: HSC context state saved**
 - [ ] **Flashcards** - Create and review flashcards
+  - [ ] **NEW: Incomplete card inputs saved (resume creation)**
+  - [ ] **NEW: Last 50 created cards tracked**
+  - [ ] **NEW: Error tracking for failed saves**
 - [ ] **Dashboard** - Overview of study stats
 
 ### 3. Music Player
@@ -92,7 +113,7 @@ Please test these features and report any issues:
 - [ ] **Volume Control** - Adjust music volume (YouTube only)
 - [ ] **Custom Playlists** - Add your own YouTube videos
 
-### 4. Export & Persistence (NEW! Very Important!)
+### 4. Export & Persistence (ENHANCED! Very Important!)
 - [ ] **Copy to Clipboard** - All modules have Copy button
   - [ ] Content copies successfully
   - [ ] Toast notification appears
@@ -101,14 +122,95 @@ Please test these features and report any issues:
   - [ ] PDF includes metadata (date, subject, etc.)
   - [ ] Difficulty colors appear correctly
   - [ ] Problems formatted as cards
-- [ ] **State Persistence**
-  - [ ] Close and reopen app - all content restored
-  - [ ] Generated summaries still visible
+  - [ ] Watermark "STUDY BUDDY PRO" visible
+- [ ] **Complete Data Caching (NEW!)**
+  - [ ] Close and reopen app - ALL inputs restored
+  - [ ] Generated summaries still visible with tabs
   - [ ] Generated problems with timer states saved
-  - [ ] Quiz questions persist
-  - [ ] Study schedules remain
-  - [ ] Pomodoro task lists restored
+  - [ ] Quiz questions and inputs persist
+  - [ ] Study schedules remain with all metadata
+  - [ ] Pomodoro task lists and inputs restored
+  - [ ] Flashcard incomplete entries saved
   - [ ] Settings saved automatically
+  - [ ] **Test: Generate content, close app, reopen → Everything restored**
+  - [ ] **Test: Enter text, close before generating → Text restored**
+- [ ] **Error Tracking (NEW!)**
+  - [ ] Try with invalid API key → Error captured
+  - [ ] Generate without input → Error handled gracefully
+  - [ ] **Check: `%AppData%/study-buddy-pro/study-buddy-data.json` contains error logs**
+
+### 5. Data Persistence Testing (CRITICAL!)
+Test the comprehensive caching system:
+
+1. **Summarizer Cache Test**:
+   - [ ] Paste text, select language, check HSC box
+   - [ ] Generate summary
+   - [ ] Close app WITHOUT clearing
+   - [ ] Reopen app, navigate to Summarizer
+   - [ ] **Expected**: Text, language, HSC checkbox, and output ALL restored
+
+2. **Problem Generator Cache Test**:
+   - [ ] Select Math, Medium, 3 problems
+   - [ ] Generate problems, start timer on Problem 1
+   - [ ] Wait 10 seconds, reveal hints
+   - [ ] Close app
+   - [ ] Reopen app, navigate to Problems
+   - [ ] **Expected**: Subject, difficulty, count, problems, AND 10-second timer restored
+
+3. **Quiz Cache Test**:
+   - [ ] Enter answers: "DNA, RNA, Protein"
+   - [ ] Select quiz type
+   - [ ] Generate quiz
+   - [ ] Close app
+   - [ ] Reopen app, navigate to Quiz
+   - [ ] **Expected**: Answers, quiz type, and generated quiz ALL restored
+
+4. **Optimizer Cache Test**:
+   - [ ] Enter subject "Physics", topics "Mechanics, Waves"
+   - [ ] Select duration 120 min, difficulty Hard
+   - [ ] Check HSC box
+   - [ ] Generate schedule
+   - [ ] Close app
+   - [ ] Reopen app, navigate to Optimizer
+   - [ ] **Expected**: All inputs AND generated schedule restored
+
+5. **Pomodoro Cache Test**:
+   - [ ] Enter subject "Chemistry", topics "Organic, Inorganic"
+   - [ ] Check HSC box
+   - [ ] Generate schedule
+   - [ ] Close app
+   - [ ] Reopen app, navigate to Pomodoro
+   - [ ] **Expected**: Subject, topics, HSC checkbox, schedule restored
+
+6. **Flashcard Cache Test**:
+   - [ ] Enter question "What is ATP?"
+   - [ ] Enter partial answer "Adenosine..."
+   - [ ] DON'T submit (leave incomplete)
+   - [ ] Close app
+   - [ ] Reopen app, navigate to Flashcards
+   - [ ] **Expected**: Question and partial answer restored
+
+## 📋 New Features in v2.8.0
+
+### Complete Data Caching System
+**Every module now caches everything:**
+- **User Inputs**: All form fields, selections, checkboxes
+- **AI Responses**: Generated content with timestamps
+- **Errors**: Failed operations with context
+- **Generation History**: Last 20-50 generations tracked
+- **Auto-Restore**: Resume exactly where you left off
+
+**What gets cached:**
+- Summarizer: Text, language, HSC context, all outputs (last 30)
+- Problems: Subject, difficulty, count, problems, timers (last 30)
+- Quiz: Answers, type, generated quizzes (last 20)
+- Optimizer: Subject, topics, schedules (last 20)
+- Pomodoro: Subject, topics, schedules (last 20)
+- Flashcards: Inputs, created cards (last 50)
+
+**Where it's stored:**
+- Windows: `%AppData%/study-buddy-pro/study-buddy-data.json`
+- You can inspect this file to see cached data
 
 ## 📋 New Features in v2.7.0
 
@@ -117,6 +219,7 @@ Every AI-generated content now has:
 - **📋 Copy Button** - Instantly copy to clipboard
 - **📄 Save as PDF** - Export professional PDFs with:
   - Header with title and module type
+  - Watermark "STUDY BUDDY PRO"
   - Metadata (date, subject, difficulty, etc.)
   - Formatted content with color coding
   - Footer with generation info

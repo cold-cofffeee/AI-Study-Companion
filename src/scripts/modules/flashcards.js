@@ -5,7 +5,9 @@ const Flashcards = {
     data: {
         cards: [],
         currentIndex: 0,
-        isFlipped: false
+        isFlipped: false,
+        lastError: null,
+        createdCards: [] // Track recently created cards
     },
 
     async render() {
@@ -96,8 +98,57 @@ const Flashcards = {
     },
 
     async init() {
+        await this.restoreState();
         await this.loadDueCards();
         await this.loadAllCards();
+    },
+
+    async restoreState() {
+        try {
+            const savedState = await window.ipcRenderer.invoke('get-module-state', 'flashcards');
+            if (savedState) {
+                // Restore input fields
+                const questionField = document.getElementById('flashcard-question');
+                const answerField = document.getElementById('flashcard-answer');
+                const categoryField = document.getElementById('flashcard-category');
+                const difficultyField = document.getElementById('flashcard-difficulty');
+                
+                if (savedState.question && questionField) questionField.value = savedState.question;
+                if (savedState.answer && answerField) answerField.value = savedState.answer;
+                if (savedState.category && categoryField) categoryField.value = savedState.category;
+                if (savedState.difficulty && difficultyField) difficultyField.value = savedState.difficulty;
+                
+                // Restore created cards history
+                if (savedState.createdCards) {
+                    this.data.createdCards = savedState.createdCards;
+                }
+            }
+        } catch (error) {
+            console.error('Error restoring flashcards state:', error);
+            this.data.lastError = { timestamp: new Date().toISOString(), error: error.message, action: 'restore-state' };
+        }
+    },
+
+    saveState() {
+        try {
+            const questionField = document.getElementById('flashcard-question');
+            const answerField = document.getElementById('flashcard-answer');
+            const categoryField = document.getElementById('flashcard-category');
+            const difficultyField = document.getElementById('flashcard-difficulty');
+            
+            const state = {
+                question: questionField?.value || '',
+                answer: answerField?.value || '',
+                category: categoryField?.value || '',
+                difficulty: difficultyField?.value || '2',
+                createdCards: this.data.createdCards,
+                lastError: this.data.lastError,
+                timestamp: new Date().toISOString()
+            };
+            window.ipcRenderer.invoke('save-module-state', 'flashcards', state);
+        } catch (error) {
+            console.error('Error saving flashcards state:', error);
+        }
     },
 
     async loadDueCards() {
@@ -203,6 +254,20 @@ const Flashcards = {
                 difficultyLevel: difficulty
             });
 
+            // Cache created card
+            this.data.createdCards.push({
+                question,
+                answer,
+                category,
+                difficulty,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Keep only last 50 created cards
+            if (this.data.createdCards.length > 50) {
+                this.data.createdCards = this.data.createdCards.slice(-50);
+            }
+
             showToast('Flashcard created successfully!', 'success');
             
             // Clear inputs
@@ -210,8 +275,17 @@ const Flashcards = {
             document.getElementById('flashcard-answer').value = '';
             document.getElementById('flashcard-category').value = '';
             
+            this.saveState();
             await this.loadAllCards();
         } catch (error) {
+            console.error('Error creating flashcard:', error);
+            this.data.lastError = { 
+                timestamp: new Date().toISOString(), 
+                error: error.message, 
+                action: 'create-card',
+                inputs: { question, answer, category, difficulty }
+            };
+            this.saveState();
             showToast('Failed to create flashcard: ' + error.message, 'error');
         }
     },

@@ -1,7 +1,7 @@
 {
   "name": "study-buddy-pro",
-  "version": "2.7.0",
-  "description": "AI-Powered Study Companion with Copy/PDF Export, HSC Bangladesh Support, Integrated Music Player & Complete State Persistence",
+  "version": "2.8.0",
+  "description": "AI-Powered Study Companion with Complete Data Caching, Copy/PDF Export, HSC Bangladesh Support, Integrated Music Player & Comprehensive State Persistence",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
